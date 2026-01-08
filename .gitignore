@@ -101,11 +101,7 @@ Thumbs.db
 # ------------------------------------------------------------------------------
 
 # Dossiers de travail personnel
-/documentation/*
+#/documentation/*
 
 # Notes personnelles et documentation en cours
-00-tech-stack-and-tooling.md
-Guide_Evaluation_Modeles_ML.md
-project_charter_calhousingV0.md
 tmp.md
-tmp1.md
