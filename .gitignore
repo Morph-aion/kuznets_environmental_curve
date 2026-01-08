@@ -79,8 +79,8 @@ _site/
 # 6. Documentation & Gestion de projet
 # -------------------------------------------------------------------------
 # Ignore le dossier tmp complet
-documentation/tmp/
-documentation/~*
+#documentation/tmp/
+#documentation/~*
 
 # Ignore tout le dossier project-management
 project-management/
