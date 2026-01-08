@@ -1,0 +1,99 @@
+```{python}
+#| label: setup
+#| output: false
+#| cache: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.stats.diagnostic import het_breuschpagan, acorr_ljungbox
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.stats.stattools import durbin_watson
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+from scipy import stats
+from IPython.display import Markdown, display
+
+# Configuration graphique
+sns.set_theme(style="whitegrid", context="paper", palette="colorblind")
+plt.rcParams['figure.figsize'] = (10, 6)
+plt.rcParams['font.size'] = 11
+
+# ═══════════════════════════════════════════════════════════════════
+# CHARGEMENT ET PRÉPARATION DES DONNÉES
+# ═══════════════════════════════════════════════════════════════════
+
+DATA_LOADED = False
+
+try:
+    df = pd.read_csv("../../data/01_raw/kuznets_data_final.csv")
+    DATA_LOADED = True
+    
+    # ─────────────────────────────────────────────────────────────────
+    # DONNÉES TRANSVERSALES
+    # ─────────────────────────────────────────────────────────────────
+    
+    ANNEE_CROSS = int(df['year'].max())
+    df_cross = df[df['year'] == ANNEE_CROSS].copy()
+    df_cross = df_cross.dropna(subset=['gdp', 'co2_per_capita'])
+    
+    # Exclusions (micro-États et paradis fiscaux)
+    EXCLUSIONS = [
+        'Liechtenstein', 'Monaco', 'San Marino', 'Andorra', 
+        'Luxembourg', 'Ireland', 'Singapore', 'Malta', 'Cyprus',
+        'Palau', 'Nauru', 'Tuvalu', 'Vatican'
+    ]
+    df_cross = df_cross[~df_cross['country'].isin(EXCLUSIONS)]
+    
+    # Transformations log
+    df_cross['log_gdp'] = np.log(df_cross['gdp'])
+    df_cross['log_co2'] = np.log(df_cross['co2_per_capita'])
+    
+    # Centrage (réduit multicolinéarité polynomiale)
+    GDP_MEAN = df_cross['log_gdp'].mean()
+    df_cross['log_gdp_c'] = df_cross['log_gdp'] - GDP_MEAN
+    
+    N_PAYS = len(df_cross)
+    
+    # ─────────────────────────────────────────────────────────────────
+    # DONNÉES TEMPORELLES (USA)
+    # ─────────────────────────────────────────────────────────────────
+    
+    df_usa = df[df['country'] == 'United States'].sort_values('year').copy()
+    
+    if not df_usa.empty:
+        # 1. On stocke la date de début réelle du dataset avant de nettoyer
+        ANNEE_DEBUT_DATA = int(df_usa['year'].min())
+        
+        df_usa['log_co2'] = np.log(df_usa['co2_per_capita'])
+        df_usa['log_gdp'] = np.log(df_usa['gdp'])
+        df_usa['lag_log_co2'] = df_usa['log_co2'].shift(1)
+        
+        # 2. Le dropna fait passer le dataset à 1991 pour l'estimation
+        df_usa = df_usa.dropna()
+        
+        N_OBS_USA = len(df_usa)
+        # Il faut utiliser ANNEE_DEBUT_DATA pour mon texte d'introduction
+        ANNEE_DEBUT = int(df_usa['year'].min()) # 1991 (À changer pour une variable plus explicite ANNEE_DEBUT_ESTIM)
+        ANNEE_FIN = int(df_usa['year'].max())
+    else:
+        N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = 0
+
+except FileNotFoundError:
+    print("⚠️ Fichier data/kuznets_data_final.csv introuvable")
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    N_PAYS = N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = 0
+
+except Exception as e:
+    print(f"⚠️ Erreur lors du chargement : {e}")
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    N_PAYS = N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = 0
+```

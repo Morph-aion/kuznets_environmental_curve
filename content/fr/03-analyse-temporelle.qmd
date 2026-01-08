@@ -1,0 +1,635 @@
+---
+title: "Analyse temporelle : Le film américain"
+execute:
+  cache: false
+---
+{{< include _setup.qmd >}}
+
+```{python}
+#| label: estimation-ardl-v1
+#| output: false
+
+if DATA_LOADED and not df_usa.empty:
+    m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit()
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit()
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', data=df_usa).fit()
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
+                         data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+    
+    RHO = m_ardl_cub.params.get('lag_log_co2', 0)
+    BETA3_USA = m_ardl_cub.params.get('I(log_gdp ** 3)', 0)
+    PVAL3_USA = m_ardl_cub.pvalues.get('I(log_gdp ** 3)', 1)
+    
+    HALFLIFE = np.log(0.5) / np.log(RHO) if 0 < RHO < 1 else np.nan
+```
+
+## Pourquoi les États-Unis ?
+
+- Premier émetteur cumulé historique (~25% du CO$_2$ mondial depuis 1850)
+- Économie post-industrielle mature (76 000 $/hab)
+- Données d'empreinte carbone complètes (`{python} ANNEE_DEBUT`-`{python} ANNEE_FIN`)
+
+## Tests de stationnarité (ADF)
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_usa.empty:
+    adf_co2 = adfuller(df_usa['log_co2'], autolag='AIC')
+    adf_gdp = adfuller(df_usa['log_gdp'], autolag='AIC')
+    adf_co2_diff = adfuller(df_usa['log_co2'].diff().dropna(), autolag='AIC')
+    adf_gdp_diff = adfuller(df_usa['log_gdp'].diff().dropna(), autolag='AIC')
+    
+    display(Markdown(f"""
+**Tests de stationnarité (ADF)**
+
+| Variable | ADF (niveaux) | p-value | ADF (diff.) | p-value | Conclusion |
+|----------|---------------|---------|-------------|---------|------------|
+| ln(CO₂) | {adf_co2[0]:.2f} | {adf_co2[1]:.3f} | {adf_co2_diff[0]:.2f} | {adf_co2_diff[1]:.3f} | I(1) |
+| ln(PIB) | {adf_gdp[0]:.2f} | {adf_gdp[1]:.3f} | {adf_gdp_diff[0]:.2f} | {adf_gdp_diff[1]:.3f} | I(1) |
+
+*I(1) = intégré d'ordre 1 (stationnaire en différence première)*
+"""))
+```
+
+**Conclusion** : Les séries sont I(1) → modèle **ARDL** adapté.
+
+## Estimation des modèles candidats {#sec-estimation-usa}
+
+Nous estimons **quatre spécifications** pour capturer la relation dynamique entre PIB et CO₂ :
+
+1. **AR(1)** : Modèle autorégressif pur (sans PIB) — benchmark minimal
+2. **ARDL linéaire** : Ajoute ln(PIB) comme régressor
+3. **ARDL quadratique** : Ajoute [ln(PIB)]²
+4. **ARDL cubique** : Ajoute [ln(PIB)]³ (test du rebond)
+
+```{python}
+#| label: estimation-ardl-v2
+#| output: false
+
+if DATA_LOADED and not df_usa.empty:
+    # Estimation avec erreurs-types Newey-West (3 lags)
+    m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit(
+        cov_type='HAC', cov_kwds={'maxlags': 3})
+    
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit(
+        cov_type='HAC', cov_kwds={'maxlags': 3})
+    
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', 
+        data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+    
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
+        data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+```
+
+```{python}
+#| label: tbl-ardl
+#| tbl-cap: "Modèles ARDL — États-Unis (1990-2020)"
+#| echo: false
+
+from IPython.display import display, Markdown
+import statsmodels.formula.api as smf
+import numpy as np
+
+# Vérification de sécurité
+if 'DATA_LOADED' in locals() and DATA_LOADED and not df_usa.empty:
+    
+    # 1. Fonction de formatage
+    def fmt_ardl(model, var):
+        """Formate coefficient (erreur-type) avec étoiles"""
+        # Statsmodels peut être sensible aux espaces dans les noms de variables I()
+        # On vérifie si la variable existe exactement
+        if var not in model.params.index:
+            return "—"
+        c = model.params[var]
+        s = model.bse[var]
+        p = model.pvalues[var]
+        stars = '***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.1 else ''
+        return f"{c:.4f}{stars} ({s:.4f})"
+    
+    # 2. Estimation des modèles (HAC pour robustesse)
+    kwds = {'maxlags': 3}
+    m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    
+    # 3. Construction du tableau
+    # Note: Assurez-vous que les noms ici correspondent EXACTEMENT aux params du modèle (print(m_ardl_cub.params.index) pour vérifier)
+    rows = [
+        ('ln(CO₂)ₜ₋₁', 'lag_log_co2'),
+        ('ln(PIB)ₜ', 'log_gdp'),
+        ('[ln(PIB)]²', 'I(log_gdp ** 2)'), 
+        ('[ln(PIB)]³', 'I(log_gdp ** 3)'),
+    ]
+    
+    table = "| Variable | AR(1) | ARDL lin. | ARDL quad. | ARDL cub. |\n"
+    table += "|----------|-------|-----------|------------|----------|\n"
+    
+    for label, var in rows:
+        table += f"| {label} | {fmt_ardl(m_ar, var)} | {fmt_ardl(m_ardl_lin, var)} | "
+        table += f"{fmt_ardl(m_ardl_quad, var)} | {fmt_ardl(m_ardl_cub, var)} |\n"
+    
+    table += f"| **R²** | {m_ar.rsquared:.3f} | {m_ardl_lin.rsquared:.3f} | "
+    table += f"{m_ardl_quad.rsquared:.3f} | {m_ardl_cub.rsquared:.3f} |\n"
+    table += f"| **AIC** | {m_ar.aic:.1f} | {m_ardl_lin.aic:.1f} | "
+    table += f"{m_ardl_quad.aic:.1f} | {m_ardl_cub.aic:.1f} |\n"
+    
+    display(Markdown(table))
+    display(Markdown("*Erreurs-types Newey-West (3 lags). \\*p<0.1, \\*\\*p<0.05, \\*\\*\\*p<0.01*"))
+
+    # 4. Calculs pour le texte d'observation
+    # Trouver le meilleur modèle selon l'AIC
+    models_aic = [m_ar.aic, m_ardl_lin.aic, m_ardl_quad.aic, m_ardl_cub.aic]
+    model_names = ['AR', 'Linéaire', 'Quadratique', 'Cubique']
+    best_aic_model = model_names[np.argmin(models_aic)]
+    
+    # Récupération p-value cubique (gestion d'erreur si la clé diffère légèrement)
+    try:
+        p_val_cub = m_ardl_cub.pvalues['I(log_gdp ** 3)']
+    except KeyError:
+        # Fallback : essaie sans espaces si statsmodels a nettoyé le nom
+        p_val_cub = m_ardl_cub.pvalues.get('I(log_gdp**3)', 1.0)
+
+    # 5. Affichage du texte d'observation dynamique
+    display(Markdown(f"""
+***
+
+**Observation préliminaire** : 
+- Le modèle cubique a le meilleur R² ({m_ardl_cub.rsquared:.3f}), 
+  mais β₃ est non significatif (p = {p_val_cub:.3f}).
+- L'AIC favorise le modèle **{best_aic_model}**.
+
+**→ Nous devons arbitrer entre significativité statistique et parcimonie. 
+La validation hors-échantillon va trancher.**
+    """))
+
+else:
+    print("Données non chargées.")
+```
+
+## Validation hors-échantillon {#sec-validation-usa}
+
+### Protocole
+
+**Pourquoi un simple train/test split (et pas expanding window) ?**
+
+L'expanding window (Section 3.3.2.2) est théoriquement supérieur pour les séries 
+temporelles, mais avec seulement **31 observations**, une fenêtre expansive de 
+10 itérations donnerait :
+- 1ère itération : 21 observations d'entraînement (1990-2010)
+- Dernière itération : 30 observations (1990-2019)
+
+→ Trop peu de données pour estimer robustement un modèle ARDL cubique (4 paramètres).
+
+**Compromis adopté** : Train/test split fixe (1990-2015 / 2016-2020) avec **5 observations test**, 
+cohérent avec la règle empirique 80/20.
+
+```{python}
+#| label: validation-setup
+#| output: false
+
+train = df_usa[df_usa['year'] <= 2015].copy()
+test = df_usa[df_usa['year'] > 2015].copy()
+
+# Ré-estimation sur train uniquement
+m_ar_train = smf.ols('log_co2 ~ lag_log_co2', data=train).fit(
+    cov_type='HAC', cov_kwds={'maxlags': 3})
+m_lin_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=train).fit(
+    cov_type='HAC', cov_kwds={'maxlags': 3})
+m_quad_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', 
+    data=train).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+m_cub_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
+    data=train).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+```
+
+### Comparaison avec benchmarks
+
+```{python}
+#| label: benchmarks-calcul
+#| output: false
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from statsmodels.tsa.arima.model import ARIMA
+
+y_test = test['log_co2']
+
+# 1. ARDL (4 versions)
+y_pred_ar = m_ar_train.predict(test)
+y_pred_lin = m_lin_train.predict(test)
+y_pred_quad = m_quad_train.predict(test)
+y_pred_cub = m_cub_train.predict(test)
+
+# 2. Benchmarks naïfs
+y_pred_rw = test['lag_log_co2']  # Marche aléatoire
+y_pred_ma = df_usa['log_co2'].rolling(3).mean().shift(1).loc[test.index]
+
+# 3. ARIMA(1,1,1)
+arima_model = ARIMA(train['log_co2'], order=(1,1,1)).fit()
+y_pred_arima = arima_model.forecast(steps=len(test))
+
+# Calcul des métriques
+def metriques(nom, y_true, y_pred):
+    return {
+        'Modèle': nom,
+        'RMSE': np.sqrt(mean_squared_error(y_true, y_pred)),
+        'MAE': mean_absolute_error(y_true, y_pred),
+        'MAPE': np.mean(np.abs((np.exp(y_true) - np.exp(y_pred)) / np.exp(y_true))) * 100
+    }
+
+resultats = [
+    metriques('Marche aléatoire', y_test, y_pred_rw),
+    metriques('Moyenne mobile', y_test, y_pred_ma),
+    metriques('ARIMA(1,1,1)', y_test, y_pred_arima),
+    metriques('ARDL — AR(1)', y_test, y_pred_ar),
+    metriques('ARDL — Linéaire', y_test, y_pred_lin),
+    metriques('ARDL — Quadratique', y_test, y_pred_quad),
+    metriques('ARDL — Cubique', y_test, y_pred_cub),
+]
+
+df_perf = pd.DataFrame(resultats).sort_values('RMSE')
+```
+
+```{python}
+#| label: tbl-performance-oos
+#| tbl-cap: "Performance hors-échantillon (2016-2020)"
+
+from IPython.display import display, Markdown
+
+# On enveloppe le résultat dans Markdown() pour qu'il soit rendu visuellement
+display(Markdown(df_perf.to_markdown(index=False, floatfmt=('.0s', '.4f', '.4f', '.2f'))))
+```
+
+```{python}
+#| label: fig-comparaison-modeles
+#| fig-cap: "Comparaison visuelle des prédictions hors-échantillon"
+#| fig-width: 12
+#| fig-height: 5
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Graphique 1 : Séries temporelles
+axes[0].plot(test['year'], np.exp(y_test), 'ko-', linewidth=2, markersize=8, label='Observé')
+axes[0].plot(test['year'], np.exp(y_pred_rw), 's--', alpha=0.6, label='Marche aléatoire')
+axes[0].plot(test['year'], np.exp(y_pred_arima), '^--', alpha=0.6, label='ARIMA')
+axes[0].plot(test['year'], np.exp(y_pred_quad), 'r-', linewidth=2, label='ARDL Quadratique')
+axes[0].set_xlabel("Année")
+axes[0].set_ylabel("CO₂ par habitant (tonnes)")
+axes[0].set_title("A. Prédictions vs Réalité (2016-2020)")
+axes[0].legend()
+axes[0].grid(True, alpha=0.3)
+
+# Graphique 2 : Erreurs par modèle (boxplot)
+erreurs = pd.DataFrame({
+    'RW': y_test - y_pred_rw,
+    'ARIMA': y_test - y_pred_arima,
+    'Quad': y_test - y_pred_quad,
+})
+erreurs.boxplot(ax=axes[1])
+axes[1].axhline(0, color='red', linestyle='--')
+axes[1].set_ylabel("Erreur de prédiction (log)")
+axes[1].set_title("B. Distribution des erreurs")
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+### Décision de sélection de modèle
+
+```{python}
+#| echo: false
+
+meilleur_modele = df_perf.iloc[0]['Modèle']
+rmse_meilleur = df_perf.iloc[0]['RMSE']
+rmse_rw = df_perf[df_perf['Modèle'] == 'Marche aléatoire']['RMSE'].values[0]
+gain = (rmse_rw - rmse_meilleur) / rmse_rw * 100
+
+# Identification du meilleur ARDL
+meilleur_ardl = df_perf[df_perf['Modèle'].str.contains('ARDL')].iloc[0]['Modèle']
+rmse_ardl = df_perf[df_perf['Modèle'].str.contains('ARDL')].iloc[0]['RMSE']
+
+display(Markdown(f"""
+**Résultats** :
+
+1. **Meilleur modèle global** : {meilleur_modele} (RMSE = {rmse_meilleur:.4f})
+2. **Meilleur ARDL** : {meilleur_ardl} (RMSE = {rmse_ardl:.4f})
+3. **Gain vs benchmark naïf** : {gain:+.1f}%
+
+**Critères de décision convergents** :
+
+| Critère | Conclusion |
+|---------|------------|
+| **AIC** (échantillon complet) | Favorise le {['AR', 'Linéaire', 'Quadratique', 'Cubique'][np.argmin([m_ar.aic, m_ardl_lin.aic, m_ardl_quad.aic, m_ardl_cub.aic])]} |
+| **Significativité β₃** | Non significatif (p = {m_ardl_cub.pvalues['I(log_gdp ** 3)']:.3f}) → Cubique rejeté |
+| **RMSE hors-échantillon** | {meilleur_ardl} gagne |
+
+---
+
+**➤ MODÈLE RETENU POUR L'ANALYSE : ARDL Quadratique**
+
+Justification : Meilleur compromis entre ajustement (in-sample) et généralisation 
+(out-of-sample), avec des coefficients tous significatifs.
+"""))
+```
+
+---
+
+## Diagnostics du modèle retenu {#sec-diagnostics-usa}
+
+```{python}
+#| label: diagnostics-modele-final
+#| fig-cap: "Diagnostics du modèle ARDL quadratique"
+#| fig-width: 12
+#| fig-height: 8
+
+# Utiliser le modèle estimé sur données complètes
+m_final = m_ardl_quad
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+
+# 1. Résidus vs temps
+axes[0,0].plot(df_usa['year'], m_final.resid, 'o-')
+axes[0,0].axhline(0, color='red', linestyle='--')
+axes[0,0].set_xlabel("Année")
+axes[0,0].set_ylabel("Résidus")
+axes[0,0].set_title("A. Résidus temporels")
+axes[0,0].grid(True, alpha=0.3)
+
+# 2. Résidus vs fitted
+axes[0,1].scatter(m_final.fittedvalues, m_final.resid)
+axes[0,1].axhline(0, color='red', linestyle='--')
+axes[0,1].set_xlabel("Valeurs ajustées")
+axes[0,1].set_ylabel("Résidus")
+axes[0,1].set_title("B. Résidus vs Prédictions")
+axes[0,1].grid(True, alpha=0.3)
+
+# 3. QQ-plot (normalité)
+from scipy import stats
+stats.probplot(m_final.resid, dist="norm", plot=axes[1,0])
+axes[1,0].set_title("C. Q-Q Plot (Test de normalité)")
+
+# 4. ACF des résidus (autocorrélation)
+from statsmodels.graphics.tsaplots import plot_acf
+plot_acf(m_final.resid, lags=10, ax=axes[1,1])
+axes[1,1].set_title("D. Autocorrélation des résidus")
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| echo: false
+from statsmodels.stats.stattools import jarque_bera, durbin_watson
+from IPython.display import display, Markdown
+
+# 1. Calcul des statistiques
+jb_stat, jb_pval, _, _ = jarque_bera(m_final.resid)
+dw_stat = durbin_watson(m_final.resid)
+
+# 2. Préparation des messages de verdict (pour éviter les backslashes dans la f-string)
+jb_verdict = "✓ Résidus normaux" if jb_pval > 0.05 else "⚠️ Non-normalité détectée"
+dw_verdict = "✓ Pas d'autocorrélation" if 1.5 < dw_stat < 2.5 else "⚠️ Autocorrélation résiduelle"
+
+# 3. Affichage
+display(Markdown(f"""
+**Tests de spécification** :
+
+| Test | Statistique | p-value | Verdict |
+|------|-------------|---------|---------|
+| **Jarque-Bera** (normalité) | {jb_stat:.2f} | {jb_pval:.3f} | {jb_verdict} |
+| **Durbin-Watson** (autocorrélation) | {dw_stat:.2f} | — | {dw_verdict} |
+
+**Conclusion des diagnostics** : Le modèle ARDL quadratique satisfait les hypothèses de base 
+de la régression linéaire. Les résidus ne montrent pas de pattern systématique exploitable.
+"""))
+```
+
+---
+
+## Interprétation économique {#sec-interpretation-usa}
+
+### Inertie et demi-vie
+
+[Garder section 5.6 actuelle, mais basée sur m_ardl_quad, pas m_ardl_cub]
+
+### Élasticité de long terme
+
+```{python}
+#| echo: false
+
+# Calcul de l'élasticité de LT : β_PIB / (1 - ρ)
+rho = m_final.params['lag_log_co2']
+beta_pib = m_final.params['log_gdp']
+beta_pib2 = m_final.params['I(log_gdp ** 2)']
+
+# Au niveau moyen de PIB américain
+log_gdp_moyen = df_usa['log_gdp'].mean()
+elasticite_CT = beta_pib + 2 * beta_pib2 * log_gdp_moyen
+elasticite_LT = elasticite_CT / (1 - rho)
+
+display(Markdown(f"""
+**Élasticités PIB → CO₂** (au PIB moyen américain, ln(PIB) = {log_gdp_moyen:.2f}) :
+
+- **Court terme** (impact immédiat) : {elasticite_CT:.3f}  
+  → Une hausse de +1% du PIB aujourd'hui augmente les émissions de {elasticite_CT*100:+.2f}% immédiatement.
+
+- **Long terme** (après ajustement complet) : {elasticite_LT:.3f}  
+  → L'effet total après {HALFLIFE*2:.0f} ans est de {elasticite_LT*100:+.2f}%.
+
+**Interprétation** : {
+    "L'élasticité est **positive** : la croissance américaine reste couplée aux émissions." 
+    if elasticite_LT > 0 
+    else "L'élasticité est **négative** : découplage structurel confirmé."
+}
+"""))
+```
+
+### Turning point (si applicable)
+
+```{python}
+#| echo: false
+
+# Calcul du turning point pour le modèle quadratique
+# CO2 max quand dln(CO2)/dln(PIB) = 0
+# β1 + 2*β2*ln(PIB) = 0
+# ln(PIB)* = -β1 / (2*β2)
+
+if beta_pib2 < 0:  # Courbe en U inversé
+    log_pib_turning = -beta_pib / (2 * beta_pib2)
+    pib_turning = np.exp(log_pib_turning)
+    
+    # Les USA ont-ils dépassé ce seuil ?
+    pib_usa_actuel = df_usa.iloc[-1]['gdp']
+    
+    display(Markdown(f"""
+**Turning point** (maximum théorique des émissions) :
+
+- **Niveau de PIB** : {pib_turning:,.0f} $/hab (PPA 2017)
+- **PIB américain actuel** ({ANNEE_FIN}) : {pib_usa_actuel:,.0f} $/hab
+
+→ Les États-Unis {"**ont dépassé**" if pib_usa_actuel > pib_turning else "**n'ont pas encore atteint**"} 
+le turning point théorique.
+
+**Attention** : Ce calcul suppose que l'élasticité de LT devient négative au-delà du seuil, 
+ce qui n'est **pas garanti empiriquement** (voir diagnostic Figure A : émissions encore élevées en 2020).
+"""))
+else:
+    display(Markdown("""
+**Pas de turning point** : Le modèle quadratique montre β₂ > 0, impliquant une relation 
+monotone croissante (pas de U inversé).
+"""))
+```
+
+---
+
+## Projection 2021-2025 {#sec-projection-usa}
+
+[Garder section 5.8, mais ajouter intervalles de confiance]
+
+```{python}
+#| label: projection-avec-ic
+#| output: false
+
+# Même logique que l'actuel, mais avec get_prediction() pour les IC
+
+last_obs = df_usa.iloc[-1]
+future_years = list(range(ANNEE_FIN + 1, ANNEE_FIN + 6))
+
+future_df = []
+curr_log_co2 = last_obs['log_co2']
+curr_log_gdp = last_obs['log_gdp']
+
+for year in future_years:
+    curr_log_gdp += 0.02  # Croissance 2%/an
+    
+    X_fut = pd.DataFrame({
+        'lag_log_co2': [curr_log_co2],
+        'log_gdp': [curr_log_gdp]
+    })
+    X_fut['I(log_gdp ** 2)'] = X_fut['log_gdp'] ** 2
+    
+    # Prédiction avec intervalle
+    pred = m_final.get_prediction(X_fut)
+    pred_summary = pred.summary_frame(alpha=0.05)
+    
+    future_df.append({
+        'year': year,
+        'log_co2_pred': pred_summary['mean'].values[0],
+        'log_co2_lower': pred_summary['mean_ci_lower'].values[0],
+        'log_co2_upper': pred_summary['mean_ci_upper'].values[0],
+    })
+    
+    curr_log_co2 = pred_summary['mean'].values[0]
+
+df_future = pd.DataFrame(future_df)
+df_future['co2_pred'] = np.exp(df_future['log_co2_pred'])
+df_future['co2_lower'] = np.exp(df_future['log_co2_lower'])
+df_future['co2_upper'] = np.exp(df_future['log_co2_upper'])
+```
+
+```{python}
+#| label: fig-projection-ic
+#| fig-cap: "Projection USA 2021-2025 avec intervalles de confiance 95%"
+
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Historique
+ax.plot(df_usa['year'], df_usa['co2_per_capita'], 
+        'ko-', linewidth=2, markersize=6, label='Historique')
+
+# Projection
+ax.plot(df_future['year'], df_future['co2_pred'], 
+        'r--', linewidth=2.5, marker='s', markersize=8, label='Projection (+2% PIB/an)')
+
+# Intervalle de confiance
+ax.fill_between(df_future['year'], 
+                df_future['co2_lower'], 
+                df_future['co2_upper'],
+                color='red', alpha=0.2, label='IC 95%')
+
+ax.axvline(ANNEE_FIN, color='gray', linestyle=':', linewidth=2)
+ax.text(ANNEE_FIN + 0.3, ax.get_ylim()[1]*0.95, 
+        'Limite\nhistorique', fontsize=9, va='top')
+
+ax.set_xlabel("Année", fontsize=12)
+ax.set_ylabel("CO₂ par habitant (tonnes)", fontsize=12)
+ax.set_title("Projection USA : Scénario tendanciel (+2% PIB/an)", fontsize=14, fontweight='bold')
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| echo: false
+
+CO2_2020 = df_usa.iloc[-1]['co2_per_capita']
+CO2_2025 = df_future.iloc[-1]['co2_pred']
+variation = (CO2_2025 - CO2_2020) / CO2_2020 * 100
+
+display(Markdown(f"""
+**Tableau de projection** :
+
+| Année | CO₂ prédit | IC 95% | Variation cumulée |
+|:-----:|:----------:|:------:|:-----------------:|
+""" + "\n".join([
+    f"| {row['year']} | {row['co2_pred']:.2f} | [{row['co2_lower']:.2f} ; {row['co2_upper']:.2f}] | {(row['co2_pred'] - CO2_2020)/CO2_2020*100:+.1f}% |"
+    for _, row in df_future.iterrows()
+]) + f"""
+
+**Message clé** : Sous l'hypothèse de croissance tendancielle (+2%/an), les émissions 
+américaines {
+    f"**baisseraient de {abs(variation):.1f}%**" if variation < 0 
+    else f"**augmenteraient de {variation:.1f}%**"
+} d'ici 2025.
+
+**Limites de cette projection** :
+
+1. **Incertitude croissante** : L'intervalle de confiance s'élargit (±{(df_future.iloc[-1]['co2_upper'] - df_future.iloc[-1]['co2_lower'])/2:.1f} t en 2025)
+2. **Hypothèse de stabilité structurelle** : Suppose que la relation PIB-CO₂ estimée sur 1990-2020 reste valide
+3. **Pas de chocs exogènes** : Ignore les politiques climatiques futures, crises, ruptures technologiques
+4. **Scénario unique** : Un scénario bas-carbone (+1% PIB, forte décarbonation) donnerait des résultats très différents
+
+**→ Ces projections sont des **extrapolations conditionnelles**, pas des prévisions certaines.**
+"""))
+```
+
+---
+
+## Résumé de l'analyse temporelle
+
+```{python}
+#| echo: false
+
+display(Markdown(f"""
+**Résultats clés** :
+
+1. **Modèle retenu** : ARDL Quadratique  
+   → Terme cubique non significatif (p = {m_ardl_cub.pvalues['I(log_gdp ** 3)']:.3f}) 
+   → Courbe en N **non détectée** sur 1990-2020
+
+2. **Inertie structurelle** : ρ = {rho:.3f}, demi-vie = {HALFLIFE:.1f} ans  
+   → Le découplage est **lent** : une politique doit être maintenue > 10 ans
+
+3. **Élasticité long terme** : {elasticite_LT:+.3f}  
+   → {
+       "Couplage persistant : la croissance américaine reste carbonée" 
+       if elasticite_LT > 0 
+       else "Découplage confirmé structurellement"
+   }
+
+4. **Projection 2025** : {CO2_2025:.1f} t CO₂/hab ({variation:+.1f}% vs 2020)  
+   → {
+       "Baisse modeste, insuffisante pour Net Zero 2050" 
+       if variation < 0 and variation > -20
+       else "Hausse inquiétante, incompatible avec Paris" if variation > 0
+       else "Baisse significative, compatible avec transition"
+   }
+
+**→ La trajectoire américaine ne montre PAS de rebond (courbe en N), 
+mais le découplage reste **trop lent** pour atteindre les objectifs climatiques 
+sans rupture politique majeure.**
+"""))
+```

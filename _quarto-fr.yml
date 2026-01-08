@@ -1,0 +1,96 @@
+# _quarto-fr.yml
+
+# ===================================================================
+# CONFIGURATION GLOBALE DU PROJET QUARTO
+# ===================================================================
+# Définit le type de projet, les fichiers à compiler, et le dossier de sortie.
+# -------------------------------------------------------------------
+project:
+  output-dir: output/fr/_book                  # Dossier de sortie spécifique au rapport FR (où Quarto génère le livre)
+
+# ===================================================================
+# PARAMÈTRES RÉGIONAUX ET LINGUISTIQUES
+# ===================================================================
+# Définit la langue principale du document.
+# Permet à Quarto de traduire automatiquement "Table of contents" en 
+# "Table des matières", "Author" en "Auteur", etc.
+# -------------------------------------------------------------------
+lang: fr
+
+# ===================================================================
+# MÉTADONNÉES DU DOCUMENT (Titres, Auteur, SEO, PDF Info)
+# ===================================================================
+# Ces infos s'affichent sur la couverture du PDF et dans les méta-tags HTML
+# -------------------------------------------------------------------
+title: "La Courbe Environnementale de Kuznets pour le $CO_2$"
+subtitle: "Une évaluation empirique par approches transversale et temporelle"
+author: "Morph-ion"
+date: today
+description: |
+  Mémoire de Master 2 — Économétrie appliquée.
+  Une enquête économétrique testant la promesse du découplage automatique 
+  entre croissance et émissions de CO₂.
+keywords: [économétrie, Kuznets, CO2, séries temporelles, OLS, ARDL, Python]
+
+# ===================================================================
+# GESTION DES RÉFÉRENCES CROISÉES
+# ===================================================================
+# Définit les préfixes en français pour les références (@fig-, @tbl-).
+# Essentiel pour un rendu correct dans la langue du document.
+crossref:
+  fig-prefix: "Figure"
+  tbl-prefix: "Tableau"
+  sec-prefix: "Section"
+  eq-prefix: "Équation"
+  thm-prefix: "Théorème"
+  lem-prefix: "Lemme"
+  def-prefix: "Définition"
+
+
+# ===================================================================
+# CONFIGURATION SPÉCIFIQUE AU LIVRE
+# ===================================================================
+# Contrôle les métadonnées (titre, auteur...) et la structure narrative du contenu.
+# -------------------------------------------------------------------
+book:
+  # --- Métadonnées principales --- 
+  title: "La Courbe Environnementale de Kuznets pour le $CO_2$"                                   # Titre du livre
+  subtitle: "Une évaluation empirique par approches transversale et temporelle"
+  #author: "Morph-ion"                                                                          # Auteur par défaut
+  author: 
+    - "A.Guilmain"
+    - "I.Balde"
+    - "A.Sylla"
+    - "D.Adjenia"
+  date: today                                                                                  # Date par défaut
+  page-navigation: true                                                                        # Active la navigation entre les pages
+
+  # --- Structure des chapitres ---
+  # Organisation : Introduction → Développement (3 parties) → Conclusion
+  chapters:
+    - index.qmd
+    - content/fr/00-introduction.qmd
+    
+    # PARTIE 1 : Cadre théorique et méthodologique
+    - part: "Cadre Théorique et Méthodologique"
+      chapters:
+        - content/fr/01-cadre-methodologique.qmd
+    
+    # PARTIE 2 : Approche synchronique
+    - part: "L'Approche Synchronique : Photographie du Monde (2020)"
+      chapters:
+        - content/fr/02-analyse-transversale.qmd
+    
+    # PARTIE 3 : Approche diachronique
+    - part: "L'Approche Diachronique : Trajectoire des États-Unis (1990-2020)"
+      chapters:
+        - content/fr/03-analyse-temporelle.qmd
+    
+    # PARTIE 4 : Confrontation et discussion
+    - part: "Confrontation des Résultats — Le Dilemme Politique"
+      chapters:
+        - content/fr/04-discussion-strategique.qmd
+                  
+    - content/fr/05-conclusion.qmd
+    - content/fr/references.qmd
+    - content/fr/annexes.qmd

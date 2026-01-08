@@ -1,0 +1,111 @@
+# -------------------------------------------------------------------------
+# 1. Python & Environnement
+# -------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+env/
+venv/
+.env
+
+# Fichiers de couverture de tests (au cas où)
+.pytest_cache/
+.coverage
+
+# --- Choix : On garde requirements.txt mais on ignore pyproject.toml ---
+pyproject.toml
+
+# -------------------------------------------------------------------------
+# 2. Jupyter Notebooks
+# -------------------------------------------------------------------------
+.ipynb_checkpoints/
+.jupyter_cache/
+# Les logs d'exécution
+*.log
+
+# Fichiers .py dans le répertoire notebooks (on garde juste les .ipynb)
+notebooks/**/*.py
+
+# -------------------------------------------------------------------------
+# 3. Données (CRITIQUE)
+# -------------------------------------------------------------------------
+# 1. On ignore TOUT dans data (fichiers et sous-dossiers récursivement)
+data/**
+
+# 2. IMPORTANT : On ré-autorise TOUS les dossiers (le slash à la fin est crucial)
+# Cela permet à Git de traverser l'arborescence
+!data/**/
+
+# 3. On garde les .gitkeep partout
+!data/**/.gitkeep
+
+# Archives compressées (souvent des données brutes)
+*.zip
+*.tar.gz
+*.rar
+
+# -------------------------------------------------------------------------
+# 4. Modèles et Artefacts lourds
+# -------------------------------------------------------------------------
+# 1. On ignore TOUT le contenu (fichiers) récursivement dans artifacts
+artifacts/**
+
+# 2. CRUCIAL : On autorise Git à "traverser" tous les sous-dossiers
+# (Sinon il ne verra jamais les .gitkeep situés en profondeur)
+!artifacts/**/
+
+# 3. On garde les fichiers .gitkeep pour maintenir la structure squelette
+!artifacts/**/.gitkeep
+
+# Ignore les binaires lourds s'ils traînent ailleurs
+*.joblib
+*.pkl
+*.h5
+*.onnx
+
+# -------------------------------------------------------------------------
+# 5. Quarto & Sorties
+# -------------------------------------------------------------------------
+# Cache interne de Quarto
+.quarto/
+_site/
+*_files/
+/_freeze/
+
+
+# -------------------------------------------------------------------------
+# 6. Documentation & Gestion de projet
+# -------------------------------------------------------------------------
+# Ignore le dossier tmp complet
+documentation/tmp/
+documentation/~*
+
+# Ignore tout le dossier project-management
+project-management/
+
+# -------------------------------------------------------------------------
+# 7. Système & IDE
+# -------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+/.quarto/
+
+# ------------------------------------------------------------------------------
+# RÉPERTOIRES ET FICHIERS PERSONNELS
+# ------------------------------------------------------------------------------
+
+# Dossiers de travail personnel
+/documentation/*
+
+# Notes personnelles et documentation en cours
+00-tech-stack-and-tooling.md
+Guide_Evaluation_Modeles_ML.md
+project_charter_calhousingV0.md
+tmp.md
+tmp1.md

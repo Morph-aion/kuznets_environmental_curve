@@ -1,0 +1,128 @@
+---
+title: "Méthodologie"
+---
+
+## Nos trois choix décisifs
+
+### Empreinte carbone (pas émissions territoriales)
+
+Un pays peut "décarboner" en délocalisant sa production polluante. Ce biais du *pollution haven* fausse les tests de l'EKC basés sur les émissions territoriales.
+
+| Indicateur | Ce qu'il mesure | Limite |
+|-----------|-----------------|--------|
+| Émissions territoriales | CO$_2$ produit localement | Ignore les importations "découplage en trompe-l'œil" |
+| **Empreinte carbone**   | CO$_2$ consommé (prod. + imports - exports) | Neutralise la délocalisation |
+
+**Exemple** : L'Europe a réduit ses émissions territoriales de 20% depuis 1990, mais son empreinte carbone seulement de 5% (Peters et al., 2011).
+
+### Test de la forme fonctionnelle (Quadratique vs Cubique)
+
+La littérature classique impose souvent une forme en U inversé (modèle quadratique). Or, cette approche est restrictive : elle interdit mathématiquement la possibilité d'un nouveau rebond des émissions aux très hauts revenus (théorie de la courbe en N).
+
+Pour ne pas masquer ce phénomène potentiel, nous estimons un modèle polynomial de degré 3 :
+
+$$\ln(CO_2)_i = \beta_0 + \beta_1 \ln(PIB)_i + \beta_2 [\ln(PIB)_i]^2 + \beta_3 [\ln(PIB)_i]^3 + \varepsilon_i$$
+
+**Validation de la forme log-log** : Un test de Box-Cox (voir @sec-box-cox) 
+confirme que la transformation logarithmique est empiriquement justifiée 
+($\lambda_{\text{optimal}} = 0.15$, proche de 0). Cette spécification 
+permet d'interpréter les coefficients comme des élasticités.
+
+**Interprétation** (sous hypothèse $\beta_1 > 0$, $\beta_2 < 0$) :
+
+- Si $\beta_3 = 0$ (non significatif) : U inversé de l'EKC classique (Le modèle quadratique suffisait)
+- Si $\beta_3 < 0$ (significatif) : Déclin accéléré (Le découplage se renforce avec la richesse).
+- Si $\beta_3 > 0$ (significatif) : Courbe en N (Rebond inquiétant : la richesse finit par repolluer).
+
+*Note : L'interprétation suppose $\beta_1 > 0$ et $\beta_2 < 0$, conditions vérifiées dans nos estimations (Table 4.1).*
+
+### Note sur les variables omises
+
+**Avertissement méthodologique** : Les modèles estimés dans ce rapport 
+(sections 4 et 5) sont des **spécifications parcimonieuses** incluant 
+uniquement le PIB comme variable explicative.
+
+Nous ne contrôlons pas pour :
+- Structure sectorielle (part de l'industrie)
+- Composition du mix énergétique (renouvelables vs fossiles)
+- Densité de population
+- Qualité institutionnelle
+
+**Implication** : Si ces facteurs sont corrélés au PIB, nos coefficients 
+peuvent souffrir d'un **biais de variable omise**. Les résultats doivent 
+être interprétés comme des associations conditionnelles, pas des effets 
+causaux "toutes choses égales par ailleurs".
+
+Cette limitation est discutée en détail dans la section sur les limites 
+méthodologiques (à venir dans une extension future du travail).
+
+## Estimateurs
+
+- **Transversal** : OLS avec écarts-types robustes **HC3** (correction hétéroscédasticité)
+- **Temporel** : ARDL avec écarts-types **Newey-West** (correction autocorrélation, 3 lags)
+
+::: {.callout-note collapse="true"}
+### Détails techniques
+
+**Estimateur OLS** :
+$$\hat{\beta} = (X'X)^{-1}X'Y$$
+
+**Variance robuste HC3** :
+$$\widehat{\text{Var}}_{HC3}(\hat{\beta}) = (X'X)^{-1} \left( \sum_{i=1}^n \frac{\hat{\varepsilon}_i^2}{(1-h_{ii})^2} x_i x_i' \right) (X'X)^{-1}$$
+
+**Variance Newey-West** (L=3) :
+$$\widehat{\text{Var}}_{NW}(\hat{\beta}) = (X'X)^{-1} \hat{\Omega} (X'X)^{-1}$$
+
+où $\hat{\Omega} = \hat{\Gamma}_0 + \sum_{j=1}^3 \left(1 - \frac{j}{4}\right) (\hat{\Gamma}_j + \hat{\Gamma}_j')$
+:::
+
+## Stratégie de prédiction et validation
+
+### Objectifs prédictifs
+
+Contrairement à l'estimation qui cherche à **comprendre** la relation PIB-CO$_2$,
+la prédiction vise à **anticiper** les émissions futures conditionnellement 
+à des scénarios de croissance.
+
+**Applications concrètes** :
+- Projections Net Zero 2050
+- Évaluation des Nationally Determined Contributions (NDC)
+- Budgets carbone nationaux
+
+### Protocoles de validation
+
+#### Analyse transversale : k-fold cross-validation
+
+- **Principe** : Partitionner les 159 pays en 5 groupes équilibrés
+- **Procédure** : Estimer sur 4/5, prédire sur 1/5, répéter 5 fois
+- **Métrique** : RMSE moyen (pénalise les grosses erreurs)
+
+**Pourquoi k=5 ?** Compromis biais-variance standard (Hastie et al., 2009).
+k=10 donnerait des ensembles d'entraînement trop petits (n=143).
+
+#### Analyse temporelle : expanding window
+
+- **Principe** : Fenêtre d'estimation croissante qui respecte la chronologie
+- **Exemple** : Estimer 1990-2010 → prédire 2011 ; puis 1990-2011 → prédire 2012, etc.
+- **Avantage** : Simule un prévisionniste en temps réel (pas de *data leakage*)
+
+### Métriques de performance
+
+| Métrique | Formule | Interprétation |
+|----------|---------|----------------|
+| **RMSE** | $\sqrt{\frac{1}{n}\sum (y_i - \hat{y}_i)^2}$ | Erreur quadratique (pénalise outliers) |
+| **MAE** | $\frac{1}{n}\sum |y_i - \hat{y}_i|$ | Erreur absolue (robuste outliers) |
+| **MAPE** | $\frac{100}{n}\sum \left|\frac{y_i - \hat{y}_i}{y_i}\right|$ | Erreur relative (%) |
+
+**Pourquoi RMSE principal ?** Cohérent avec OLS (minimise SSR).
+
+### Benchmarks
+
+Un modèle n'est "bon" que relativement à des alternatives. Nous comparons 
+systématiquement à :
+
+- **Marche aléatoire** : $\hat{y}_{t+1} = y_t$ (benchmark naïf)
+- **Moyenne mobile** : $\hat{y}_{t+1} = \frac{1}{3}(y_t + y_{t-1} + y_{t-2})$
+- **ARIMA(1,1,1)** : Modèle univarié optimisé (sans PIB)
+
+**Si notre modèle ARDL cubique ne bat pas la marche aléatoire, il est inutile.**

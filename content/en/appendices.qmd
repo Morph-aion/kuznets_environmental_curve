@@ -1,0 +1,28 @@
+---
+title: "Annexes"
+---
+
+## Ressources Complémentaires sur le Dataset
+
+Pour les lecteurs souhaitant approfondir, voici une sélection de ressources techniques et communautaires consultées ou pertinentes pour ce projet. Les sources académiques et les livres cités dans ce rapport se trouvent dans la section [Références](#references).
+
+---
+
+- 🐍 **Documentation Officielle Scikit-learn**  
+  La page de la fonction `fetch_california_housing` est la référence technique principale pour l'utilisation du dataset en Python.  
+  → [Lien vers la documentation](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_california_housing.html)
+
+- 💡 **Notebooks d'Analyses sur Kaggle**  
+  La communauté Kaggle offre une multitude d'exemples d'analyses exploratoires et de modélisations sur ce dataset. C'est une excellente source d'inspiration.  
+  → [Lien vers le dataset sur Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices)
+  
+- 🏛️ **Source Originelle des Données (US Census)**  
+  Les données brutes proviennent du fichier "Summary Tape File 3 (STF3)" du recensement américain de 1990.  
+  → [Lien vers l'archive du recensement de 1990](https://www.census.gov/data/datasets/1990/dec/summary-file-3.html)
+
+- 🌍 **Version sur OpenML**  
+  OpenML est une plateforme ouverte pour le machine learning qui héberge également une version du dataset avec des métadonnées riches.  
+  → [Lien vers le dataset sur OpenML](https://www.openml.org/d/41158)
+
+## Détails des Modèles
+*(Ici, vous pouvez mettre des tableaux détaillés des hyperparamètres de vos modèles, etc.)*

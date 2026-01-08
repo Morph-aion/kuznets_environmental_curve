@@ -1,0 +1,90 @@
+# _quarto-en.yml
+
+# ===================================================================
+# CONFIGURATION GLOBALE DU PROJET QUARTO
+# ===================================================================
+# Définit le type de projet, les fichiers à compiler, et le dossier de sortie.
+# -------------------------------------------------------------------
+project:
+  output-dir: output/en/_book                  # Dossier de sortie spécifique au rapport En (où Quarto génère le livre)
+
+# ===================================================================
+# PARAMÈTRES RÉGIONAUX ET LINGUISTIQUES
+# ===================================================================
+# Définit la langue principale du document.
+# Permet à Quarto de traduire automatiquement "Table of contents" en 
+# "Table des matières", "Author" en "Auteur", etc.
+# -------------------------------------------------------------------
+lang: en
+
+# ===================================================================
+# MÉTADONNÉES DU DOCUMENT (Titres, Auteur, SEO, PDF Info)
+# ===================================================================
+# Ces infos s'affichent sur la couverture du PDF et dans les méta-tags HTML
+# -------------------------------------------------------------------
+title: "The Environmental Kuznets Curve: Statistical Mirage or Political Promise?"
+subtitle: "Empirical Validation of the Environmental Kuznets Curve"
+author: "Morph-ion"
+date: today
+description: |
+  A rigorous econometric analysis testing the GDP-CO2 relationship through two lenses: synchronic (cross-sectional) and diachronic (time-series).
+keywords: [econometrics, Kuznets, CO2, time series, OLS, ARDL, Python]
+
+
+# ===================================================================
+# GESTION DES RÉFÉRENCES CROISÉES
+# ===================================================================
+# Définit les préfixes en français pour les références (@fig-, @tbl-).
+# Essentiel pour un rendu correct dans la langue du document.
+crossref:
+  fig-prefix: "Figure"
+  tbl-prefix: "Table"
+  sec-prefix: "Section"
+  eq-prefix: "Equation"
+
+# ===================================================================
+# CONFIGURATION SPÉCIFIQUE AU LIVRE
+# ===================================================================
+# Contrôle les métadonnées (titre, auteur...) et la structure narrative du contenu.
+# -------------------------------------------------------------------
+book:
+  # --- Métadonnées principales --- 
+  title: "The Environmental Kuznets Curve: Statistical Mirage or Political Promise?"  # Titre du livre
+  #author: "Morph-ion"                                                                # Auteur par défaut
+  author: 
+    - "A.Guilmain"
+    - "I.Balde"
+    - "A.Sylla"
+    - "D.Adjenia"
+  date: today                                                                         # Date par défaut
+  page-navigation: true                                                               # Active la navigation entre les pages
+
+  # --- Chapter Structure ---
+  # Organization: Introduction → Development (4 parts) → Conclusion
+  chapters:
+    - index.qmd
+    - content/en/01-introduction.qmd
+    
+    # PART 1: Theoretical and Methodological Framework
+    - part: "Theoretical and Methodological Framework"
+      chapters:
+        - content/en/01-methodological-framework.qmd 
+    
+    # PART 2: Synchronic Approach
+    - part: "The Synchronic Approach: A Global Snapshot (2020)"
+      chapters:
+        - content/en/02-cross-sectional-analysis.qmd
+    
+    # PART 3: Diachronic Approach
+    - part: "The Diachronic Approach: The United States Trajectory (1990-2020)"
+      chapters:
+        - content/en/03-time-series-analysis.qmd
+    
+    # PART 4: Comparison and Discussion
+    - part: "Comparison of Results — The Policy Dilemma"
+      chapters:
+        - content/en/04-policy-discussion.qmd
+                  
+    - content/en/05-conclusion.qmd
+    - content/en/references.qmd
+    - content/en/appendices.qmd

@@ -1,0 +1,83 @@
+::: {.content-visible when-profile="fr"}
+
+# Croissance et Climat : De l’Hypothèse à la Preuve
+
+:::{#fig-ekc-concept}
+![Représentation schématique de la Courbe Environnementale de Kuznets (EKC).](assets/images/Courbe_environnement.png){width=60% fig-align="center"}
+*Courbe théorique en U inversé : les émissions augmentent avec la richesse… puis baissent après un seuil critique.*
+
+*Source : Schéma conceptuel inspiré de Grossman & Krueger (1995) ; adapté pour ce rapport.*
+:::
+
+> *"The real purpose of scientific method is to make sure Nature hasn't 
+> misled you into thinking you know something you don't actually know."*
+> — Robert M. Pirsig, *Zen and the Art of Motorcycle Maintenance* (1974)
+
+## Ce que vous allez découvrir
+
+Ce document présente une **analyse économétrique rigoureuse** de l'hypothèse 
+de la **Courbe Environnementale de Kuznets (EKC)** — postulant qu'après un 
+certain seuil de richesse, la croissance économique entraîne une baisse 
+"naturelle" des émissions polluantes.
+
+L'objectif ? Tester cette promesse théorique à travers deux prismes complémentaires :
+
+- **Synchronique** (coupe transversale entre pays en 2020),
+- **Diachronique** (évolution temporelle des États-Unis, 1990–2020).
+
+> *(La justification méthodologique et épistémologique de cette double approche 
+> est détaillée dans l'introduction.)*
+
+\newpage
+
+## À qui s’adresse ce rapport ?
+
+Ce document s’adresse aux :
+
+- **Économistes et climatologues** souhaitant évaluer empiriquement la validité de l’EKC,
+- **Décideurs politiques et négociateurs climatiques** à la recherche de leviers différenciés Nord/Sud,
+- **Étudiants en économétrie** cherchant un cas d’étude structuré, reproductible, et aligné sur les standards académiques.
+
+🔍 *Parcourez la **table des matières** sur la gauche pour naviguer entre les chapitres.*
+
+> 💡 *Ce document a été généré avec [Quarto](https://quarto.org), un outil open-source pour la publication scientifique reproductible.*
+
+:::
+
+::: {.content-visible when-profile="en"}
+
+# Growth and Climate: From Hypothesis to Evidence
+
+:::{#fig-ekc-concept-en}
+![Schematic representation of the Environmental Kuznets Curve (EKC).](assets/images/Courbe_environnement.png){width=60% fig-align="center"}
+*Theoretical inverted U-shape curve: emissions rise with wealth... then decline after a critical threshold.*
+
+*Source: Conceptual diagram inspired by Grossman & Krueger (1995); adapted for this report.*
+:::
+
+> *“Testing a theory is not about finding patterns — it’s about confronting hypotheses with real-world data.”*
+
+## What You'll Discover
+
+This document presents a **rigorous econometric analysis** of the **Environmental Kuznets Curve (EKC)** hypothesis — which posits that, beyond a certain income threshold, economic growth leads to a “natural” decline in pollution.
+
+The goal? To test this theoretical promise through two complementary lenses:
+- **Synchronic** (cross-sectional comparison across countries in 2020),
+- **Diachronic** (time-series evolution of the United States, 1990–2020).
+
+> *(The methodological and epistemological justification for this dual approach is detailed in the introduction.)*
+
+
+## Who is this report for?
+
+This document is intended for:
+
+- **Economists and Climate Scientists** seeking to empirically evaluate the EKC’s validity,
+- **Policy Makers and Climate Negotiators** looking for differentiated North/South levers,
+- **Econometrics Students** searching for a structured, reproducible case study aligned with academic standards.
+
+🔍 *Browse the **table of contents** on the left to navigate between chapters.*
+
+> 💡 *This document was generated with [Quarto](https://quarto.org), an open-source tool for reproducible scientific publishing.*
+
+:::

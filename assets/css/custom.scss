@@ -1,0 +1,35 @@
+/*-- scss:defaults --*/
+// Définition des variables par défaut
+
+/*-- scss:mixins --*/
+// Définition des mixins pour réutiliser des styles.
+
+/*-- scss:functions --*/
+// Définition des fonctions personnalisées.
+
+/*-- scss:rules --*/
+// Règles CSS générales pour le style de la page.
+h1 {
+    color: #1F4EB6; // Couleur du titre principal
+}
+body {
+    font-size: 1.3rem; // Taille de la police pour le corps du texte
+}
+.green-highlight {
+  color: #2e7d32;  /* Vert doux (inspiré Material Design) */
+  font-weight: bold;
+}
+
+.orange-highlight {
+  color: #ef6c00;  /* Orange plus doux */
+  font-weight: bold;
+}
+
+/*-- scss:headings --*/
+// Styles spécifiques pour les titres.
+
+
+/*-- scss:uses --*/
+// Importation d'autres fichiers SCSS si nécessaire
+
+

@@ -1,0 +1,218 @@
+---
+title: "Conclusion : Le verdict des données"
+execute:
+  cache: false
+---
+
+{{< include _setup.qmd >}}
+
+## Synthèse
+
+```{python}
+#| label: tableau-conclusionv0
+#| echo: false
+
+import json
+from pathlib import Path
+from IPython.display import Markdown, display
+
+# ─────────────────────────────────────────────────────────────────
+# Fonctions utilitaires
+# ─────────────────────────────────────────────────────────────────
+def format_stars(pval):
+    """Retourne les étoiles de significativité"""
+    if pval < 0.01:
+        return "***"
+    elif pval < 0.05:
+        return "**"
+    elif pval < 0.1:
+        return "*"
+    else:
+        return ""
+
+def format_verdict(pval, seuil=0.05):
+    """Retourne le verdict du test"""
+    if pval < seuil:
+        return "Rejeté"
+    else:
+        return "Non rejeté"
+
+# ─────────────────────────────────────────────────────────────────
+# Trouver la racine du projet
+# ─────────────────────────────────────────────────────────────────
+current = Path.cwd()
+while not (current / '_quarto.yml').exists() and current != current.parent:
+    current = current.parent
+
+shared_dir = current / '_shared'
+
+# ─────────────────────────────────────────────────────────────────
+# 1. Chargement des résultats TRANSVERSALE
+# ─────────────────────────────────────────────────────────────────
+cross_file = shared_dir / 'resultats_cross.json'
+try:
+    with open(cross_file, 'r') as f:
+        data_cross = json.load(f)
+        BETA3 = data_cross['BETA3']
+        PVAL3 = data_cross.get('PVAL3', 1)  # Valeur par défaut si absent
+        N_PAYS = data_cross['N_PAYS']
+        ANNEE_CROSS = data_cross['ANNEE_CROSS']
+except FileNotFoundError:
+    BETA3, PVAL3, N_PAYS, ANNEE_CROSS = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# 2. Chargement des résultats USA
+# ─────────────────────────────────────────────────────────────────
+usa_file = shared_dir / 'results_usa.json'
+try:
+    with open(usa_file, 'r') as f:
+        data_usa = json.load(f)
+        BETA3_USA = data_usa['BETA3_USA']
+        PVAL3_USA = data_usa.get('PVAL3_USA', 1)  # Valeur par défaut si absent
+        ANNEE_DEBUT = data_usa['ANNEE_DEBUT']
+        ANNEE_FIN = data_usa['ANNEE_FIN']
+except FileNotFoundError:
+    BETA3_USA, PVAL3_USA, ANNEE_DEBUT, ANNEE_FIN = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# 3. Tableau de synthèse avec logique conditionnelle
+# ─────────────────────────────────────────────────────────────────
+stars_cross = format_stars(PVAL3)
+stars_usa = format_stars(PVAL3_USA)
+verdict_cross = format_verdict(PVAL3)
+verdict_usa = format_verdict(PVAL3_USA)
+
+display(Markdown(f"""
+| Approche | Hypothèse | Résultat | Coefficient | p-value |
+|----------|-----------|----------|-------------|---------|
+| **Transversale** ({N_PAYS} pays, {ANNEE_CROSS}) | $\\beta_3 = 0$ | {verdict_cross} | β₃ = {BETA3:.4f}{stars_cross} | {PVAL3:.4f} |
+| **Temporelle** (USA, {ANNEE_DEBUT}-{ANNEE_FIN}) | $\\beta_3 = 0$ | {verdict_usa} | β₃ = {BETA3_USA:.4f}{stars_usa} | {PVAL3_USA:.4f} |
+"""))
+```
+
+```{python}
+#| label: tableau-conclusion
+#| echo: false
+#| output: asis
+
+import json
+import pandas as pd
+from pathlib import Path
+
+# ─────────────────────────────────────────────────────────────────
+# Fonctions utilitaires
+# ─────────────────────────────────────────────────────────────────
+def format_stars_latex(pval):
+    if pval < 0.01:
+        return "^{***}"
+    elif pval < 0.05:
+        return "^{**}"
+    elif pval < 0.1:
+        return "^{*}"
+    return ""
+
+def format_verdict(pval, seuil=0.05):
+    return "Rejeté" if pval < seuil else "Non rejeté"
+
+# ─────────────────────────────────────────────────────────────────
+# Chargement des données
+# ─────────────────────────────────────────────────────────────────
+current = Path.cwd()
+while not (current / '_quarto.yml').exists() and current != current.parent:
+    current = current.parent
+shared_dir = current / '_shared'
+
+try:
+    with open(shared_dir / 'resultats_cross.json', 'r') as f:
+        d = json.load(f)
+        BETA3, PVAL3 = d['BETA3'], d.get('PVAL3', 1)
+        N_PAYS, ANNEE_CROSS = d['N_PAYS'], d['ANNEE_CROSS']
+except FileNotFoundError:
+    BETA3, PVAL3, N_PAYS, ANNEE_CROSS = 0, 1, 0, 0
+
+try:
+    with open(shared_dir / 'results_usa.json', 'r') as f:
+        d = json.load(f)
+        BETA3_USA, PVAL3_USA = d['BETA3_USA'], d.get('PVAL3_USA', 1)
+        ANNEE_DEBUT, ANNEE_FIN = d['ANNEE_DEBUT'], d['ANNEE_FIN']
+except FileNotFoundError:
+    BETA3_USA, PVAL3_USA, ANNEE_DEBUT, ANNEE_FIN = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# Génération LaTeX brute (pour PDF)
+# ─────────────────────────────────────────────────────────────────
+latex_code = rf"""
+\begin{{table}}[h]
+\centering
+\caption{{Synthèse des tests de l'EKC cubique}}
+\label{{tab:verdict-ekc}}
+\begin{{tabular}}{{lcccc}}
+\toprule
+Approche & Hypothèse & Résultat & Coefficient & p-value \\
+\midrule
+Transversale ({N_PAYS} pays, {ANNEE_CROSS}) & $\beta_3 = 0$ & {format_verdict(PVAL3)} & ${BETA3:.4f}{format_stars_latex(PVAL3)}$ & {PVAL3:.4f} \\
+Temporelle (USA, {ANNEE_DEBUT}--{ANNEE_FIN}) & $\beta_3 = 0$ & {format_verdict(PVAL3_USA)} & ${BETA3_USA:.4f}{format_stars_latex(PVAL3_USA)}$ & {PVAL3_USA:.4f} \\
+\bottomrule
+\end{{tabular}}
+\end{{table}}
+"""
+
+print(latex_code)
+```
+
+```{python}
+#| echo: false
+
+display(Markdown(f"""
+**Les deux approches divergent** :
+
+- **Transversale** ({N_PAYS} pays, {ANNEE_CROSS}) : β₃ = {BETA3:.4f}{stars_cross} 
+  → **U inversé renforcé** : le découplage s'accélère aux hauts revenus
+
+- **Temporelle** (USA, {ANNEE_DEBUT}-{ANNEE_FIN}) : β₃ = {BETA3_USA:.4f} (p={PVAL3_USA:.3f})
+  → **Non significatif** : le modèle quadratique suffit
+"""))
+```
+
+**Interprétation** :
+
+La **coupe transversale** suggère un découplage structurel durable 
+(les pays les plus riches ont les émissions les plus basses en 2020).
+
+L'**analyse temporelle USA** ne montre pas de rebond, mais la période 
+est peut-être trop courte pour capturer une éventuelle reprise.
+
+**Verdict** : L'EKC **classique (U inversé) est validée** en transversal.
+L'hypothèse de rebond (courbe en N) est **infirmée**.
+
+## Le verdict
+
+**L'hypothèse EKC classique (U inversé) est VALIDÉE par l'analyse transversale, mais doit être qualifiée.**
+
+### 1. La validation statistique
+Le découplage est réel à l'échelle mondiale en 2020. Les pays les plus riches ont réussi à abaisser leur empreinte carbone par habitant, invalidant les craintes d'un "rebond" systématique (courbe en N) aux très hauts revenus.
+
+### 2. Hétérogénéité structurelle masquée par la moyenne
+
+Le modèle global valide l'EKC **en moyenne**, mais cette relation agrégée 
+masque **trois trajectoires distinctes** (Figure 8.2) :
+
+| Type de pays | Exemples | Forme observée | Turning point |
+|--------------|----------|----------------|---------------|
+| **OCDE avancés** | USA, France, Allemagne | U inversé (∩) | Atteint ~1990-2000 |
+| **Émergents industriels** | Chine, Inde, Brésil | Linéaire croissante (/) | Pas encore atteint |
+| **Exportateurs fossiles** | Qatar, Koweït | Plat élevé (–) | Découplage faible |
+
+**Interprétation** : L'EKC décrit une **tendance conditionnelle** (Stern, 2004), 
+pas une loi déterministe universelle. Ces "clubs de convergence" (Baumol, 1986) 
+reflètent des **dépendances de sentier** (path dependencies) liées aux choix 
+technologiques et institutionnels passés.
+
+### 3. Le découplage n'est pas automatique
+L'inertie mesurée sur le cas américain montre que la croissance seule ne suffit pas. Le découplage observé en Europe ou aux USA est le fruit de politiques actives (transition énergétique, désindustrialisation, prix du carbone), et non d'un mécanisme de marché spontané.
+
+### Réponse à la question initiale
+
+> *« La croissance économique finit-elle par réduire la pollution ? »*
+
+**Réponse nuancée** : **OUI**, les données confirment qu'il existe un niveau de richesse au-delà duquel les émissions diminuent. **MAIS** ce point de retournement n'est pas garanti : il doit être construit par des politiques volontaristes pour briser l'inertie des systèmes fossiles, comme le montre la divergence des trajectoires en Annexe.

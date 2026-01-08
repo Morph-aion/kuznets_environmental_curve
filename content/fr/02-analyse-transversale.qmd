@@ -1,0 +1,590 @@
+---
+title: "Analyse transversale : Photographie du monde"
+execute:
+  cache: false
+---
+{{< include _setup.qmd >}}
+
+```{python}
+#| label: estimation-cross
+#| output: false
+
+if DATA_LOADED and not df_cross.empty:
+    # Estimation des trois modèles
+    m_lin = smf.ols('log_co2 ~ log_gdp_c', data=df_cross).fit(cov_type='HC3')
+    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+    m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_cross).fit(cov_type='HC3')
+    
+    # Statistiques clés
+    BETA3 = m_cub.params.get('I(log_gdp_c ** 3)', 0)
+    PVAL3 = m_cub.pvalues.get('I(log_gdp_c ** 3)', 1)
+    R2_CUB = m_cub.rsquared_adj
+    AIC_QUAD = m_quad.aic
+    AIC_CUB = m_cub.aic
+```
+
+## Vue d'ensemble
+
+::: {.callout-important}
+### Note méthodologique : Pourquoi deux représentations ?
+
+Avant d'analyser les données, il est crucial de comprendre **la différence 
+entre la vision du modèle et la réalité physique** :
+
+- **Gauche (Log-Log)** : Espace de travail du modèle économétrique. 
+  Les variations relatives (%) sont comparables.
+  
+- **Droite (Log-Linéaire)** : Réalité climatique en tonnes absolues. 
+  Une tonne de CO$_2$ reste une tonne, quel que soit le logarithme.
+
+**Pourquoi c'est important ?** Le modèle peut capturer la "dynamique moyenne" 
+(gauche), mais sous-estimer l'**hétérogénéité extrême** aux hauts revenus (droite).
+:::
+
+```{python}
+#| label: fig-comparison-scales
+#| fig-cap: "Confrontation des échelles : La vision du modèle vs La réalité physique"
+#| warning: false
+#| fig-width: 12
+#| fig-height: 6
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# SÉLECTION STRATÉGIQUE : 1 ou 2 pays par "type" économique pour éviter la surcharge
+PAYS_A_AFFICHER = {
+    'United States': 'USA',   # Le géant riche polluant
+    'China': 'CHN',           # Le géant émergent
+    'India': 'IND',           # Le géant en développement
+    'Qatar': 'QAT',           # L'extrême pétrolier (Le point qui s'envole en Linéaire)
+    'France': 'FRA',          # Le modèle nucléaire/sobre
+    'Sweden': 'SWE',          # Le modèle nordique
+    'Germany': 'DEU',         # L'industriel européen
+    'Brazil': 'BRA',          # L'émergent sud-américain
+    'Singapore': 'SGP',       # La cité-état riche (Contraste avec QAT)
+    'Russia': 'RUS'           # L'économie fossile
+}
+
+if 'df_cross' in locals() and not df_cross.empty:
+    # Récupération sécurisée des métadonnées pour le titre
+    year_str = str(ANNEE_CROSS) if 'ANNEE_CROSS' in locals() else str(df_cross['year'].max())
+    count_str = str(N_PAYS) if 'N_PAYS' in locals() else str(len(df_cross))
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    
+    # --- AJOUT DU TITRE GLOBAL (Date + N) ---
+    fig.suptitle(f"Distribution Mondiale des Émissions : {count_str} Pays en {year_str}", 
+                 fontsize=14, fontweight='bold', y=0.98)
+    
+    # ---------------------------------------------------------
+    # GRAPHIQUE GAUCHE : Log-Log (La vision du modèle)
+    # ---------------------------------------------------------
+    sns.scatterplot(ax=axes[0], data=df_cross, x='gdp', y='co2_per_capita', 
+                    color='#34495e', alpha=0.5, s=50, edgecolor='white')
+    
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_title("A. Échelle Log-Log\n(Vision Économétrique)", fontweight='bold', fontsize=11)
+    axes[0].set_xlabel("PIB par habitant (Log)")
+    axes[0].set_ylabel("CO2 par habitant (Log)")
+    axes[0].grid(True, which="both", ls="--", alpha=0.2)
+
+    # ---------------------------------------------------------
+    # GRAPHIQUE DROITE : Log-Lin (La réalité physique)
+    # ---------------------------------------------------------
+    sns.scatterplot(ax=axes[1], data=df_cross, x='gdp', y='co2_per_capita', 
+                    color='#c0392b', alpha=0.5, s=50, edgecolor='white')
+    
+    # Tendance LOWESS pour guider l'œil
+    sns.regplot(ax=axes[1], data=df_cross, x='gdp', y='co2_per_capita', 
+                scatter=False, lowess=True, 
+                line_kws={'color': 'black', 'linewidth': 1.5, 'linestyle': '--', 'label': 'Tendance moyenne'})
+
+    axes[1].set_xscale('log')
+    # Y reste linéaire ! C'est là que la magie opère.
+    axes[1].set_title("B. Échelle Log-Linéaire\n(Réalité Physique)", fontweight='bold', fontsize=11)
+    axes[1].set_xlabel("PIB par habitant (Log)")
+    axes[1].set_ylabel("CO2 par habitant (Tonnes)")
+    axes[1].grid(True, which="both", ls="--", alpha=0.2)
+
+    # ---------------------------------------------------------
+    # ANNOTATIONS
+    # ---------------------------------------------------------
+    for pays, code in PAYS_A_AFFICHER.items():
+        row = df_cross[df_cross['country'] == pays]
+        if not row.empty:
+            x = row['gdp'].values[0]
+            y = row['co2_per_capita'].values[0]
+            
+            # Gauche : Texte noir discret
+            axes[0].text(x, y, f" {code}", fontsize=8, fontweight='bold', 
+                         color='#2c3e50', va='bottom')
+            
+            # Droite : Texte rouge ou décalé pour les extrêmes
+            # Petite astuce : décaler le texte du Qatar vers la gauche car il est au bord du cadre
+            ha = 'right' if y > 30 else 'left' 
+            axes[1].text(x, y, f"{code} " if ha=='right' else f" {code}", 
+                         fontsize=8, fontweight='bold', 
+                         color='#c0392b', va='center', ha=ha)
+
+    plt.tight_layout()
+    plt.show()
+```
+
+**Observations empiriques :**
+
+1. En log-log : relation relativement linéaire → justifie le modèle polynomial
+2. En log-lin : dispersion explosive à droite → Qatar s'envole, Suède plafonne
+3. Conclusion : L'EKC moyenne masque des **trajectoires radicalement divergentes**
+
+## Performance prédictive
+
+### Validation croisée k=5
+
+```{python}
+#| label: validation-croisee
+#| output: false
+
+if DATA_LOADED and not df_cross.empty:
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    
+    rmse_results = {'Linéaire': [], 'Quadratique': [], 'Cubique': []}
+    
+    for train_idx, test_idx in kf.split(df_cross):
+        train_data = df_cross.iloc[train_idx]
+        test_data = df_cross.iloc[test_idx]
+        
+        m1 = smf.ols('log_co2 ~ log_gdp_c', data=train_data).fit()
+        m2 = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=train_data).fit()
+        m3 = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=train_data).fit()
+        
+        rmse_results['Linéaire'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m1.predict(test_data))))
+        rmse_results['Quadratique'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m2.predict(test_data))))
+        rmse_results['Cubique'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m3.predict(test_data))))
+    
+    RMSE_LIN = np.mean(rmse_results['Linéaire'])
+    RMSE_QUAD = np.mean(rmse_results['Quadratique'])
+    RMSE_CUB = np.mean(rmse_results['Cubique'])
+    GAIN_VS_QUAD = (RMSE_QUAD - RMSE_CUB) / RMSE_QUAD * 100
+```
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if GAIN_VS_QUAD > 0:
+        interpretation = f"améliore la prédiction de {GAIN_VS_QUAD:.1f}%"
+        recommandation = "Privilégier le modèle **cubique**."
+    else:
+        interpretation = f"dégrade la prédiction de {abs(GAIN_VS_QUAD):.1f}%"
+        recommandation = "Privilégier le modèle **quadratique** (plus parcimonieux)."
+    
+    display(Markdown(f"""
+**Validation croisée (k=5)**
+
+| Modèle | RMSE moyen | Écart vs quadratique |
+|--------|------------|---------------------|
+| Linéaire | {RMSE_LIN:.4f} | {(RMSE_LIN - RMSE_QUAD) / RMSE_QUAD * 100:+.1f}% |
+| Quadratique | {RMSE_QUAD:.4f} | référence |
+| Cubique | {RMSE_CUB:.4f} | {GAIN_VS_QUAD:+.1f}% |
+
+**Interprétation** : Le modèle cubique {interpretation}.
+
+**Recommandation** : {recommandation}
+"""))
+```
+
+### Diagnostic des erreurs de prédiction
+
+::: {.callout-note}
+### Objectif
+Identifier quels types de pays sont **systématiquement mal prédits** par le modèle cubique. Cela révèle les limites structurelles de l'EKC.
+:::
+
+```{python}
+#| label: fig-diagnostic-erreurs-cross
+#| fig-cap: "Analyse des erreurs de prédiction : Qui le modèle rate-t-il ?"
+#| warning: false
+#| fig-width: 14
+#| fig-height: 10
+
+if DATA_LOADED and not df_cross.empty:
+    # Prédictions et résidus
+    df_cross['pred_cub'] = m_cub.predict(df_cross)
+    df_cross['resid_cub'] = df_cross['log_co2'] - df_cross['pred_cub']
+    df_cross['resid_abs'] = np.abs(df_cross['resid_cub'])
+    
+    # Conversion en tonnes pour l'interprétation
+    df_cross['co2_pred'] = np.exp(df_cross['pred_cub'])
+    df_cross['erreur_tonnes'] = df_cross['co2_per_capita'] - df_cross['co2_pred']
+    
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    
+    # ═══════════════════════════════════════════════════════════════
+    # A. RÉSIDUS vs PRÉDICTIONS (détection de biais systématique)
+    # ═══════════════════════════════════════════════════════════════
+    sns.scatterplot(ax=axes[0,0], data=df_cross, x='pred_cub', y='resid_cub',
+                    alpha=0.6, s=60, color='#34495e', edgecolor='white')
+    
+    axes[0,0].axhline(0, color='red', linestyle='--', linewidth=2, label='Biais nul')
+    axes[0,0].set_xlabel("Prédictions $\ln(\mathrm{CO}_2)$")
+    axes[0,0].set_ylabel("Résidus")
+    axes[0,0].set_title("A. Résidus vs Prédictions\n(Détection de biais)", fontweight='bold')
+    axes[0,0].legend()
+    axes[0,0].grid(True, alpha=0.3)
+    
+    # Annotation des 3 pires résidus positifs et négatifs
+    top_resid = df_cross.nlargest(3, 'resid_cub')
+    bot_resid = df_cross.nsmallest(3, 'resid_cub')
+    
+    for _, row in pd.concat([top_resid, bot_resid]).iterrows():
+        axes[0,0].annotate(row['country'], 
+                          xy=(row['pred_cub'], row['resid_cub']),
+                          xytext=(5, 5), textcoords='offset points',
+                          fontsize=8, color='darkred', fontweight='bold',
+                          bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.3))
+    
+    # ═══════════════════════════════════════════════════════════════
+    # B. ERREUR ABSOLUE vs PIB (hétéroscédasticité)
+    # ═══════════════════════════════════════════════════════════════
+    sns.scatterplot(ax=axes[0,1], data=df_cross, x='gdp', y='resid_abs',
+                    alpha=0.6, s=60, color='#e74c3c')
+    
+    # Tendance LOWESS
+    from statsmodels.nonparametric.smoothers_lowess import lowess
+    lowess_result = lowess(df_cross['resid_abs'], np.log(df_cross['gdp']), frac=0.3)
+    axes[0,1].plot(np.exp(lowess_result[:, 0]), lowess_result[:, 1], 
+                   color='black', linewidth=2, linestyle='--', label='Tendance')
+    
+    axes[0,1].set_xscale('log')
+    axes[0,1].set_xlabel("PIB par habitant (Log)")
+    axes[0,1].set_ylabel("Erreur absolue")
+    axes[0,1].set_title("B. Erreur vs Richesse\n(Hétéroscédasticité)", fontweight='bold')
+    axes[0,1].legend()
+    axes[0,1].grid(True, alpha=0.3)
+    
+    # ═══════════════════════════════════════════════════════════════
+    # C. DISTRIBUTION DES ERREURS (normalité)
+    # ═══════════════════════════════════════════════════════════════
+    axes[1,0].hist(df_cross['resid_cub'], bins=20, color='#3498db', 
+                   alpha=0.7, edgecolor='black')
+    axes[1,0].axvline(0, color='red', linestyle='--', linewidth=2)
+    axes[1,0].set_xlabel("Résidus")
+    axes[1,0].set_ylabel("Fréquence")
+    axes[1,0].set_title("C. Distribution des Résidus\n(Test de normalité)", fontweight='bold')
+    axes[1,0].grid(True, alpha=0.3)
+    
+    # Statistique de Jarque-Bera
+    from scipy.stats import jarque_bera
+    jb_stat, jb_pval = jarque_bera(df_cross['resid_cub'])
+    axes[1,0].text(0.05, 0.95, f'Jarque-Bera: {jb_stat:.2f}\np = {jb_pval:.3f}',
+                   transform=axes[1,0].transAxes, fontsize=10,
+                   verticalalignment='top',
+                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    
+    # ═══════════════════════════════════════════════════════════════
+    # D. TOP 10 PAYS MAL PRÉDITS (en valeur absolue)
+    # ═══════════════════════════════════════════════════════════════
+    top_erreurs = df_cross.nlargest(10, 'resid_abs')[['country', 'erreur_tonnes', 'gdp']]
+    top_erreurs = top_erreurs.sort_values('erreur_tonnes')
+    
+    colors = ['red' if x > 0 else 'green' for x in top_erreurs['erreur_tonnes']]
+    axes[1,1].barh(range(len(top_erreurs)), top_erreurs['erreur_tonnes'], color=colors, alpha=0.7)
+    axes[1,1].set_yticks(range(len(top_erreurs)))
+    axes[1,1].set_yticklabels(top_erreurs['country'], fontsize=9)
+    axes[1,1].axvline(0, color='black', linewidth=1)
+    axes[1,1].set_xlabel("Erreur (tonnes CO₂/hab)")
+    axes[1,1].set_title("D. Top 10 Pays Mal Prédits\n(Rouge=surestimé, Vert=sous-estimé)", fontweight='bold')
+    axes[1,1].grid(True, alpha=0.3, axis='x')
+    
+    plt.tight_layout()
+    plt.show()
+```
+
+### Analyse des erreurs
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    # Identification des profils d'erreurs
+    surpred = df_cross[df_cross['resid_cub'] > 0.5]  # Surestimés (prédit > observé)
+    souspred = df_cross[df_cross['resid_cub'] < -0.5]  # Sous-estimés
+    
+    display(Markdown(f"""
+### Profils des pays mal prédits
+
+**Pays surestimés** (modèle prédit trop de CO₂) :
+- **Nombre** : {len(surpred)}
+- **Exemples** : {', '.join(surpred.nlargest(5, 'resid_cub')['country'].tolist())}
+- **PIB moyen** : {surpred['gdp'].mean():,.0f} $/hab
+- **Interprétation** : Pays ayant décarbonné **plus vite** que la moyenne EKC
+  (ex: nucléaire français, hydroélectricité nordique)
+
+**Pays sous-estimés** (modèle prédit trop peu de CO₂) :
+- **Nombre** : {len(souspred)}
+- **Exemples** : {', '.join(souspred.nsmallest(5, 'resid_cub')['country'].tolist())}
+- **PIB moyen** : {souspred['gdp'].mean():,.0f} $/hab
+- **Interprétation** : Pays dépendants des **énergies fossiles** malgré leur richesse
+  (ex: économies pétrolières, charbon)
+
+**Test de normalité** :  
+- Jarque-Bera = {jb_stat:.2f} (p = {jb_pval:.3f})
+- Conclusion : {"Résidus normalement distribués ✓" if jb_pval > 0.05 else "Résidus NON gaussiens ⚠️ (queue épaisse)"}
+"""))
+```
+
+## Estimation et sélection de modèle
+
+```{python}
+#| label: tbl-resultats-cross
+#| tbl-cap: 'Estimation OLS — Variable dépendante : $\ln(\mathrm{CO}_2/\text{hab})$'
+
+if DATA_LOADED and not df_cross.empty:
+    def format_coef(model, var):
+        try:
+            coef = model.params[var]
+            se = model.bse[var]
+            pval = model.pvalues[var]
+            stars = '***' if pval < 0.01 else '**' if pval < 0.05 else '*' if pval < 0.1 else ''
+            return f"{coef:.4f}{stars} ({se:.4f})"
+        except KeyError:
+            return "—"
+    
+    display(Markdown(f"""
+| Variable | Linéaire | Quadratique | Cubique |
+|----------|----------|-------------|---------|
+| ln(PIB) centré | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
+| [ln(PIB)]² | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
+| [ln(PIB)]³ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
+| **R² ajusté** | {m_lin.rsquared_adj:.3f} | {m_quad.rsquared_adj:.3f} | {m_cub.rsquared_adj:.3f} |
+| **AIC** | {m_lin.aic:.1f} | {m_quad.aic:.1f} | {m_cub.aic:.1f} |
+| **N** | {int(m_lin.nobs)} | {int(m_quad.nobs)} | {int(m_cub.nobs)} |
+
+*Erreurs-types robustes HC3 entre parenthèses. \\*p<0.1, \\*\\*p<0.05, \\*\\*\\*p<0.01*
+"""))
+```
+
+### Test F emboîté : le terme cubique est-il nécessaire ?
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    rss_quad = m_quad.ssr
+    rss_cub = m_cub.ssr
+    df_diff = m_quad.df_resid - m_cub.df_resid
+    df_resid = m_cub.df_resid
+    
+    F_STAT = ((rss_quad - rss_cub) / df_diff) / (rss_cub / df_resid)
+    P_VAL_F = 1 - stats.f.cdf(F_STAT, df_diff, df_resid)
+    
+    conclusion = "statistiquement nécessaire" if P_VAL_F < 0.05 else "non significatif"
+    
+    display(Markdown(f"""
+**Test F emboîté** ($H_0: \\beta_3 = 0$)
+
+- Statistique : $F = {F_STAT:.2f}$
+- p-value : ${P_VAL_F:.4f}$
+- **Conclusion** : Le terme cubique est **{conclusion}**
+
+**Critère AIC** : Cubique ({AIC_CUB:.1f}) vs Quadratique ({AIC_QUAD:.1f})
+
+- Gain : **{AIC_QUAD - AIC_CUB:.1f}** points
+"""))
+```
+
+## Résultat clé n°1 : U inversé renforcé
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if BETA3 < 0 and PVAL3 < 0.05:
+        display(Markdown(f"""
+**Coefficient $\\beta_3$ = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- Le terme cubique est **négatif et significatif** (p < 0.05).
+- La relation suit un **U inversé renforcé** : aux très hauts revenus, 
+  le découplage **s'accélère** (déclin plus rapide que le modèle quadratique).
+- Ce résultat suggère un **découplage potentiellement durable** au-delà 
+  du turning point, conforme à l'hypothèse EKC optimiste.
+"""))
+    elif BETA3 > 0 and PVAL3 < 0.05:
+        print(f"""
+**Coefficient $\\beta_3 = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- Le terme cubique est **positif et significatif** → Courbe en **N**.
+- Le découplage est **temporaire** : rebond aux très hauts revenus.
+""")
+    else:
+        print(f"""
+**Coefficient $\\beta_3 = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- Le terme cubique est **non significatif** → le modèle quadratique suffit.
+""")
+```
+
+## Visualisation de la courbe ajustée
+
+```{python}
+#| label: fig-fitted-curve
+#| fig-cap: "Modèle cubique ajusté avec IC 95%"
+
+if DATA_LOADED and not df_cross.empty:
+    gdp_grid = np.linspace(df_cross['gdp'].min(), df_cross['gdp'].max(), 200)
+    log_gdp_grid_c = np.log(gdp_grid) - GDP_MEAN
+    
+    pred_df = pd.DataFrame({'log_gdp_c': log_gdp_grid_c})
+    predictions = m_cub.get_prediction(pred_df)
+    pred_summary = predictions.summary_frame(alpha=0.05)
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    ax.scatter(df_cross['gdp'], df_cross['co2_per_capita'], 
+               alpha=0.3, s=40, c='gray', label='Observations')
+    
+    ax.plot(gdp_grid, np.exp(pred_summary['mean']), 
+            color='#c0392b', linewidth=2.5, label='Modèle cubique')
+    
+    ax.fill_between(gdp_grid,
+                    np.exp(pred_summary['mean_ci_lower']),
+                    np.exp(pred_summary['mean_ci_upper']),
+                    color='#c0392b', alpha=0.15, label='IC 95%')
+    
+    ax.set_xscale('log')
+    ax.set_xlabel("PIB par habitant (USD PPA 2017)")
+    ax.set_ylabel("CO₂ par habitant (tonnes)")
+    if BETA3 < 0:
+        titre = "U inversé renforcé : l'EKC classique est confirmée"
+    else:
+        titre = "Courbe en N : l'EKC classique est rejetée"
+    
+    ax.set_title(titre)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.show()
+```
+
+::: {.callout-important}
+### Dilemme biais-variance : Pourquoi privilégier le quadratique ?
+
+Nous sommes confrontés à un arbitrage classique en modélisation :
+
+1. **Significativité statistique** : Le test F (p=0.020) et le coefficient β₃** 
+   (p=0.011) indiquent que le terme cubique améliore l'ajustement aux données 
+   de 2020.
+
+2. **Capacité prédictive** : La validation croisée révèle que ce gain 
+   statistique ne se traduit pas par une meilleure généralisation (RMSE +1.4%).
+
+**Interprétation** : Le terme cubique capture probablement des spécificités 
+des pays ultra-riches (Qatar, Koweït, Singapour) qui constituent des cas 
+particuliers (économies rentières, cités-États) plutôt qu'une tendance 
+structurelle généralisable.
+
+**Décision méthodologique** : Conformément au principe de parcimonie 
+(Occam's Razor) et à la priorité donnée à la robustesse prédictive, 
+**nous retenons le modèle quadratique pour les projections** (Section 5.6). 
+
+Cependant, nous reconnaissons que les données de 2020 ne permettent pas 
+d'exclure définitivement un déclin accéléré (β₃ < 0) aux très hauts revenus. 
+Des travaux futurs avec des panels temporels multi-pays permettraient de 
+trancher cette question.
+:::
+
+## Interprétation : Régimes de la relation PIB-CO$_2$
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if BETA3 > 0 and PVAL3 < 0.05:  # ← ENLEVEZ "and SEUILS_CALCULES"
+        # Courbe en N → calculer et afficher les 3 phases
+        b1 = m_cub.params['log_gdp_c']
+        b2 = m_cub.params['I(log_gdp_c ** 2)']
+        b3 = m_cub.params['I(log_gdp_c ** 3)']
+        
+        a, b, c = 3 * b3, 2 * b2, b1
+        discriminant = b**2 - 4*a*c
+        
+        if discriminant >= 0 and a != 0:
+            x1 = (-b - np.sqrt(discriminant)) / (2*a)
+            x2 = (-b + np.sqrt(discriminant)) / (2*a)
+            
+            SEUIL1 = np.exp(min(x1, x2) + GDP_MEAN)
+            SEUIL2 = np.exp(max(x1, x2) + GDP_MEAN)
+            
+            display(Markdown(f"""
+**Trois régimes distincts** (courbe en N) :
+
+| Phase | Plage de PIB/hab | Dynamique |
+|-------|------------------|-----------|
+| 1. Industrialisation | < {SEUIL1:,.0f} $ | Croissance |
+| 2. Transition | {SEUIL1:,.0f} - {SEUIL2:,.0f} $ | Déclin temporaire |
+| 3. Rebond | > {SEUIL2:,.0f} $ | Reprise |
+
+**Message clé** : Le découplage est **temporaire**, pas permanent.
+"""))
+        else:
+            print("Impossible de calculer les points d'inflexion.")
+    
+    elif BETA3 < 0 and PVAL3 < 0.05:
+        # U inversé renforcé → PAS de phase 3
+        display(Markdown(f"""
+**Deux régimes distincts** (U inversé renforcé) :
+
+| Phase | Dynamique | Interprétation |
+|-------|-----------|----------------|
+| 1. Industrialisation | Croissance | Émissions augmentent avec le PIB |
+| 2. Découplage durable | Déclin accéléré | Émissions baissent de plus en plus vite |
+
+**Message clé** : Pas de rebond détecté — le découplage semble **permanent**.
+"""))
+    else:
+        print(f"Le terme cubique n'est pas significatif (p = {PVAL3:.3f}) — le modèle quadratique suffit.")
+```
+
+## Bilan de l'approche transversale
+
+Les données de `{python} ANNEE_CROSS` valident l'EKC classique **en moyenne** : 
+le découplage existe à l'échelle mondiale.
+
+**Mais cette photographie statique ne répond pas à trois questions dynamiques :**
+
+1. Ce découplage est-il **durable** dans le temps, ou seulement conjoncturel ?
+2. L'inertie des systèmes énergétiques permet-elle une **transition rapide** ?
+3. Un pays peut-il **revenir en arrière** (re-couplage) après une phase de découplage ?
+
+**La Partie III répond à ces questions** via l'analyse temporelle du cas américain (1991-2020).
+
+```{python}
+#| label: sauvegarde-resultats-cross
+#| echo: false
+#| output: false
+
+import json
+from pathlib import Path
+
+if DATA_LOADED and not df_cross.empty:
+    current = Path.cwd()
+    while not (current / '_quarto.yml').exists() and current != current.parent:
+        current = current.parent
+    
+    shared_dir = current / '_shared'
+    shared_dir.mkdir(exist_ok=True)
+    output_file = shared_dir / 'resultats_cross.json'
+    
+    donnees = {
+        "BETA3": BETA3,
+        "PVAL3": PVAL3,      # ← AJOUTER
+        "N_PAYS": N_PAYS,
+        "ANNEE_CROSS": ANNEE_CROSS,
+        "R2_CUB": R2_CUB
+    }
+    
+    with open(output_file, 'w') as f:
+        json.dump(donnees, f)
+```

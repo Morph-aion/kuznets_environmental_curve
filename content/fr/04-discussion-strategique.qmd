@@ -1,0 +1,25 @@
+---
+title: "Discussion Stratégique"
+subtitle: "Concilier Inertie Temporelle et Hétérogénéité Spatiale"
+---
+
+## 4.1 La Confrontation : Espace contre Temps
+
+[À rédiger selon mes résultats réels]
+
+## 4.2 Leçon 1 : L'Inertie Structurelle (Analyse Temporelle)
+
+Coefficient d'inertie : ρ = 0.878*** 
+[Récupérer le contenu de l'ancienne version, section "Gérer l'inertie"]
+
+## 4.3 Leçon 2 : Hétérogénéité des Trajectoires (Analyse Transversale)
+
+[Expliquer pourquoi Suède ≠ USA ≠ Qatar]
+
+## 4.4 Le "Tunneling" Technologique
+
+[Récupérer quasi tel quel de l'ancienne version]
+
+## 4.5 Implications Politiques
+
+[Adapter selon mes résultats]

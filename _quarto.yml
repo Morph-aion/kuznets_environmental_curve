@@ -1,0 +1,161 @@
+# _quarto.yml
+
+# ===================================================================
+# CONFIGURATION GLOBALE DU PROJET QUARTO
+# ===================================================================
+# Définit le type de projet, les fichiers à compiler, et le dossier de sortie.
+# -------------------------------------------------------------------
+project:
+  type: book                                   # Type de projet Quarto : ici un livre
+  render:
+    - "*.qmd"                                  # Rendre tous les fichiers avec l'extension .qmd
+    - "!preparatory-work/"                     # Ignorer le dossier "preparatory-work" et son contenu
+    - "!notebooks/"                            # Ignorer le dossier notebooks
+    - "!data/"
+    - "!models/"
+    
+# ===================================================================
+# DÉFINITION DES FORMATS DE SORTIE
+# ===================================================================
+# Personnalise l'apparence et les options pour chaque format de sortie (HTML, PDF...).
+# -------------------------------------------------------------------
+format:
+  # --- FORMAT PDF (rendu académique imprimable) ---
+  pdf:
+    # --- Moteur et classe LaTeX ---
+    pdf-engine: xelatex
+    documentclass: scrreprt            # Classe KOMA-Script idéale pour les rapports/mémoires (meilleure typographie que "report").
+
+    # --- Mise en page ---
+    papersize: a4
+    geometry: margin=2.5cm             # Définit les marges du document (ici, 2.5cm de chaque côté).
+
+    # --- Police et typographie ---
+    #mainfont: "Libertinus Serif"       # Police élégante, gratuite
+    #sansfont: "Libertinus Sans"
+    #monofont: "Fira Code"              # Police à chasse fixe pour le code
+    #mathfont: "Libertinus Math"
+    fontsize: 11pt                     # Taille de police principale du document.
+    linestretch: 1.15                  # Interligne légèrement aéré
+    
+    # --- Numérotation ---  
+    number-sections: true              # Active la numérotation des sections (ex: 1.1, 1.1.1).
+    number-depth: 3                    # Numéroter jusqu'au niveau 1.2.3
+    
+    # --- Tables des matières ---    
+    toc: true                          # Génère une table des matières au début du PDF.
+    toc-depth: 3
+    toc-title: "Table des matières"
+    lof: true                          # Liste des figures
+    lot: true                          # Liste des tableaux    
+    
+    
+    link-refs: true                    # Active les hyperliens internes pour les références croisées dans le PDF.
+    fig-cap-location: bottom           # Positionne la légende sous la figure, conformément aux standards académiques.
+
+    # Injecte du code LaTeX dans le préambule pour personnalisation avancée.
+    include-in-header:
+      text: |
+        % ===================================================================
+        % 1. CONFIGURATION DES POLICES POUR XeLaTeX
+        % ===================================================================
+        % XeLaTeX gère nativement l'UTF-8 : NE PAS utiliser inputenc/fontenc
+        % (ces packages sont réservés à pdfLaTeX et cassent le rendu Unicode).
+        % -------------------------------------------------------------------
+        \usepackage{fontspec}                    % Permet de charger des polices OpenType/TrueType système
+        \setmainfont{Latin Modern Roman}         % Police principale du texte (héritière moderne de Computer Modern)
+        \usepackage{unicode-math}                % Support complet des symboles mathématiques Unicode (α, β, γ, ∑, ∫...)
+        \setmathfont{Latin Modern Math}          % Police mathématique cohérente avec le texte principal
+        
+        % ===================================================================
+        % 2 SUPPORT DES EMOJIS COLORÉS (Twitter Emoji via twemojis)
+        % ===================================================================
+        \usepackage{twemojis}
+        
+        % ===================================================================
+        % 3. TYPOGRAPHIE FRANÇAISE
+        % ===================================================================
+        % Configuration des guillemets français pour le package babel.
+        % og = opening guillemet (ouvrant), fg = closing guillemet (fermant).
+        % -------------------------------------------------------------------
+        \frenchbsetup{og=«, fg=»}
+        
+        % ===================================================================
+        % 4. INTERLIGNE
+        % ===================================================================
+        % Augmente l'interligne à 1.5× pour améliorer la lisibilité.
+        % Alternatives : \singlespacing (1×) ou \doublespacing (2×).
+        % -------------------------------------------------------------------
+        \usepackage{setspace}
+        \onehalfspacing
+        
+        % ===================================================================
+        % 5. ESPACEMENT DES TITRES DE CHAPITRES (KOMA-Script)
+        % ===================================================================
+        % Par défaut, scrreprt laisse un grand espace vide avant les titres.
+        % beforeskip : espace AVANT le titre (valeur négative = remonte)
+        % afterskip  : espace APRÈS le titre (avant le contenu)
+        % Les valeurs "plus/minus" permettent à LaTeX d'ajuster élastiquement.
+        % -------------------------------------------------------------------
+        \RedeclareSectionCommand[
+          beforeskip=-3.5ex plus -1ex minus -.2ex,
+          afterskip=3.25ex plus .2ex
+        ]{chapter}
+        
+        % ===================================================================
+        % 6. CONTRÔLE DU PLACEMENT DES FLOTTANTS
+        % ===================================================================
+        % float    : ajoute l'option [H] (Here) pour forcer le placement exact
+        % needspace: évite les titres orphelins en bas de page (réserve de l'espace)
+        % -------------------------------------------------------------------
+        \usepackage{float}
+        \usepackage{needspace}
+        
+        % ===================================================================
+        % 7. COMPORTEMENT PAR DÉFAUT DES FIGURES ET TABLEAUX
+        % ===================================================================
+        % Force LaTeX à placer TOUS les flottants exactement là où ils
+        % apparaissent dans le code source (pas de déplacement automatique).
+        % ⚠️ Peut créer des espaces blancs si l'image est trop grande.
+        % -------------------------------------------------------------------
+        \floatplacement{figure}{H}
+        \floatplacement{table}{H}
+
+  # --- FORMAT HTML (consultation interactive) ---
+  html:
+    # --- Thème ---
+    theme:
+      - cosmo                          # Thème Bootswatch de base pour le style visuel.
+      - assets/css/custom.scss         # Fichier de style personnalisé (Sass/SCSS) pour surcharger ou étendre 'cosmo'.
+      
+    # --- Navigation ---
+    toc: true                          # Affiche la table des matières
+    toc-depth: 3                       # Inclut les titres jusqu'au niveau H3 (###) dans la TOC.
+    
+    
+    link-refs: true                    # Active les liens cliquables pour les références croisées (@fig-, @tbl-).
+    fig-cap-location: bottom           # Positionne les légendes de figures sous l'image pour cohérence avec le PDF.
+
+    # --- Footer ---
+    page-footer:
+      left: "© 2025 Morph-ion — Mémoire M2 Économétrie"
+      right: "Généré avec Quarto"
+
+# ===================================================================
+# PARAMÈTRES D'EXÉCUTION DU CODE
+# ===================================================================
+# Contrôle la manière dont Quarto exécute les blocs de code Python/R dans les .qmd.
+# -------------------------------------------------------------------
+execute:
+   cache: true                         # Active la mise en cache des cellules de code (chunks) pour éviter de les réexécuter s'ils n'ont pas changé.
+   freeze: true                        # Ne recompile le document qu s'il a été modifié (contenu, YAML ou code).
+   echo: false                         # N'affiche PAS le code source dans le rendu final (sauf si overridé localement avec #| echo: true).
+   warning: false                      # Masque les avertissements (warnings) → utile pour un rendu propre. À activer en debug.
+
+# ===================================================================
+# GESTION DE LA BIBLIOGRAPHIE
+# ===================================================================
+# Connecte le fichier de références et définit le style de citation.
+# -------------------------------------------------------------------
+bibliography: references.bib
+csl: assets/csl/apa.csl                # Style de citation (American Psychological Association)
