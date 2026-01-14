@@ -73,7 +73,7 @@ pas trop restrictive, nous comparons les prédictions paramétriques
 qui laisse les données "parler d'elles-mêmes".
 
 ```{python}
-#| label: fig-check-models-comparisonv
+#| label: fig-check-models-comparison
 #| fig-cap: "Modèles paramétriques (Quadratique et Cubique) vs Modèle non-paramétrique (LOWESS)"
 #| warning: false
 #| fig-width: 12
@@ -144,118 +144,4 @@ if 'df_cross' in locals() and not df_cross.empty:
 
 else:
     print("Erreur : df_cross n'est pas chargé.")
-```
-
-```{python}
-#| label: fig-quad-vs-cubic-diff
-#| fig-cap: "Test visuel du rebond : différence Quadratique vs Cubique"
-#| warning: false
-#| fig-width: 16
-#| fig-height: 5
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import statsmodels.formula.api as smf
-import statsmodels.api as sm
-
-if 'df_cross' in locals() and not df_cross.empty:
-    
-    df_sorted = df_cross.sort_values('gdp_pc')
-    
-    # Modèles
-    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_sorted).fit()
-    m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_sorted).fit()
-    
-    # Prédictions
-    pred_quad_log = m_quad.predict(df_sorted)
-    pred_cub_log = m_cub.predict(df_sorted)
-    
-    # Différence pour le zoom
-    diff = pred_cub_log - pred_quad_log
-    
-    # LOWESS
-    lowess_log = sm.nonparametric.lowess(df_sorted['log_co2'], df_sorted['log_gdp'], frac=0.3)
-    
-    # IC 95% Quadratique
-    predictions = m_quad.get_prediction(df_sorted)
-    pred_summary = predictions.summary_frame(alpha=0.05)
-
-    # GRAPHIQUE 3 PANELS
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-    
-    # ======================
-    # PANEL A : Superposition
-    # ======================
-    axes[0].scatter(df_sorted['log_gdp'], df_sorted['log_co2'], 
-                   alpha=0.25, color='lightgray', s=30, label='Données (n=159)')
-    
-    axes[0].fill_between(df_sorted['log_gdp'], 
-                        pred_summary['mean_ci_lower'], 
-                        pred_summary['mean_ci_upper'],
-                        alpha=0.15, color='blue', label='IC 95%')
-    
-    # ORDRE INVERSÉ pour voir la cubique en dessous
-    axes[0].plot(df_sorted['log_gdp'], pred_cub_log, 
-                'r-', linewidth=4, label='Cubique (dessous)', alpha=0.6, zorder=2)
-    axes[0].plot(df_sorted['log_gdp'], pred_quad_log, 
-                'b--', linewidth=2.5, label='Quadratique (dessus)', alpha=0.9, zorder=3)
-    
-    axes[0].set_title("A. Superposition (quasi-parfaite)", fontweight='bold', fontsize=12)
-    axes[0].set_xlabel("Log PIB (centré)", fontsize=10)
-    axes[0].set_ylabel("Log CO₂ (t/hab)", fontsize=10)
-    axes[0].legend(loc='upper left', fontsize=9, framealpha=0.95)
-    axes[0].grid(True, alpha=0.3, linestyle='--')
-    
-    # ======================
-    # PANEL B : DIFFÉRENCE
-    # ======================
-    axes[1].axhline(0, color='black', linewidth=1, linestyle='--', alpha=0.5, label='Différence nulle')
-    axes[1].plot(df_sorted['log_gdp'], diff, 
-                'purple', linewidth=3, label='Cubique - Quadratique', alpha=0.8)
-    axes[1].fill_between(df_sorted['log_gdp'], diff, 0, 
-                        alpha=0.2, color='purple')
-    
-    # Zone hauts revenus
-    axes[1].axvspan(10.8, 11.2, alpha=0.1, color='red', zorder=0)
-    axes[1].text(11.0, 0.98, 'Zone critique\n(PIB > $50k)', 
-                ha='center', fontsize=9, color='darkred',
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.3))
-    
-    axes[1].set_title("B. Différence Cubique - Quadratique", fontweight='bold', fontsize=12)
-    axes[1].set_xlabel("Log PIB (centré)", fontsize=10)
-    axes[1].set_ylabel("Écart (log CO₂)", fontsize=10)
-    axes[1].legend(loc='best', fontsize=9, framealpha=0.95)
-    axes[1].grid(True, alpha=0.3, linestyle='--')
-    
-    # Annotation résultat
-    max_diff = np.abs(diff).max()
-    axes[1].text(0.02, 0.98, 
-                f'Écart maximal : {max_diff:.4f}\n(≈ 0% en pratique)',
-                transform=axes[1].transAxes, 
-                fontsize=10,
-                verticalalignment='top',
-                bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgreen', alpha=0.7))
-    
-    # ======================
-    # PANEL C : Validation LOWESS
-    # ======================
-    axes[2].scatter(df_sorted['log_gdp'], df_sorted['log_co2'], 
-                   alpha=0.25, color='lightgray', s=30, label='Données')
-    
-    axes[2].plot(df_sorted['log_gdp'], pred_quad_log, 
-                'b-', linewidth=3, label='Quadratique', alpha=0.8)
-    axes[2].plot(lowess_log[:, 0], lowess_log[:, 1], 
-                'orange', linewidth=2.5, linestyle=':', label='LOWESS', alpha=0.9)
-    
-    axes[2].set_title("C. Validation non-paramétrique", fontweight='bold', fontsize=12)
-    axes[2].set_xlabel("Log PIB", fontsize=10)
-    axes[2].set_ylabel("Log CO₂", fontsize=10)
-    axes[2].legend(loc='upper left', fontsize=9, framealpha=0.95)
-    axes[2].grid(True, alpha=0.3, linestyle='--')
-
-    plt.tight_layout()
-    
-    plt.subplots_adjust(bottom=0.12)
-    plt.show()
 ```
