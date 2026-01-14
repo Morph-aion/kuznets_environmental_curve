@@ -3,6 +3,7 @@ title: "Introduction"
 ---
 
 {{< include _setup.qmd >}}
+{{< include _footnotes.qmd >}}
 
 ## La promesse de l'EKC
 
@@ -10,19 +11,24 @@ Depuis 1991, une hypothèse influence les discours politiques sur climat et dév
 
 > **« La croissance économique finit par réduire la pollution. »**
 
-Cette **courbe environnementale de Kuznets** (EKC) postule que les émissions de CO$_2$ suivent un U inversé : elles augmentent pendant l'industrialisation, atteignent un pic, puis diminuent spontanément à mesure que les pays s'enrichissent.
+Cette **courbe environnementale de Kuznets** (EKC[^ekc]) postule que les émissions de CO$_2$ 
+suivent un U inversé : elles augmentent pendant l'industrialisation, atteignent un pic, puis 
+diminuent spontanément à mesure que les pays s'enrichissent.
 
-*Certains décideurs ont interprété l'EKC comme justifiant une approche attentiste : si la croissance réduit spontanément les émissions au-delà d'un seuil, les contraintes réglementaires seraient superflues (Beckerman, 1992). Cette lecture reste toutefois controversée, car elle néglige les mécanismes institutionnels sous-jacents.*
+*Certains décideurs ont interprété l'EKC comme justifiant une approche attentiste : si 
+la croissance réduit spontanément les émissions au-delà d'un seuil, les contraintes 
+réglementaires seraient superflues (Beckerman, 1992). Cette lecture reste toutefois 
+controversée, car elle néglige les mécanismes institutionnels sous-jacents.*
 
 ## Les données mobilisées
 
 ### Source et justification
 
-Pour tester l'hypothèse EKC, nous mobilisons le **dataset consolidé de Our World in Data (OWID)**, 
+Pour tester l'hypothèse EKC, nous mobilisons le **dataset consolidé de Our World in Data (OWID)**[^owid], 
 qui agrège deux sources de référence :
 
 - **Global Carbon Project** pour les émissions de CO$_2$
-- **Banque Mondiale** pour les indicateurs économiques (PIB ajusté PPA)
+- **Banque Mondiale** pour les indicateurs économiques (PIB ajusté PPA[^ppa])
 
 ::: {.callout-note}
 ## Pourquoi OWID plutôt que l'API Banque Mondiale ?
@@ -37,8 +43,8 @@ qui offre les mêmes données sources dans un format consolidé et stable.
 
 | Variable | Description | Unité |
 |----------|-------------|-------|
-| `co2_per_capita` | Émissions de CO₂ par habitant | tonnes/hab/an |
-| `gdp` | PIB par habitant | $ internationaux (PPA, prix constants) |
+| `co2_per_capita` | Émissions de CO$_2$ par habitant | tonnes/hab/an |
+| `gdp_per_capita` | PIB par habitant | $ internationaux (PPA, prix constants) |
 | `country` | Nom du pays | — |
 | `iso_code` | Code ISO-3 | — |
 | `year` | Année d'observation | — |
@@ -54,7 +60,7 @@ if DATA_LOADED:
 |-----------|--------|---------------|
 | **Période** | {ANNEE_DEBUT_DATA}–{ANNEE_FIN} | Couverture dense et cohérente post-Guerre Froide |
 | **Pays** | {N_PAYS} pays | Exclusion des agrégats continentaux (filtrage sur `iso_code`) |
-| **Observations** | ~{N_PAYS * (ANNEE_FIN - ANNEE_DEBUT_DATA)} lignes | Panel équilibré après nettoyage |
+| **Observations** | ~{N_PAYS * (ANNEE_FIN - ANNEE_DEBUT_DATA)} lignes | Coupe transversale ({ANNEE_CROSS}) + série temporelle USA ({ANNEE_DEBUT_DATA}-{ANNEE_FIN}) |
 """))
 ```
 
@@ -98,12 +104,19 @@ méthodologiques **explicites, rigoureux et reproductibles**.
 
 Nous testons l'EKC selon **deux approches complémentaires** et **deux objectifs distincts** :
 
+```{python}
+#| echo: false
+
+if DATA_LOADED:
+    display(Markdown(f"""
 ### Double approche : Espace et Temps
 
 | Approche | Échantillon | Période | Question clé |
 |----------|-------------|---------|--------------|
 | **Transversale** | {N_PAYS} pays | {ANNEE_CROSS} | Les pays riches polluent-ils moins *aujourd'hui* ? |
-| **Temporelle** | États-Unis | {ANNEE_DEBUT}-{ANNEE_FIN} | Un pays réduit-il ses émissions *en s'enrichissant* ? |
+| **Temporelle** | États-Unis | {ANNEE_DEBUT_DATA}–{ANNEE_FIN} | Un pays réduit-il ses émissions *en s'enrichissant* ? |
+"""))
+```
 
 ### Double objectif : Estimer et Prédire
 
@@ -141,4 +154,3 @@ Le contenu est organisé en quatre parties analytiques, suivies d'une conclusion
    Espace contre temps : quelles implications pour les pays du Sud et les politiques climatiques mondiales ?
 
 Chaque chapitre combine **tests d'hypothèses**, **diagnostics économétriques**, et **recommandations ancrées dans les résultats**.
-

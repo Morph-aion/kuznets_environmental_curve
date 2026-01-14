@@ -1,0 +1,85 @@
+---
+title: "Annexe E : Sources et traitement des données"
+---
+
+{{< include _setup.qmd >}}
+
+Cette annexe documente l’origine des données, les transformations appliquées, et les choix de nettoyage — essentiels pour garantir la **reproductibilité** et la **transparence méthodologique**.
+
+## Sources primaires {#sec-sources-primaires}
+
+Les données utilisées dans ce rapport proviennent de sources internationales reconnues, consolidées par **Our World in Data (OWID)** — plateforme académique réputée pour son harmonisation rigoureuse.
+
+| Variable | Source | Indicateur original | Période |
+|----------|--------|---------------------|---------|
+| Émissions $\text{CO}_2$ par habitant | Global Carbon Project | Territorial emissions (Mt$\text{CO}_2$) | 1750–2022 |
+| PIB par habitant (PPA) | Banque Mondiale | `NY.GDP.PCAP.PP.KD` (USD 2017) | 1990–2022 |
+| Population | UN World Population Prospects | — | 1950–2022 |
+
+→ **Agrégateur principal** : [Our World in Data](https://ourworldindata.org/) — dépôt GitHub : https://github.com/owid/co2-data
+
+> **Pourquoi OWID ?**  
+> Plutôt qu’une extraction directe via les API (fragile, sujette à erreurs), nous utilisons les datasets consolidés d’OWID, qui :  
+> - Harmonisent les unités et définitions entre sources,  
+> - Corrigent les trous de données de façon transparente,  
+> - Sont régulièrement mis à jour et versionnés.
+
+## Pipeline de traitement
+
+<!--
+flowchart LR
+    A[Données brutes OWID] --> B[Filtrage pays]
+    B --> C[Suppression NA]
+    C --> D[Log-transformation]
+    D --> E[Centrage PIB]
+    E --> F[Création lags]
+    F --> G[Données finales]
+-->
+
+| Étape | Action | Code | Justification |
+|-------|--------|------|---------------|
+| 1 | Filtrage | `iso_code.notna()` | Exclure agrégats (World, EU, etc.) |
+| 2 | Nettoyage | `dropna(subset=['co2_per_capita', 'gdp_pc'])` | Observations complètes |
+| 3 | Log | `np.log(x)` | Interprétation en élasticités |
+| 4 | Centrage | `log_gdp - mean(log_gdp)` | Réduire multicolinéarité polynomiale |
+| 5 | Lags | `shift(1)` | Modèle ARDL |
+
+## Statistiques descriptives
+
+```{python}
+#| echo: false
+#| tbl-cap: "Statistiques descriptives — Échantillon 2020"
+
+if DATA_LOADED:
+    desc = df_cross[['co2_per_capita', 'gdp_pc']].describe()
+    desc.columns = ['CO₂/hab (tonnes)', 'PIB/hab ($)']
+    display(desc.round(2).to_markdown())
+```
+
+## Reproductibilité
+
+Toutes les analyses de ce rapport sont **entièrement reproductibles**.
+
+**Code source** : Disponible sur [GitHub]({https://github.com/Morph-aion}) — structure claire, commentée, avec notebooks Quarto (.qmd).
+
+**Environnement technique** :
+
+```yaml
+Python       : 3.11.2
+pandas       : 2.3.3
+numpy        : 2.4.1
+statsmodels  : 0.14.6
+Quarto       : 1.7.31
+matplotlib   : 3.10.8
+seaborn      : 0.13.2
+```
+
+**Dépendances** : Un fichier `requirements.txt` est fourni pour recréer l’environnement exact.
+
+> **Bonnes pratiques respectées** :
+> - Données brutes conservées séparément des scripts.
+> - Toutes les transformations documentées.
+> - Versions des librairies figées.
+> - Sorties (graphiques, tableaux) générées automatiquement — pas de copier-coller manuel.
+
+→ Ce rapport répond aux standards FAIR : **Findable, Accessible, Interoperable, Reusable**.

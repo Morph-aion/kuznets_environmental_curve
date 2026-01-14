@@ -39,24 +39,33 @@ try:
     
     ANNEE_CROSS = int(df['year'].max())
     df_cross = df[df['year'] == ANNEE_CROSS].copy()
-    df_cross = df_cross.dropna(subset=['gdp', 'co2_per_capita'])
     
     # Exclusions (micro-États et paradis fiscaux)
+    # Justification : Micro-États (<500k hab) et paradis fiscaux 
+    # ont une structure économique atypique (PIB/hab artificiellement gonflé)
     EXCLUSIONS = [
-        'Liechtenstein', 'Monaco', 'San Marino', 'Andorra', 
-        'Luxembourg', 'Ireland', 'Singapore', 'Malta', 'Cyprus',
-        'Palau', 'Nauru', 'Tuvalu', 'Vatican'
+        'Liechtenstein', 'Monaco', 'San Marino', 'Andorra',  # Micro-États
+        'Luxembourg', 'Ireland', 'Singapore', 'Malta', 'Cyprus',  # Hubs financiers
+        'Palau', 'Nauru', 'Tuvalu', 'Vatican'  # Micro-États insulaires
     ]
+    
+    # Nettoyage    
     df_cross = df_cross[~df_cross['country'].isin(EXCLUSIONS)]
+    df_cross = df_cross.dropna(subset=['gdp_per_capita', 'co2_per_capita'])
     
     # Transformations log
-    df_cross['log_gdp'] = np.log(df_cross['gdp'])
+    df_cross['log_gdp'] = np.log(df_cross['gdp_per_capita'])
     df_cross['log_co2'] = np.log(df_cross['co2_per_capita'])
+
+    # Création d'un alias pratique pour l'affichage plus tard
+    # (S'assure qu'on utilise bien la colonne divisée par la population)    
+    df_cross['gdp_pc'] = df_cross['gdp_per_capita']
     
-    # Centrage (réduit multicolinéarité polynomiale)
+    # Centrage pour réduire multicolinéarité polynomiale
     GDP_MEAN = df_cross['log_gdp'].mean()
     df_cross['log_gdp_c'] = df_cross['log_gdp'] - GDP_MEAN
     
+    N_PAYS_EXCLUS = len(EXCLUSIONS)
     N_PAYS = len(df_cross)
     
     # ─────────────────────────────────────────────────────────────────
@@ -66,34 +75,59 @@ try:
     df_usa = df[df['country'] == 'United States'].sort_values('year').copy()
     
     if not df_usa.empty:
-        # 1. On stocke la date de début réelle du dataset avant de nettoyer
-        ANNEE_DEBUT_DATA = int(df_usa['year'].min())
-        
+        # Donnée brute disponible dès 1990
+        ANNEE_DEBUT_DATA = int(df_usa['year'].min())  # 1990
+
+        # Transformations log      
         df_usa['log_co2'] = np.log(df_usa['co2_per_capita'])
-        df_usa['log_gdp'] = np.log(df_usa['gdp'])
+        df_usa['log_gdp'] = np.log(df_usa['gdp_per_capita'])
+        
+        # Création d'un alias pratique pour l'affichage plus tard
+        df_usa['gdp_pc'] = df_usa['gdp_per_capita']
+
+        # Centrage USA, Moyenne calculée AVANT dropna pour cohérence
+        GDP_MEAN_USA = df_usa['log_gdp'].mean()
+        df_usa['log_gdp_c'] = df_usa['log_gdp'] - GDP_MEAN_USA
+
+        # Création des lags (APRÈS centrage)
         df_usa['lag_log_co2'] = df_usa['log_co2'].shift(1)
+        df_usa['lag_log_gdp_c'] = df_usa['log_gdp_c'].shift(1) 
         
-        # 2. Le dropna fait passer le dataset à 1991 pour l'estimation
+        # Nettoyage : enlève la première observation (1990) car lag = NaN
         df_usa = df_usa.dropna()
-        
-        N_OBS_USA = len(df_usa)
-        # Il faut utiliser ANNEE_DEBUT_DATA pour mon texte d'introduction
-        ANNEE_DEBUT = int(df_usa['year'].min()) # 1991 (À changer pour une variable plus explicite ANNEE_DEBUT_ESTIM)
-        ANNEE_FIN = int(df_usa['year'].max())
+
+        # Estimation démarre en 1991 (après création du lag)
+        ANNEE_DEBUT_ESTIM = int(df_usa['year'].min())  # 1991
+        ANNEE_FIN = int(df_usa['year'].max())          # 2020
+        N_OBS_USA = len(df_usa)                        # 30 observations
     else:
         N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = 0
 
 except FileNotFoundError:
-    print("⚠️ Fichier data/kuznets_data_final.csv introuvable")
+    print("⚠️ ERREUR : Fichier data/01_raw/kuznets_data_final.csv introuvable.")
+    print("   Vérifiez le chemin relatif depuis le répertoire du notebook.")
     df_cross = pd.DataFrame()
     df_usa = pd.DataFrame()
-    N_PAYS = N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = ANNEE_CROSS = 0
-    GDP_MEAN = 0
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
+
+except ValueError as e:
+    print(f"⚠️ ERREUR DE DONNÉES : {e}")
+    print("   Causes possibles : valeurs négatives dans PIB ou CO₂, types incorrects.")
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
 
 except Exception as e:
-    print(f"⚠️ Erreur lors du chargement : {e}")
+    print(f"⚠️ ERREUR INATTENDUE : {e}")
+    import traceback
+    traceback.print_exc()
     df_cross = pd.DataFrame()
     df_usa = pd.DataFrame()
-    N_PAYS = N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = ANNEE_CROSS = 0
-    GDP_MEAN = 0
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
 ```

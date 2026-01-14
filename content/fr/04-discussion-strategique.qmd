@@ -3,23 +3,72 @@ title: "Discussion Stratégique"
 subtitle: "Concilier Inertie Temporelle et Hétérogénéité Spatiale"
 ---
 
-## 4.1 La Confrontation : Espace contre Temps
+## La Confrontation : Espace contre Temps
 
-[À rédiger selon mes résultats réels]
+Nos deux approches convergent sur un point central : **le modèle quadratique (U inversé) 
+est suffisant**. Le terme cubique n'est significatif ni en transversal ($p = 0.995$) ni en 
+temporel ($p > 0.10$). L'hypothèse d'un rebond des émissions aux très hauts revenus 
+(courbe en N) est **rejetée** sur nos données.
 
-## 4.2 Leçon 1 : L'Inertie Structurelle (Analyse Temporelle)
+Cependant, les deux approches révèlent des **dynamiques complémentaires** :
 
-Coefficient d'inertie : ρ = 0.878*** 
-[Récupérer le contenu de l'ancienne version, section "Gérer l'inertie"]
+| Dimension | Transversal (2020) | Temporel (USA 1990-2020) |
+|-----------|-------------------|--------------------------|
+| **Question** | Les riches polluent-ils moins ? | Un pays se décarbone-t-il en s'enrichissant ? |
+| **Réponse** | **Oui** ($\beta_2 < 0$ significatif) | **Oui, mais lentement** ($\rho \approx 1$) |
+| **Limite** | Photographie statique | Cas unique (généralisabilité ?) |
 
-## 4.3 Leçon 2 : Hétérogénéité des Trajectoires (Analyse Transversale)
+**Interprétation** : La photographie mondiale de 2020 montre un découplage **déjà réalisé** 
+dans les pays riches. Mais le film américain révèle que ce découplage fut **lent, progressif, 
+et potentiellement fragile**.
 
-[Expliquer pourquoi Suède ≠ USA ≠ Qatar]
+## Leçon 1 : L'Inertie Structurelle
 
-## 4.4 Le "Tunneling" Technologique
+L'analyse temporelle révèle une **persistance extrême** des niveaux d'émissions ($\rho \approx 1.00$).
 
-[Récupérer quasi tel quel de l'ancienne version]
+**Que signifie $\rho \approx 1$ concrètement ?**
 
-## 4.5 Implications Politiques
+- Les chocs sur les émissions sont **quasi-permanents**
+- Une centrale à charbon construite aujourd'hui émettra pendant 40 ans
+- Les infrastructures énergétiques verrouillent les trajectoires d'émissions
 
-[Adapter selon mes résultats]
+**Implication politique** : 
+
+> *Le découplage ne s'accélère pas spontanément.* 
+> Attendre le "turning point naturel" de l'EKC est une stratégie à haut risque. 
+> Chaque année de retard verrouille des émissions futures.
+
+**Chiffre clé** : Avec une élasticité de court terme de $-0.12$, il faudrait **$+8\%$ de 
+croissance annuelle** pour réduire les émissions de $1\%$ par an — un rythme insuffisant 
+pour les objectifs de Paris.
+
+## Leçon 2 : Hétérogénéité des Trajectoires
+
+L'analyse des résidus (Section 4.2.3) révèle que l'EKC "moyenne" masque 
+**trois clubs de pays** :
+
+| Profil | Exemples | Position vs EKC | Caractéristique |
+|--------|----------|-----------------|-----------------|
+| **Décarbonés** | France, Suède, Suisse | Sous la courbe | Mix bas-carbone (nucléaire, hydro) |
+| **Sur-carbonés** | Qatar, Koweït, Australie | Au-dessus de la courbe | Rente fossile, climat extrême |
+| **En transition** | Chine, Inde, Brésil | Phase ascendante | Industrialisation en cours |
+
+**Pourquoi la Suède $\neq$ le Qatar à PIB comparable ?**
+
+À $\approx 50\,000\text{ \$/hab}$, la Suède émet $\approx 4\text{ tCO}_2/\text{hab}$ tandis que le Qatar émet $\approx 35\text{ tCO}_2/\text{hab}$.
+Cette différence de **facteur 9** s'explique par :
+
+1. **Mix énergétique** : Hydroélectricité (Suède) vs Gaz naturel (Qatar)
+2. **Structure économique** : Services (Suède) vs Extraction (Qatar)
+3. **Climat** : Chauffage efficace (Suède) vs Climatisation intensive (Qatar)
+4. **Politiques** : Taxe carbone depuis 1991 (Suède) vs Subventions fossiles (Qatar)
+
+**Conclusion** : L'EKC décrit une **tendance conditionnelle**, pas une loi universelle.
+Le découplage dépend des choix technologiques et institutionnels, pas seulement du revenu.
+
+## Le "Tunneling" Technologique
+
+Les pays en développement peuvent-ils **éviter** le pic d'émissions des pays industrialisés ?
+
+**Concept** : Le "tunneling" (Munasinghe, 1999) désigne la possibilité de "creuser un tunnel"
+sous la courbe EKC en adoptant directement des technologies propres.

@@ -1,0 +1,80 @@
+---
+title: "Annexe B : Tests statistiques"
+---
+
+Cette annexe détaille les formalismes mathématiques des tests utilisés pour valider nos modèles.
+
+## Tests de spécification {#sec-tests-spec}
+
+Ces tests valident *a priori* la structure du modèle — choix des variables, forme fonctionnelle, ou dynamique temporelle — avant toute inférence.
+
+### Test ADF (*Augmented Dickey-Fuller*) {#sec-adf}
+
+Le test vérifie la présence d'une racine unitaire dans une série temporelle $y_t$ à l'aide de la régression auxiliaire :
+
+$$ \Delta y_t = \alpha + \beta t + \gamma y_{t-1} + \sum_{i=1}^p \delta_i \Delta y_{t-i} + \varepsilon_t $$
+
+| Élément | Détail |
+|---------|--------|
+| **Hypothèse $H_0$** | $\gamma = 0$ (La série a une racine unitaire $\to$ non-stationnaire) |
+| **Hypothèse $H_1$** | $\gamma < 0$ (La série est stationnaire) |
+| **Règle de décision** | Si la statistique $t$ est inférieure à la valeur critique (ou $p < 0.05$), on rejette $H_0$. |
+| **Utilisé en** | Section 5.2 |
+
+### Test $F$ emboîté {#sec-test-f}
+
+Compare deux modèles emboîtés (ex: quadratique vs cubique) pour savoir si les paramètres supplémentaires améliorent significativement l’ajustement.
+
+$$ F = \frac{(SSR_r - SSR_u) / q}{SSR_u / (n - k - 1)} \sim F(q, n - k - 1) $$
+
+| Élément | Détail |
+|---------|--------|
+| **Question** | Le modèle complexe (cubique) améliore-t-il significativement le modèle simple (quadratique) ? |
+| **Hypothèse $H_0$** | $\beta_3 = 0$ (le terme cubique est inutile) |
+| **Notation** | $SSR_r$ : somme des carrés résiduelle contrainte (quadratique)<br>$SSR_u$ : non-contrainte (cubique) |
+| **Utilisé en** | Section 4.3 |
+
+### Critère AIC (*Akaike Information Criterion*) {#sec-aic}
+
+Mesure la qualité relative d'un modèle statistique en pénalisant le surapprentissage.
+
+$$ \text{AIC} = 2k - 2\ln(\hat{L}) $$
+
+| Élément | Détail |
+|---------|--------|
+| **Interprétation** | Pénalise la complexité. AIC plus faible = meilleur modèle |
+| **Avantage** | Comparable entre modèles non-emboîtés |
+| **Utilisé en** | Sections 4.3, 5.3 |
+
+## Tests de diagnostic {#sec-tests-diag}
+
+Ces tests vérifient *post-estimation* que les résidus $\hat{\varepsilon}_t$ respectent les hypothèses de Gauss-Markov.
+
+### Test de Jarque-Bera (Normalité) {#sec-jarque-bera}
+
+Vérifie si les résidus ont l'asymétrie ($S$) et l'aplatissement ($K$) d'une loi normale.
+
+$$ JB = \frac{n}{6} \left( S^2 + \frac{(K - 3)^2}{4} \right) \sim \chi^2(2) $$
+
+| Élément | Détail |
+|---------|--------|
+| **Hypothèse $H_0$** | Les résidus sont distribués normalement ($S=0, K=3$) |
+| **Statistique** | Basée sur l'asymétrie (skewness) et l'aplatissement (kurtosis) |
+| **Décision** | Si $p > 0.05$, on ne rejette pas $H_0$ (Normalité acceptée). |
+| **Conséquence si rejetée** | Les tests $t$ de Student et les intervalles de confiance peuvent être biaisés sur de petits échantillons. |
+
+### Statistique de Durbin-Watson (Autocorrélation) {#sec-durbin-watson}
+
+Détecte l'autocorrélation d'ordre 1 dans les résidus d'une série temporelle.
+
+$$ DW = \frac{\sum_{t=2}^T (\hat{\varepsilon}_t - \hat{\varepsilon}_{t-1})^2}{\sum_{t=1}^T \hat{\varepsilon}_t^2} \approx 2(1 - \hat{\rho}) $$
+
+| Élément | Détail |
+|---------|--------|
+| **Valeur idéale** | $DW \approx 2$ (pas d'autocorrélation) |
+| **Zones critiques** | $DW < 1.5$ $\to$ autocorrélation positive (tendance)<br>$DW > 2.5$ $\to$ autocorrélation négative (oscillation) |
+| **Utilisé en** | Section 5.5 |
+
+### Test de Box-Cox (transformation optimale)
+
+Voir @sec-box-cox pour les détails et résultats.

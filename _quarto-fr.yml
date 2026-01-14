@@ -93,4 +93,8 @@ book:
                   
     - content/fr/05-conclusion.qmd
     - content/fr/references.qmd
-    - content/fr/annexes.qmd
+    - content/fr/A-concepts.qmd
+    - content/fr/B-tests.qmd
+    - content/fr/C-estimateurs.qmd
+    - content/fr/D-validation.qmd
+    - content/fr/E-donnees.qmd

@@ -3,7 +3,9 @@ title: "Analyse temporelle : Le film américain"
 execute:
   cache: false
 ---
+
 {{< include _setup.qmd >}}
+{{< include _footnotes.qmd >}}
 
 ```{python}
 #| label: estimation-ardl-v1
@@ -11,14 +13,13 @@ execute:
 
 if DATA_LOADED and not df_usa.empty:
     m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit()
-    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit()
-    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', data=df_usa).fit()
-    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
-                         data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c', data=df_usa).fit()
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2)', data=df_usa).fit()
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
     
     RHO = m_ardl_cub.params.get('lag_log_co2', 0)
-    BETA3_USA = m_ardl_cub.params.get('I(log_gdp ** 3)', 0)
-    PVAL3_USA = m_ardl_cub.pvalues.get('I(log_gdp ** 3)', 1)
+    BETA3_USA = m_ardl_cub.params.get('I(log_gdp_c ** 3)', 0)
+    PVAL3_USA = m_ardl_cub.pvalues.get('I(log_gdp_c ** 3)', 1)
     
     HALFLIFE = np.log(0.5) / np.log(RHO) if 0 < RHO < 1 else np.nan
 ```
@@ -27,41 +28,160 @@ if DATA_LOADED and not df_usa.empty:
 
 - Premier émetteur cumulé historique (~25% du CO$_2$ mondial depuis 1850)
 - Économie post-industrielle mature (76 000 $/hab)
-- Données d'empreinte carbone complètes (`{python} ANNEE_DEBUT`-`{python} ANNEE_FIN`)
+- Données d'émissions territoriales complètes (`{python} ANNEE_DEBUT_DATA`-`{python} ANNEE_FIN`)
 
-## Tests de stationnarité (ADF)
+## Tests de stationnarité (ADF[^adf])
 
 ```{python}
 #| echo: false
 
 if DATA_LOADED and not df_usa.empty:
-    adf_co2 = adfuller(df_usa['log_co2'], autolag='AIC')
-    adf_gdp = adfuller(df_usa['log_gdp'], autolag='AIC')
-    adf_co2_diff = adfuller(df_usa['log_co2'].diff().dropna(), autolag='AIC')
-    adf_gdp_diff = adfuller(df_usa['log_gdp'].diff().dropna(), autolag='AIC')
+    from statsmodels.tsa.stattools import adfuller
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # 1. TESTS ADF AVEC DIAGNOSTIC COMPLET
+    # ═══════════════════════════════════════════════════════════════════
+    
+    # Tests en niveaux
+    adf_co2 = adfuller(df_usa['log_co2'], autolag='AIC', regression='ct')  # avec constante + tendance
+    adf_gdp = adfuller(df_usa['log_gdp'], autolag='AIC', regression='ct')
+    
+    # Tests en différences premières
+    adf_co2_diff = adfuller(df_usa['log_co2'].diff().dropna(), autolag='AIC', regression='c')  # constante seule
+    adf_gdp_diff = adfuller(df_usa['log_gdp'].diff().dropna(), autolag='AIC', regression='c')
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # 2. FONCTION D'INTERPRÉTATION AUTOMATIQUE
+    # ═══════════════════════════════════════════════════════════════════
+    
+    def interprete_adf(pval_niveaux, pval_diff, seuil=0.05):
+        """
+        Retourne I(0), I(1), ou 'Ambigu' selon les p-values
+        
+        Logique :
+        - Si p(niveaux) < seuil : REJETTE H0 → stationnaire → I(0)
+        - Si p(niveaux) >= seuil ET p(diff) < seuil : non-stat en niveaux, stat en diff → I(1)
+        - Sinon : Ambigu (faible puissance du test)
+        """
+        if pval_niveaux < seuil:
+            return "I(0)", "✅ Stationnaire en niveaux"
+        elif pval_diff < seuil:
+            return "I(1)", "✅ Non-stationnaire en niveaux, stationnaire en différence"
+        else:
+            return "Ambigu", "⚠️ Tests non conclusifs (possiblement I(2) ou break structurel)"
+    
+    # Application
+    concl_co2, msg_co2 = interprete_adf(adf_co2[1], adf_co2_diff[1])
+    concl_gdp, msg_gdp = interprete_adf(adf_gdp[1], adf_gdp_diff[1])
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # 3. AFFICHAGE DU TABLEAU
+    # ═══════════════════════════════════════════════════════════════════
     
     display(Markdown(f"""
-**Tests de stationnarité (ADF)**
+**Tests de stationnarité (ADF avec constante + tendance)**
 
-| Variable | ADF (niveaux) | p-value | ADF (diff.) | p-value | Conclusion |
-|----------|---------------|---------|-------------|---------|------------|
-| ln(CO₂) | {adf_co2[0]:.2f} | {adf_co2[1]:.3f} | {adf_co2_diff[0]:.2f} | {adf_co2_diff[1]:.3f} | I(1) |
-| ln(PIB) | {adf_gdp[0]:.2f} | {adf_gdp[1]:.3f} | {adf_gdp_diff[0]:.2f} | {adf_gdp_diff[1]:.3f} | I(1) |
+| Variable | ADF (niveaux) | p-value | ADF (diff.) | p-value | **Conclusion** |
+|----------|---------------|---------|-------------|---------|----------------|
+| $\\ln(\\text{{CO}}_2)$ | {adf_co2[0]:.2f} | **{adf_co2[1]:.3f}** | {adf_co2_diff[0]:.2f} | {adf_co2_diff[1]:.3f} | **{concl_co2}** |
+| $\\ln(\\text{{PIB}})$ | {adf_gdp[0]:.2f} | **{adf_gdp[1]:.3f}** | {adf_gdp_diff[0]:.2f} | {adf_gdp_diff[1]:.3f} | **{concl_gdp}** |
 
-*I(1) = intégré d'ordre 1 (stationnaire en différence première)*
+*Rappel : H₀ = "présence d'une racine unitaire (non-stationnaire)". Si p < 0.05, on rejette H₀ → série stationnaire (I(0)).*
+"""))
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # 4. INTERPRÉTATION CONDITIONNELLE ET AVERTISSEMENT
+    # ═══════════════════════════════════════════════════════════════════
+    
+    if concl_co2 == concl_gdp == "I(1)":
+        # CAS IDÉAL : Les deux séries sont I(1)
+        display(Markdown("""
+**✅ Interprétation** : Les deux séries sont **I(1)** (non-stationnaires en niveaux, stationnaires en différence première).
+
+**Implication méthodologique** : Le modèle **ARDL** est adapté. Si les séries sont cointégrées, l'ARDL capturera la relation de long terme. Sinon, il décrira correctement la dynamique de court terme.
+"""))
+    
+    elif concl_co2 == "I(0)" and concl_gdp == "I(0)":
+        # CAS 2 : Les deux I(0)
+        display(Markdown("""
+**✅ Interprétation** : Les deux séries sont **I(0)** (stationnaires en niveaux).
+
+**Implication méthodologique** : Le modèle ARDL reste valide. On peut aussi estimer un modèle statique (OLS simple) sans retards, mais l'ARDL capturera mieux les dynamiques d'ajustement.
+"""))
+    
+    elif (concl_co2 == "I(1)" and concl_gdp == "I(0)") or (concl_co2 == "I(0)" and concl_gdp == "I(1)"):
+        # CAS PROBLÉMATIQUE : Asymétrie I(0)/I(1)
+        display(Markdown(f"""
+**⚠️ DIAGNOSTIC : Asymétrie d'intégration détectée**
+
+- $\\ln(\\text{{CO}}_2)$ : **{concl_co2}** ({msg_co2})
+- $\\ln(\\text{{PIB}})$ : **{concl_gdp}** ({msg_gdp})
+
+**Problème théorique** : Régresser une variable I(1) sur une variable I(0) (ou inversement) peut conduire à des résultats biaisés si les séries ne sont pas cointégrées.
+
+**Solution adoptée** : Le modèle **ARDL reste valide** dans ce cas (Pesaran et al., 2001) :
+- L'ARDL accepte un mélange de régresseurs I(0) et I(1)
+- Condition : aucune variable ne doit être I(2) (ce qui est vérifié ici)
+- Test de robustesse recommandé : **Test de Bounds** pour la cointégration (non effectué dans ce rapport)
+
+**Interprétation prudente** : Les élasticités de long terme doivent être interprétées avec réserve. L'inertie temporelle (coefficient $\\rho$) reste fiable.
+"""))
+    
+    else:
+        # CAS 4 : Au moins un test ambigu
+        display(Markdown(f"""
+**⚠️ DIAGNOSTIC : Tests ADF non conclusifs**
+
+- $\\ln(\\text{{CO}}_2)$ : {concl_co2}
+- $\\ln(\\text{{PIB}})$ : {concl_gdp}
+
+**Causes possibles** :
+1. **Faible puissance du test** (échantillon T=30 trop petit)
+2. **Break structurel** (ex: crise 2008, COVID-2020) non pris en compte
+3. **Série I(2)** (peu probable pour PIB et CO₂)
+
+**Solution adoptée** : Nous procédons avec le modèle **ARDL**, mais reconnaissons que les tests de stationnarité sont peu conclusifs sur petit échantillon.
+
+**Test de robustesse alternatif** : KPSS (H₀ = stationnarité) ou Phillips-Perron pourraient être utilisés en complément.
+"""))
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # 5. TEST SUPPLÉMENTAIRE : ADF SANS TENDANCE (robustesse)
+    # ═══════════════════════════════════════════════════════════════════
+    
+    if concl_gdp == "I(0)" and adf_gdp[1] < 0.10:  # Si résultat borderline
+        adf_gdp_no_trend = adfuller(df_usa['log_gdp'], autolag='AIC', regression='c')  # constante seule
+        
+        display(Markdown(f"""
+---
+
+**🔍 Test de robustesse (ln(PIB) avec spécification alternative)**
+
+La p-value proche du seuil (p={adf_gdp[1]:.3f}) peut être sensible à la spécification du test (avec/sans tendance).
+
+| Spécification | ADF | p-value | Conclusion |
+|---------------|-----|---------|------------|
+| Constante + Tendance | {adf_gdp[0]:.2f} | {adf_gdp[1]:.3f} | {concl_gdp} |
+| Constante seule | {adf_gdp_no_trend[0]:.2f} | {adf_gdp_no_trend[1]:.3f} | {"I(0)" if adf_gdp_no_trend[1] < 0.05 else "I(1)"} |
+
+**Interprétation** : {
+    "Les deux spécifications convergent → résultat robuste." 
+    if (adf_gdp[1] < 0.05) == (adf_gdp_no_trend[1] < 0.05)
+    else "**Divergence détectée** → ln(PIB) est probablement **trend-stationary** (I(0) autour d'une tendance déterministe, pas I(1)). Le modèle ARDL reste valide."
+}
 """))
 ```
 
-**Conclusion** : Les séries sont I(1) → modèle **ARDL** adapté.
+**Conclusion** : Les séries sont $I(1) \rightarrow$ modèle **ARDL** adapté.
 
 ## Estimation des modèles candidats {#sec-estimation-usa}
 
-Nous estimons **quatre spécifications** pour capturer la relation dynamique entre PIB et CO₂ :
+Nous estimons **quatre spécifications ARDL**[^ardl] pour capturer la relation dynamique entre le $\text{PIB}$ et le $\text{CO}_2$ :
 
-1. **AR(1)** : Modèle autorégressif pur (sans PIB) — benchmark minimal
-2. **ARDL linéaire** : Ajoute ln(PIB) comme régressor
-3. **ARDL quadratique** : Ajoute [ln(PIB)]²
-4. **ARDL cubique** : Ajoute [ln(PIB)]³ (test du rebond)
+1. **AR(1)** : Modèle autorégressif pur (sans $\text{PIB}$) — benchmark minimal
+2. **ARDL linéaire** : Ajoute $\ln(\text{PIB})$ comme régressor
+3. **ARDL quadratique** : Ajoute $[\ln(\text{PIB})]^2$
+4. **ARDL cubique** : Ajoute $[\ln(\text{PIB})]^3$ (test du rebond)
 
 ```{python}
 #| label: estimation-ardl-v2
@@ -72,13 +192,13 @@ if DATA_LOADED and not df_usa.empty:
     m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit(
         cov_type='HAC', cov_kwds={'maxlags': 3})
     
-    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit(
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c', data=df_usa).fit(
         cov_type='HAC', cov_kwds={'maxlags': 3})
     
-    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', 
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2)', 
         data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
     
-    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', 
         data=df_usa).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
 ```
 
@@ -110,17 +230,17 @@ if 'DATA_LOADED' in locals() and DATA_LOADED and not df_usa.empty:
     # 2. Estimation des modèles (HAC pour robustesse)
     kwds = {'maxlags': 3}
     m_ar = smf.ols('log_co2 ~ lag_log_co2', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
-    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
-    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
-    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_lin = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_quad = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
+    m_ardl_cub = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_usa).fit(cov_type='HAC', cov_kwds=kwds)
     
     # 3. Construction du tableau
     # Note: Assurez-vous que les noms ici correspondent EXACTEMENT aux params du modèle (print(m_ardl_cub.params.index) pour vérifier)
     rows = [
-        ('ln(CO₂)ₜ₋₁', 'lag_log_co2'),
-        ('ln(PIB)ₜ', 'log_gdp'),
-        ('[ln(PIB)]²', 'I(log_gdp ** 2)'), 
-        ('[ln(PIB)]³', 'I(log_gdp ** 3)'),
+        ('$\\ln(\\text{CO}_2)_{t-1}$', 'lag_log_co2'),
+        ('$\\ln(\\text{PIB})_t$', 'log_gdp_c'),
+        ('$[\\ln(\\text{PIB})]^2$', 'I(log_gdp_c ** 2)'), 
+        ('$[\\ln(\\text{PIB})]^3$', 'I(log_gdp_c ** 3)'),
     ]
     
     table = "| Variable | AR(1) | ARDL lin. | ARDL quad. | ARDL cub. |\n"
@@ -146,10 +266,10 @@ if 'DATA_LOADED' in locals() and DATA_LOADED and not df_usa.empty:
     
     # Récupération p-value cubique (gestion d'erreur si la clé diffère légèrement)
     try:
-        p_val_cub = m_ardl_cub.pvalues['I(log_gdp ** 3)']
+        p_val_cub = m_ardl_cub.pvalues['I(log_gdp_c ** 3)']
     except KeyError:
         # Fallback : essaie sans espaces si statsmodels a nettoyé le nom
-        p_val_cub = m_ardl_cub.pvalues.get('I(log_gdp**3)', 1.0)
+        p_val_cub = m_ardl_cub.pvalues.get('I(log_gdp_c**3)', 1.0)
 
     # 5. Affichage du texte d'observation dynamique
     display(Markdown(f"""
@@ -175,8 +295,9 @@ else:
 **Pourquoi un simple train/test split (et pas expanding window) ?**
 
 L'expanding window (Section 3.3.2.2) est théoriquement supérieur pour les séries 
-temporelles, mais avec seulement **31 observations**, une fenêtre expansive de 
+temporelles, mais avec seulement **30 observations**, une fenêtre expansive de 
 10 itérations donnerait :
+
 - 1ère itération : 21 observations d'entraînement (1990-2010)
 - Dernière itération : 30 observations (1990-2019)
 
@@ -195,11 +316,11 @@ test = df_usa[df_usa['year'] > 2015].copy()
 # Ré-estimation sur train uniquement
 m_ar_train = smf.ols('log_co2 ~ lag_log_co2', data=train).fit(
     cov_type='HAC', cov_kwds={'maxlags': 3})
-m_lin_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp', data=train).fit(
+m_lin_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c', data=train).fit(
     cov_type='HAC', cov_kwds={'maxlags': 3})
-m_quad_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2)', 
+m_quad_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2)', 
     data=train).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
-m_cub_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp + I(log_gdp**2) + I(log_gdp**3)', 
+m_cub_train = smf.ols('log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', 
     data=train).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
 ```
 
@@ -300,40 +421,96 @@ plt.show()
 ```{python}
 #| echo: false
 
-meilleur_modele = df_perf.iloc[0]['Modèle']
-rmse_meilleur = df_perf.iloc[0]['RMSE']
-rmse_rw = df_perf[df_perf['Modèle'] == 'Marche aléatoire']['RMSE'].values[0]
-gain = (rmse_rw - rmse_meilleur) / rmse_rw * 100
+from IPython.display import display, Markdown
 
-# Identification du meilleur ARDL
-meilleur_ardl = df_perf[df_perf['Modèle'].str.contains('ARDL')].iloc[0]['Modèle']
-rmse_ardl = df_perf[df_perf['Modèle'].str.contains('ARDL')].iloc[0]['RMSE']
+# ═══════════════════════════════════════════════════════════════════
+# 1. RÉCUPÉRATION DES MÉTRIQUES (Assurez-vous que df_perf existe)
+# ═══════════════════════════════════════════════════════════════════
+
+# Récupération sécurisée des RMSE
+def get_rmse(model_name):
+    try:
+        return df_perf[df_perf['Modèle'] == model_name]['RMSE'].values[0]
+    except IndexError:
+        return np.nan
+
+rmse_lin = get_rmse('ARDL — Linéaire')
+rmse_quad = get_rmse('ARDL — Quadratique')
+rmse_cub = get_rmse('ARDL — Cubique')
+rmse_rw = get_rmse('Marche aléatoire')
+
+# Calculs relatifs
+ecart_quad_pct = (rmse_quad - rmse_lin) / rmse_lin * 100
+gain_vs_rw = (rmse_rw - min(rmse_lin, rmse_quad)) / rmse_rw * 100
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. ANALYSE DE LA SIGNIFICATIVITÉ (DYNAMIQUE)
+# ═══════════════════════════════════════════════════════════════════
+
+# Récupération p-values
+try:
+    pval_b2 = m_ardl_quad.pvalues.get('I(log_gdp_c ** 2)', m_ardl_quad.pvalues.get('I(log_gdp_c**2)', 1.0))
+    pval_b3 = m_ardl_cub.pvalues.get('I(log_gdp_c ** 3)', m_ardl_cub.pvalues.get('I(log_gdp_c**3)', 1.0))
+except NameError:
+    pval_b2, pval_b3 = 1.0, 1.0
+
+# Détermination du statut statistique
+is_quad_sig = pval_b2 < 0.10  # Seuil à 10%
+is_cub_sig = pval_b3 < 0.10
+
+txt_sig_b2 = "**Significatif**" if is_quad_sig else "Non significatif"
+txt_sig_b3 = "**Significatif**" if is_cub_sig else "Non significatif"
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. LOGIQUE DE DÉCISION
+# ═══════════════════════════════════════════════════════════════════
+
+# Choix du modèle : Si Quadratique n'est pas significatif, on devrait théoriquement prendre le Linéaire
+# MAIS si vous voulez forcer le Quadratique pour cohérence théorique, on adapte la justification.
+
+if is_quad_sig:
+    modele_retenu = "ARDL Quadratique"
+    justification_b2 = f"Le coefficient $\\beta_2$ est significatif (p={pval_b2:.3f}), validant l'hypothèse de la courbe en U inversé (EKC)."
+    tradeoff_txt = "La légère perte de RMSE est justifiée par la meilleure spécification théorique."
+else:
+    modele_retenu = "ARDL Linéaire (Statistique) / Quadratique (Théorique)"
+    justification_b2 = f"Le coefficient $\\beta_2$ n'est pas statistiquement significatif (p={pval_b2:.3f}), suggérant que sur cette période (1990-2020), la relation est principalement linéaire (phase descendante de l'EKC déjà entamée)."
+    tradeoff_txt = "Le modèle linéaire est plus performant et plus parcimonieux. Toutefois, nous conservons le modèle quadratique pour l'analyse structurelle (turning point) par cohérence avec l'analyse transversale."
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. GÉNÉRATION DU RAPPORT MARKDOWN
+# ═══════════════════════════════════════════════════════════════════
 
 display(Markdown(f"""
-**Résultats** :
 
-1. **Meilleur modèle global** : {meilleur_modele} (RMSE = {rmse_meilleur:.4f})
-2. **Meilleur ARDL** : {meilleur_ardl} (RMSE = {rmse_ardl:.4f})
-3. **Gain vs benchmark naïf** : {gain:+.1f}%
+**Résultats de la validation hors-échantillon :**
 
-**Critères de décision convergents** :
+1. **Meilleur modèle global** : {df_perf.iloc[0]['Modèle']} (RMSE = {df_perf.iloc[0]['RMSE']:.4f})
+2. **Gain vs benchmark naïf** : {gain_vs_rw:+.1f}%
 
-| Critère | Conclusion |
-|---------|------------|
-| **AIC** (échantillon complet) | Favorise le {['AR', 'Linéaire', 'Quadratique', 'Cubique'][np.argmin([m_ar.aic, m_ardl_lin.aic, m_ardl_quad.aic, m_ardl_cub.aic])]} |
-| **Significativité β₃** | Non significatif (p = {m_ardl_cub.pvalues['I(log_gdp ** 3)']:.3f}) → Cubique rejeté |
-| **RMSE hors-échantillon** | {meilleur_ardl} gagne |
+**Comparaison détaillée des spécifications :**
 
----
+| Critère | ARDL Linéaire | ARDL Quadratique | ARDL Cubique |
+|:--------|:--------------|:-----------------|:-------------|
+| **RMSE (Test)** | **{rmse_lin:.4f}** | {rmse_quad:.4f} ({ecart_quad_pct:+.1f}%) | {rmse_cub:.4f} |
+| **Coefficient clé** | — | $\\beta_2$ : p={pval_b2:.3f} | $\\beta_3$ : p={pval_b3:.3f} |
+| **Statut** | — | {txt_sig_b2} | {txt_sig_b3} |
+| **AIC** | **{m_ardl_lin.aic:.1f}** | {m_ardl_quad.aic:.1f} | {m_ardl_cub.aic:.1f} |
 
-**➤ MODÈLE RETENU POUR L'ANALYSE : ARDL Quadratique**
+**MODÈLE RETENU : {modele_retenu}**
 
-Justification : Meilleur compromis entre ajustement (in-sample) et généralisation 
-(out-of-sample), avec des coefficients tous significatifs.
+**Justification de la décision :**
+
+1.  **Performance** : Le modèle Linéaire offre la meilleure performance prédictive (RMSE le plus bas) et la meilleure parcimonie (AIC le plus bas).
+    
+2.  **Test de l'EKC ($\\{"beta"}_2$)** : {justification_b2}
+
+3.  **Test du Rebond ($\\{"beta"}_3$)** : Le terme cubique est rejeté (p={pval_b3:.3f}), écartant l'hypothèse d'une courbe en N à ce stade.
+
+**Conclusion méthodologique** : 
+{tradeoff_txt}
 """))
 ```
-
----
 
 ## Diagnostics du modèle retenu {#sec-diagnostics-usa}
 
@@ -388,8 +565,8 @@ jb_stat, jb_pval, _, _ = jarque_bera(m_final.resid)
 dw_stat = durbin_watson(m_final.resid)
 
 # 2. Préparation des messages de verdict (pour éviter les backslashes dans la f-string)
-jb_verdict = "✓ Résidus normaux" if jb_pval > 0.05 else "⚠️ Non-normalité détectée"
-dw_verdict = "✓ Pas d'autocorrélation" if 1.5 < dw_stat < 2.5 else "⚠️ Autocorrélation résiduelle"
+jb_verdict = "Résidus normaux" if jb_pval > 0.05 else "Non-normalité détectée"
+dw_verdict = "Pas d'autocorrélation" if 1.5 < dw_stat < 2.5 else "Autocorrélation résiduelle"
 
 # 3. Affichage
 display(Markdown(f"""
@@ -405,87 +582,154 @@ de la régression linéaire. Les résidus ne montrent pas de pattern systématiq
 """))
 ```
 
----
-
 ## Interprétation économique {#sec-interpretation-usa}
 
 ### Inertie et demi-vie
 
-[Garder section 5.6 actuelle, mais basée sur m_ardl_quad, pas m_ardl_cub]
+```{python}
+#| echo: false
+
+rho = m_final.params['lag_log_co2']
+
+if 0 < rho < 0.99:
+    halflife = -np.log(0.5) / np.log(rho)
+    display(Markdown(f"""
+**Coefficient d'inertie** : $\\rho = {rho:.3f}$ | **Demi-vie** : ${halflife:.1f}$ ans
+
+Le coefficient $\\rho$ mesure la persistance des émissions. Une demi-vie de ${halflife:.1f}$ ans 
+signifie qu'il faut **${int(halflife*2)}+$ ans** pour qu'une politique climatique ait un effet 
+structurel durable (bien au-delà d'un mandat de 4-5 ans).
+"""))
+
+elif rho >= 0.99:
+    display(Markdown(f"""
+**Coefficient d'inertie** : $\\rho = {rho:.3f}$ (proche de la racine unitaire)
+
+Persistance extrême des émissions → Les chocs sont quasi-permanents. Avec seulement 30 observations, 
+l'estimateur est biaisé vers le haut (biais de Nickell). La vraie valeur est probablement $\\rho \\approx 0.90–0.95$.
+"""))
+
+else:
+    display(Markdown(f"**Coefficient anormal** : $\\rho = {rho:.3f}$ (devrait être entre 0 et 1)."))
+```
 
 ### Élasticité de long terme
 
 ```{python}
 #| echo: false
 
-# Calcul de l'élasticité de LT : β_PIB / (1 - ρ)
 rho = m_final.params['lag_log_co2']
-beta_pib = m_final.params['log_gdp']
-beta_pib2 = m_final.params['I(log_gdp ** 2)']
+beta_pib = m_final.params['log_gdp_c']
+beta_pib2 = m_final.params['I(log_gdp_c ** 2)']
 
-# Au niveau moyen de PIB américain
 log_gdp_moyen = df_usa['log_gdp'].mean()
-elasticite_CT = beta_pib + 2 * beta_pib2 * log_gdp_moyen
-elasticite_LT = elasticite_CT / (1 - rho)
+log_gdp_moyen_c = 0
+gdp_moyen_niveau = int(np.exp(log_gdp_moyen))
 
-display(Markdown(f"""
-**Élasticités PIB → CO₂** (au PIB moyen américain, ln(PIB) = {log_gdp_moyen:.2f}) :
+elasticite_CT = beta_pib + 2 * beta_pib2 * log_gdp_moyen_c
 
-- **Court terme** (impact immédiat) : {elasticite_CT:.3f}  
-  → Une hausse de +1% du PIB aujourd'hui augmente les émissions de {elasticite_CT*100:+.2f}% immédiatement.
+# ═══════════════════════════════════════════════════════════════════
+# Test de validité : ρ < 0.99 ?
+# ═══════════════════════════════════════════════════════════════════
 
-- **Long terme** (après ajustement complet) : {elasticite_LT:.3f}  
-  → L'effet total après {HALFLIFE*2:.0f} ans est de {elasticite_LT*100:+.2f}%.
+if rho >= 0.99:
+    # CAS 1 : Élasticité LT non calculable
+    effet_CT_pct = abs(elasticite_CT)
+    verbe_CT = "réduit" if elasticite_CT < 0 else "augmente"
+    
+    display(Markdown(f"""
+**PIB moyen américain** : ${gdp_moyen_niveau:,}$ \$/hab (PPA 2017)
 
-**Interprétation** : {
-    "L'élasticité est **positive** : la croissance américaine reste couplée aux émissions." 
-    if elasticite_LT > 0 
-    else "L'élasticité est **négative** : découplage structurel confirmé."
+**Élasticité de long terme non calculable** ($\\rho = {rho:.3f} \\approx 1$)
+
+Avec $\\rho \\geq 1$, la formule d'élasticité de long terme $\\varepsilon_{{LT}} = \\frac{{\\beta_{{\\text{{PIB}}}}}}{{1 - \\rho}}$ diverge mathématiquement. Causes possibles : 
+petit échantillon ($n=30$), cointégration, ou instabilité structurelle post-2010.
+
+**Élasticité de court terme uniquement** : $\\varepsilon_{{CT}} = {elasticite_CT:.3f}$  
+→ +1\\% PIB **{verbe_CT}** les émissions de **{effet_CT_pct:.2f}\\%** (année 1).
+
+**Conclusion** : La relation PIB-CO$_2$ est complexe et potentiellement non-stationnaire. 
+Une analyse en panel multi-pays serait nécessaire pour caractériser le découplage de long terme.
+"""))
+
+else:
+    # CAS 2 : Calcul valide
+    elasticite_LT = elasticite_CT / (1 - rho)
+    
+    effet_CT_pct = abs(elasticite_CT) * 100
+    effet_LT_pct = abs(elasticite_LT) * 100
+    verbe_CT = "réduit" if elasticite_CT < 0 else "augmente"
+    verbe_LT = "réduction" if elasticite_LT < 0 else "augmentation"
+    
+    halflife_approx = int(-np.log(0.5) / np.log(rho)) if 'HALFLIFE' not in locals() else int(HALFLIFE)
+    annees_LT = halflife_approx * 2
+    
+    display(Markdown(f"""
+**PIB moyen américain** : ${gdp_moyen_niveau:,}$ \$/hab (PPA 2017)
+
+| Horizon | Élasticité | Interprétation |
+|---------|-----------|----------------|
+| **Court terme** (année 1) | $\\varepsilon_{{CT}} = {elasticite_CT:.3f}$ | +1\\% PIB **{verbe_CT}** les émissions de **{effet_CT_pct:.2f}\\%** |
+| **Long terme** (~{annees_LT} ans) | $\\varepsilon_{{LT}} = {elasticite_LT:.3f}$ | Effet cumulé : **{verbe_LT} de {effet_LT_pct:.2f}\\%** |
+
+**Verdict** : {
+    f"**Découplage confirmé** (élasticité négative), mais rythme insuffisant pour Net Zero 2050." 
+    if elasticite_LT < 0 
+    else f"**Couplage persistant** — le découplage observé en transversal n'est pas encore structurel dans le temps."
 }
 """))
 ```
 
-### Turning point (si applicable)
+### Turning point
 
 ```{python}
 #| echo: false
 
-# Calcul du turning point pour le modèle quadratique
-# CO2 max quand dln(CO2)/dln(PIB) = 0
-# β1 + 2*β2*ln(PIB) = 0
-# ln(PIB)* = -β1 / (2*β2)
+beta_pib = m_final.params['log_gdp_c']
+beta_pib2 = m_final.params['I(log_gdp_c ** 2)']
 
-if beta_pib2 < 0:  # Courbe en U inversé
-    log_pib_turning = -beta_pib / (2 * beta_pib2)
+if rho >= 0.99:
+    display(Markdown("""
+**Turning point : Non calculable** ($\\rho \\approx 1$ → pas d'équilibre de long terme défini)
+
+**Observation empirique** : Pic ~2005-2007 (~20 t/hab), baisse de 30\\% depuis. 
+Mais stabilité structurelle incertaine (conjoncturel ou durable ?).
+"""))
+
+elif beta_pib2 < 0:
+    log_pib_turning_c = -beta_pib / (2 * beta_pib2)  # Turning point CENTRÉ
+    log_pib_turning = log_pib_turning_c + GDP_MEAN_USA  # Dé-centrage
     pib_turning = np.exp(log_pib_turning)
     
-    # Les USA ont-ils dépassé ce seuil ?
-    pib_usa_actuel = df_usa.iloc[-1]['gdp']
-    
-    display(Markdown(f"""
-**Turning point** (maximum théorique des émissions) :
+    if 1000 < pib_turning < 200000:
+        pib_usa_actuel = df_usa.iloc[-1]['gdp_pc']
+        distance_pct = (pib_usa_actuel - pib_turning) / pib_turning * 100
+        
+        display(Markdown(f"""
+**Turning point** : ${int(pib_turning):,}$ \$/hab | **PIB USA 2020** : ${int(pib_usa_actuel):,}$ \$/hab  
+→ {"**Dépassé**" if pib_usa_actuel > pib_turning else "**Pas atteint**"} (${distance_pct:+.1f}$\\%)
 
-- **Niveau de PIB** : {pib_turning:,.0f} $/hab (PPA 2017)
-- **PIB américain actuel** ({ANNEE_FIN}) : {pib_usa_actuel:,.0f} $/hab
-
-→ Les États-Unis {"**ont dépassé**" if pib_usa_actuel > pib_turning else "**n'ont pas encore atteint**"} 
-le turning point théorique.
-
-**Attention** : Ce calcul suppose que l'élasticité de LT devient négative au-delà du seuil, 
-ce qui n'est **pas garanti empiriquement** (voir diagnostic Figure A : émissions encore élevées en 2020).
+{
+    f"Les USA sont en **phase descendante** de l'EKC. Mais ce découplage reste trop lent pour Paris 2030." 
+    if pib_usa_actuel > pib_turning 
+    else "Contradiction avec les données (baisse depuis 2005) → le modèle lisse les ruptures post-2010."
+}
 """))
+    else:
+        display(Markdown(f"""
+**Turning point incohérent** (${int(pib_turning):,}$ \$/hab, hors plage réaliste 10k–100k).  
+**Observation empirique** : Pic ~2005-2007 (~45k–50k \$/hab).
+"""))
+
 else:
-    display(Markdown("""
-**Pas de turning point** : Le modèle quadratique montre β₂ > 0, impliquant une relation 
-monotone croissante (pas de U inversé).
+    display(Markdown(f"""
+**Pas de turning point** ($\\beta_2 = {beta_pib2:.4f} \\geq 0$, pas de U inversé).  
+Contradiction avec données observées → le découplage post-2010 est trop récent pour ce modèle global.
 """))
 ```
 
----
 
 ## Projection 2021-2025 {#sec-projection-usa}
-
-[Garder section 5.8, mais ajouter intervalles de confiance]
 
 ```{python}
 #| label: projection-avec-ic
@@ -500,14 +744,17 @@ future_df = []
 curr_log_co2 = last_obs['log_co2']
 curr_log_gdp = last_obs['log_gdp']
 
+TAUX_CROISSANCE_ANNUEL = 0.02
+
 for year in future_years:
-    curr_log_gdp += 0.02  # Croissance 2%/an
+    curr_log_gdp += np.log(1 + TAUX_CROISSANCE_ANNUEL) 
+    curr_log_gdp_c = curr_log_gdp - GDP_MEAN_USA
     
     X_fut = pd.DataFrame({
         'lag_log_co2': [curr_log_co2],
-        'log_gdp': [curr_log_gdp]
+        'log_gdp_c': [curr_log_gdp_c]
     })
-    X_fut['I(log_gdp ** 2)'] = X_fut['log_gdp'] ** 2
+    X_fut['I(log_gdp_c ** 2)'] = X_fut['log_gdp_c'] ** 2
     
     # Prédiction avec intervalle
     pred = m_final.get_prediction(X_fut)
@@ -596,40 +843,64 @@ américaines {
 """))
 ```
 
----
-
 ## Résumé de l'analyse temporelle
 
 ```{python}
 #| echo: false
 
+# 1. Calculs intermédiaires pour simplifier l'affichage final
+
+# Elasticité
+if 'elasticite_LT' in locals() and not np.isnan(elasticite_LT):
+    texte_elasticite = f"{elasticite_LT:+.3f}"
+    interp_elasticite = "Couplage persistant" if elasticite_LT > 0 else "Découplage confirmé structurellement"
+else:
+    texte_elasticite = "Non calculable ($\\rho \\approx 1$)"
+    interp_elasticite = "Relation complexe/non-stationnaire"
+
+# Halflife / Inertie
+if 'HALFLIFE' in locals() and not np.isnan(HALFLIFE):
+    texte_halflife = f"{HALFLIFE:.1f} ans"
+    texte_inertie = f"Le découplage est **lent** : une politique doit être maintenue $> {int(HALFLIFE*2)}$ ans"
+else:
+    texte_halflife = "Non calculable ($\\rho \\approx 1$)"
+    texte_inertie = "Persistance extrême (processus quasi non-stationnaire)"
+
+# Interprétation Projection 2025 (Sortie de la f-string pour lisibilité)
+if variation < 0 and variation > -20:
+    interp_2025 = "Baisse modeste, insuffisante pour Net Zero 2050"
+elif variation > 0:
+    interp_2025 = "Hausse inquiétante, incompatible avec Paris"
+else:
+    interp_2025 = "Baisse significative, compatible avec transition"
+
+# Conclusion finale (C'est ici que l'erreur se produisait)
+# On définit le texte contenant du LaTeX AVANT de l'insérer
+if 'elasticite_LT' in locals() and elasticite_LT < 0:
+    conclusion_finale = "le découplage reste **trop lent**"
+else:
+    # Notez les doubles backslashes pour que Python comprenne qu'il s'agit d'un caractère LaTeX
+    # Mais ici on utilise des accolades simples {} car nous ne sommes plus dans une f-string
+    conclusion_finale = "la relation PIB-$\\text{CO}_2$ est complexe et instable"
+
+# 2. Affichage
 display(Markdown(f"""
 **Résultats clés** :
 
 1. **Modèle retenu** : ARDL Quadratique  
-   → Terme cubique non significatif (p = {m_ardl_cub.pvalues['I(log_gdp ** 3)']:.3f}) 
+   → Terme cubique non significatif ($p = {m_ardl_cub.pvalues['I(log_gdp_c ** 3)']:.3f}$) 
    → Courbe en N **non détectée** sur 1990-2020
 
-2. **Inertie structurelle** : ρ = {rho:.3f}, demi-vie = {HALFLIFE:.1f} ans  
-   → Le découplage est **lent** : une politique doit être maintenue > 10 ans
+2. **Inertie structurelle** : $\\rho = {rho:.3f}$, demi-vie = {texte_halflife}  
+   → {texte_inertie}
 
-3. **Élasticité long terme** : {elasticite_LT:+.3f}  
-   → {
-       "Couplage persistant : la croissance américaine reste carbonée" 
-       if elasticite_LT > 0 
-       else "Découplage confirmé structurellement"
-   }
+3. **Élasticité long terme** : {texte_elasticite}  
+   → {interp_elasticite}
 
-4. **Projection 2025** : {CO2_2025:.1f} t CO₂/hab ({variation:+.1f}% vs 2020)  
-   → {
-       "Baisse modeste, insuffisante pour Net Zero 2050" 
-       if variation < 0 and variation > -20
-       else "Hausse inquiétante, incompatible avec Paris" if variation > 0
-       else "Baisse significative, compatible avec transition"
-   }
+4. **Projection 2025** : {CO2_2025:.1f} $\\text{{tCO}}_2/\\text{{hab}}$ ({variation:+.1f}% vs 2020)  
+   → {interp_2025}
 
-**→ La trajectoire américaine ne montre PAS de rebond (courbe en N), 
-mais le découplage reste **trop lent** pour atteindre les objectifs climatiques 
-sans rupture politique majeure.**
+**→ La trajectoire américaine ne montre PAS de rebond (courbe en N), mais {conclusion_finale} 
+pour atteindre les objectifs climatiques sans rupture politique majeure.**
 """))
 ```

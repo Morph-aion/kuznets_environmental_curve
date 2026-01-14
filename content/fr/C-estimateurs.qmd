@@ -1,0 +1,98 @@
+---
+title: "Annexe C : Estimateurs et corrections"
+---
+
+Cette annexe justifie les choix d'estimateurs (HC3, Newey-West) et détaille la mécanique du modèle ARDL.
+
+## OLS : Méthode et limites {#sec-ols}
+
+### Principe
+
+L'estimateur des **Moindres Carrés Ordinaires** (OLS) minimise la somme des carrés des résidus :
+
+$$\hat{\beta}_{OLS} = \arg\min_\beta \sum_{i=1}^n (y_i - x_i'\beta)^2$$
+
+La solution analytique est donnée par : $\hat{\beta} = (X'X)^{-1}X'Y$.
+
+### Hypothèses de Gauss-Markov
+
+Pour que l'estimateur OLS soit **BLUE** (*Best Linear Unbiased Estimator*), cinq conditions doivent être réunies :
+
+| Hypothèse | Notation | Violation fréquente |
+|-----------|----------|---------------------|
+| Linéarité | $Y = X\beta + \varepsilon$ | Relation non-linéaire |
+| Exogénéité | $E[\varepsilon|X] = 0$ | Variable omise corrélée |
+| Homoscédasticité | $Var(\varepsilon|X) = \sigma^2$ | Variance non-constante |
+| Pas d'autocorrélation | $Cov(\varepsilon_i, \varepsilon_j) = 0$ | Séries temporelles |
+| Pas de multicolinéarité parfaite | $X'X$ inversible | Variables redondantes |
+
+> **Dans ce rapport** : Les hypothèses d’homoscédasticité (3) et d’autocorrélation (4) sont violées → **les erreurs-types standard de l’OLS sont biaisées** → inférences invalides (intervalles, tests t/F).
+
+→ **Solution** : Utiliser des estimateurs robustes : **HC3** (transversal) et **Newey-West** (temporel).
+
+## Corrections robustes {#sec-corrections}
+
+### HC3 : Robustesse à l'hétéroscédasticité {#sec-hc3}
+
+**Problème** : La variance des erreurs n'est pas constante (ex: les petits pays ont une variance d'émissions différente des grands pays).
+
+**Solution** : Utilisation de l'estimateur de "sandwich" HC3 de MacKinnon & White (1985).
+
+$$\widehat{\text{Var}}_{HC3}(\hat{\beta}) = (X'X)^{-1} \left( \sum_{i=1}^n \frac{\hat{\varepsilon}_i^2}{(1-h_{ii})^2} x_i x_i' \right) (X'X)^{-1}$$
+
+où $h_{ii}$ représente le levier (*leverage*) de l'observation $i$, issu de la matrice de projection $H = X(X'X)^{-1}X'$.
+
+> **Pourquoi HC3 ?** Parmi les variantes (HC0 à HC4), HC3 est **la plus fiable sur petits échantillons** ($N < 250$) — c’est notre cas (159 pays). Référence : Long & Ervin (2000).
+
+→ **Impact pratique** : Sans HC3, les $p$-values seraient trop optimistes — on risquerait de croire à tort qu’un coefficient est significatif.
+
+### Newey-West : Robustesse à l'autocorrélation (HAC) {#sec-nw}
+
+**Problème** : En série temporelle, l'erreur en $t$ est souvent corrélée à celle en $t-1$ (inertie des chocs).
+
+**Solution** : Estimateur HAC (*Heteroskedasticity and Autocorrelation Consistent*) avec noyau de Bartlett.
+
+$$\widehat{\text{Var}}_{NW} = (X'X)^{-1} \hat{\Omega} (X'X)^{-1}$$
+
+où $\hat{\Omega}$ pondère les autocovariances jusqu'au retard $L$ :
+
+$$ \hat{\Omega} = \hat{\Gamma}_0 + \sum_{j=1}^L w_j (\hat{\Gamma}_j + \hat{\Gamma}_j') \quad \text{avec} \quad w_j = 1 - \frac{j}{L+1} $$
+
+> **Choix de $L$** : Règle automatique : $L \approx \lfloor 4(T/100)^{2/9} \rfloor$. Pour $T=30$ (USA 1990–2020) → $L=3$.
+
+→ **Impact pratique** : Sans Newey-West, on sous-estimerait l’incertitude des coefficients → risque de conclure à tort qu’une politique a un effet significatif.
+
+## Modèle ARDL {#sec-ardl}
+
+Le modèle *AutoRegressive Distributed Lag* (ARDL) permet d'analyser simultanément la dynamique de court terme et l'équilibre de long terme.
+
+### Spécification (ARDL 1,1)
+
+$$ Y_t = \alpha + \rho Y_{t-1} + \beta_0 X_t + \beta_1 X_{t-1} + \varepsilon_t $$
+
+→ Permet de modéliser **l’inertie** (effet persistant du passé) et les **ajustements progressifs**.
+
+### Interprétation des paramètres structurels
+
+| Paramètre | Signification économique | Formule dérivée |
+|-----------|--------------------------|-----------------|
+| $\rho$ | **Inertie / Persistance** | Coefficient autorégressif |
+| $\beta_0$ | **Impact immédiat** | Élasticité de court terme ($\varepsilon_{CT}$) |
+| $\theta = \frac{\beta_0 + \beta_1}{1-\rho}$ | **Impact total cumulé** | Élasticité de long terme ($\varepsilon_{LT}$) |
+| $H = \frac{\ln(0.5)}{\ln(\rho)}$ | **Demi-vie** (*Half-life*) | Temps pour absorber 50% d'un choc |
+
+### Pourquoi l'ARDL ?
+
+1. **Flexibilité d'intégration** : L'ARDL reste valide que les régresseurs soient $I(0)$, $I(1)$ ou un mélange des deux (Pesaran et al., 2001).
+2. **Dynamique explicite** : Il capture le temps d'ajustement technologique, contrairement à une régression statique.
+3. **Robustesse aux petits échantillons** : Plus performant que la cointégration de Johansen pour $T < 50$.
+
+### Condition de stabilité
+
+Pour que l'élasticité de long terme ait un sens, le modèle doit être dynamiquement stable :
+
+$$ |\rho| < 1 $$
+
+Si $\rho \approx 1$ (comme observé pour les USA), le processus est **non-stationnaire** : les chocs ont un effet permanent et il n'y a pas de retour à l'équilibre.
+
+> **Dans notre cas USA** : $\rho \approx 1.003$ → très proche de 1 → signe d’instabilité ou de petit échantillon → élasticité de long terme non calculable → interprétation prudente requise.

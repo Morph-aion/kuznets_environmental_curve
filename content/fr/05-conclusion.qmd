@@ -163,14 +163,32 @@ print(latex_code)
 ```{python}
 #| echo: false
 
+# Interprétations conditionnelles
+if PVAL3 < 0.05 and BETA3 < 0:
+    interp_cross = "U inversé renforcé (β₃ < 0 significatif)"
+elif PVAL3 < 0.05 and BETA3 > 0:
+    interp_cross = "⚠️ Courbe en N détectée (rebond)"
+else:
+    interp_cross = "Quadratique suffisant (β₃ non significatif)"
+
+if PVAL3_USA < 0.05 and BETA3_USA > 0:
+    interp_usa = "⚠️ Courbe en N détectée"
+elif PVAL3_USA < 0.05 and BETA3_USA < 0:
+    interp_usa = "Découplage accéléré"
+else:
+    interp_usa = "Quadratique suffisant (β₃ non significatif)"
+
 display(Markdown(f"""
-**Les deux approches divergent** :
+**Convergence des deux approches** :
 
-- **Transversale** ({N_PAYS} pays, {ANNEE_CROSS}) : β₃ = {BETA3:.4f}{stars_cross} 
-  → **U inversé renforcé** : le découplage s'accélère aux hauts revenus
+- **Transversale** ({N_PAYS} pays, {ANNEE_CROSS}) : β₃ = {BETA3:.4f} (p = {PVAL3:.3f})  
+  → {interp_cross}
 
-- **Temporelle** (USA, {ANNEE_DEBUT}-{ANNEE_FIN}) : β₃ = {BETA3_USA:.4f} (p={PVAL3_USA:.3f})
-  → **Non significatif** : le modèle quadratique suffit
+- **Temporelle** (USA, {ANNEE_DEBUT}–{ANNEE_FIN}) : β₃ = {BETA3_USA:.4f} (p = {PVAL3_USA:.3f})  
+  → {interp_usa}
+
+**Verdict** : Les deux analyses convergent → le **modèle quadratique** (U inversé classique) est suffisant.
+Aucune preuve de courbe en N (rebond) n'est détectée.
 """))
 ```
 

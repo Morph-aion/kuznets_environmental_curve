@@ -1,0 +1,108 @@
+---
+title: "Annexe A : Concepts fondamentaux"
+---
+
+Cette annexe clarifie les distinctions conceptuelles essentielles à la compréhension 
+du rapport.
+
+## Estimation vs Prédiction {#sec-estimation-prediction}
+
+| Aspect | **Estimation** | **Prédiction** |
+|--------|----------------|----------------|
+| **Question** | Quelle est la relation entre $X$ et $Y$ ? | Quelle sera la valeur de $Y$ demain ? |
+| **Objectif** | Comprendre les mécanismes | Anticiper le futur |
+| **Critère de qualité** | Significativité des coefficients, $R^2$ | RMSE, MAE, performance hors-échantillon |
+| **Risque principal** | Biais (mauvaise spécification) | Surapprentissage (*overfitting*) |
+| **Validation** | Tests statistiques ($t$, $F$) | Validation croisée, *holdout* |
+
+**Exemple dans ce rapport** :
+- *Estimation* : « Le coefficient $\beta_2 < 0$ est-il significatif ? » → Test du U inversé
+- *Prédiction* : « Quelles seront les émissions US en 2025 ? » → Projection ARDL
+
+::: {.callout-important}
+### Pourquoi cette distinction est cruciale
+
+Un modèle peut être **excellent en estimation** (coefficients significatifs, $R^2$ élevé) 
+mais **médiocre en prédiction** (surapprentissage aux données passées).
+
+C'est pourquoi nous utilisons **deux protocoles de validation distincts** (Section 3.3).
+:::
+
+## Le dilemme Biais-Variance {#sec-biais-variance}
+
+Tout modèle statistique fait face à un arbitrage :
+
+| Composante | Définition | Cause | Symptôme |
+|------------|------------|-------|----------|
+| **Biais** | Erreur systématique | Modèle trop simple | Sous-apprentissage |
+| **Variance** | Sensibilité aux données | Modèle trop complexe | Surapprentissage |
+
+$$\text{Erreur totale} = \text{Biais}^2 + \text{Variance} + \text{Bruit irréductible}$$
+
+```{python}
+#| echo: false
+#| fig-cap: "Illustration du compromis biais-variance"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+complexity = np.linspace(0.5, 5, 100)
+bias = 1 / complexity
+variance = 0.1 * complexity ** 1.5
+total = bias + variance
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(complexity, bias, 'b--', label='Biais²', linewidth=2)
+ax.plot(complexity, variance, 'r--', label='Variance', linewidth=2)
+ax.plot(complexity, total, 'k-', label='Erreur totale', linewidth=2.5)
+ax.axvline(complexity[np.argmin(total)], color='green', linestyle=':', label='Optimum')
+ax.set_xlabel('Complexité du modèle')
+ax.set_ylabel('Erreur')
+ax.set_title('Compromis Biais-Variance')
+ax.legend()
+ax.set_xticks([1, 2, 3, 4, 5])
+ax.set_xticklabels(['Linéaire', 'Quadratique', 'Cubique', 'Degré 4', 'Degré 5'])
+plt.tight_layout()
+plt.show()
+```
+
+**Application dans ce rapport** :
+- Modèle **linéaire** : biais élevé (ignore la non-linéarité)
+- Modèle **cubique** : variance élevée (sensible aux outliers)
+- Modèle **quadratique** : compromis optimal (validé par AIC et cross-validation)
+
+## Stationnarité des séries temporelles {#sec-stationnarite}
+
+Une série temporelle $\{y_t\}_{t=1}^T$ est dite **stationnaire (au sens faible)** si ses trois premières propriétés statistiques sont **invariantes dans le temps** :
+
+$$
+\begin{aligned}
+(1)\quad & \mathbb{E}[y_t] = \mu \quad & \text{(moyenne constante)} \\
+(2)\quad & \text{Var}(y_t) = \sigma^2 \quad & \text{(variance constante)} \\
+(3)\quad & \text{Cov}(y_t, y_{t-k}) = \gamma_k \quad & \text{(autocovariance dépend seulement du lag $k$, pas de $t$)}
+\end{aligned}
+$$
+
+| Propriété | Série stationnaire $I(0)$ | Série non-stationnaire $I(1)$ |
+|-----------|---------------------------|-------------------------------|
+| **Moyenne** | $\mathbb{E}[y_t] = \mu$ | Tendance déterministe ($y_t = \alpha t + \varepsilon_t$) ou stochastique (racine unitaire) |
+| **Variance** | $\text{Var}(y_t) = \sigma^2$ | Hétéroscédasticité conditionnelle (ex: GARCH), volatilité croissante |
+| **Autocorrélation** | Décroît exponentiellement | Persistance quasi-permanente (intégration d’ordre 1 : I(1)) |
+| **Régressions** | Inférences valides | **Régressions fallacieuses** (*spurious regression*) |
+
+**Pourquoi c'est crucial ?**
+
+Régresser deux séries non-stationnaires (ex: PIB et CO$_2$) sans précaution peut produire des 
+résultats **statistiquement significatifs mais totalement faux** ($R^2 \to 1$, $t$-stat élevés), 
+simplement parce que les deux séries ont une tendance, même si elles n'ont aucun lien causal 
+(Granger & Newbold, 1974).
+
+**Solution adoptée dans ce rapport** :
+1. **Tester la stationnarité** via le test ADF (*Augmented Dickey-Fuller*) — Section 5.2 — dont l’hypothèse nulle est :
+   $$
+   H_0: \rho = 1 \quad \text{(présence d’une racine unitaire → série non-stationnaire)}
+   $$
+2. Si les séries sont I(1), **utiliser un modèle ARDL** (*AutoRegressive Distributed Lag*) — 
+Section 5.3 — qui permet d’estimer des relations à court et long terme **sans exiger la 
+stationnarité préalable**, sous réserve que les variables soient cointégrées ou que le modèle 
+inclue suffisamment de dynamique.

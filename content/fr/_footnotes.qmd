@@ -1,0 +1,37 @@
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- NOTES DE BAS DE PAGE HARMONISÉES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<!-- CONCEPTS DE BASE (Introduction) -->
+[^ekc]: **EKC** (Environmental Kuznets Curve) — Hypothèse d'un U inversé pollution-revenu. Détails : @sec-concepts-fondamentaux
+
+[^owid]: **Our World in Data** — Repository académique harmonisant GCP + Banque Mondiale. https://ourworldindata.org
+
+[^ppa]: **PPA** (Parité de Pouvoir d'Achat) — Ajustement PIB pour comparabilité internationale.
+
+<!-- ESTIMATEURS (Méthodologie) -->
+[^ols]: **OLS** — Moindres Carrés Ordinaires. Principe : @sec-ols
+
+[^hc3]: **HC3** — Correction hétéroscédasticité (N<250). Formule : @sec-hc3
+
+[^nw]: **Newey-West (HAC)** — Correction autocorrélation (séries temporelles). Formule : @sec-nw
+
+[^ardl]: **ARDL** — Modèle dynamique (retards de Y et X). Spécification : @sec-ardl
+
+<!-- TESTS STATISTIQUES -->
+[^adf]: **ADF** (Augmented Dickey-Fuller) — Test de racine unitaire. H₀: non-stationnarité. Détails : @sec-adf
+
+[^test-f]: **Test F emboîté** — Compare modèles emboîtés. Formule : @sec-test-f
+
+[^aic]: **AIC** (Akaike Information Criterion) — Arbitre ajustement/parcimonie. Plus bas = meilleur. Formule : @sec-aic
+
+[^jb]: **Jarque-Bera** — Test de normalité (H₀: résidus normaux). Détails : @sec-jarque-bera
+
+[^dw]: **Durbin-Watson** — Détecte autocorrélation ordre 1. DW≈2 = pas d'autocorrélation. Détails : @sec-durbin-watson
+
+<!-- AUTRES -->
+[^ndc]: **NDC** (Nationally Determined Contributions) — Engagements climatiques Accord de Paris.
+
+[^rmse]: **RMSE** (Root Mean Squared Error) — Erreur quadratique moyenne. Pénalise les gros écarts.
+
+[^cv]: **Validation croisée** — Teste généralisation sur données non-utilisées. Méthode : @sec-validation
