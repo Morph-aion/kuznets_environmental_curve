@@ -1,0 +1,106 @@
+# presentation/_quarto.yml
+
+# ===================================================================
+# CONFIGURATION GLOBALE DE LA PRÉSENTATION REVEAL.JS
+# -------------------------------------------------------------------
+# Ce fichier définit les paramètres partagés entre les versions FR et EN.
+# Les configurations spécifiques (langue, titre, fichiers à compiler)
+# sont gérées dans _quarto-fr.yml et _quarto-en.yml.
+# ===================================================================
+
+# -------------------------------------------------------------------
+# PROFILS LINGUISTIQUES — permet de basculer facilement entre langues
+# -------------------------------------------------------------------
+profiles:
+  default: fr
+  group:
+    - [fr, en]
+
+# -------------------------------------------------------------------
+# PROJET ET RENDU — Cadre général du projet Quarto
+# -------------------------------------------------------------------
+project:
+  type: default                    # Type "default" suffit pour une présentation reveal.js
+  title: "Soutenance Kuznets CO2"  # Titre du projet Quarto (affiché dans les métadonnées)
+
+# -------------------------------------------------------------------
+# MÉTADONNÉES PAR DÉFAUT — Valeurs communes à toutes les langues
+# -------------------------------------------------------------------
+author:                            # Liste des auteurs — affichée sur la diapo de titre
+  - "A.Guilmain"
+  - "I.Balde"
+  - "A.Sylla"
+  - "D.Adjenia"
+
+
+# -------------------------------------------------------------------
+# FORMAT REVEAL.JS — Options d’affichage, navigation, design
+# -------------------------------------------------------------------
+format:
+  revealjs:                        # Utilisation de Reveal.js comme moteur de présentation
+    # --- Apparence générale ---
+    theme:
+      - default                    # Thème graphique de la présentation (peut être 'solarized', 'white', etc.)
+      - assets/style.scss          # Utilisation de Sass avec un fichier SCSS personnalisé
+    # Dimensions de la présentation (commentées car facultatives — à activer si besoin de personnaliser)
+    width: 2000
+    height: 1300
+    # margin: 0                    # Marge autour des slides (en cm ou pouces selon le format)
+    center: true
+
+    # --- Navigation & Interface ---
+    slide-number: c/t              # Ajoute la numérotation des slides : 'c/t' = current / total slides
+    toc: true                      # Affiche une table des matières sur le côté
+    toc-depth: 1
+    
+    # Configuration du menu latéral (navigation entre sections/slides)
+    menu:
+      side: right                 # Position du menu : 'left', 'right', ou 'none'
+      width: wide                 # Largeur du menu : 'thin', 'wide'
+      items:                      # Liste des éléments à ajouter dans le menu (facultatif)
+        - text: Accueil
+          href: index.html        # Lien vers une page d'accueil externe ou interne (peut pointer vers un index.html généré)
+
+    # --- Fonctionnalités ---
+    transition: slide             # Type de transition entre slides : 'slide', 'fade', 'none'
+    #incremental: true            # Fait apparaître les listes à puces une à une (effet progressif)
+    chalkboard: true              # Active un tableau noir interactif sur les slides (utile avec un stylet)
+
+    # --- Code ---
+    # Style de coloration syntaxique pour les blocs de code
+    highlight-style: github      # Autres choix disponibles : atom-one-light, monokai, vs, etc.
+    code-line-numbers: true      # Ajoute des numéros de ligne aux blocs de code pour plus de clarté
+    code-fold: false             # Si true, permet de replier/déplier les blocs de code (ici désactivé)
+    code-overflow: scroll        # Si le code dépasse la zone, une barre de défilement apparaît
+
+    # --- Math ---
+    math: mathjax
+
+
+    # Plugins Reveal.js à activer (nécessite parfois inclusion manuelle dans HTML)
+    reveal-plugins:
+      - notes                   # Permet d’ajouter des notes de présentateur visibles dans l'application "Speaker View"
+      - zoom                    # Ajoute une fonction de zoom sur une zone de la slide
+
+
+# -------------------------------------------------------------------
+# BIBLIOGRAPHIE — Gestion des citations et références
+# -------------------------------------------------------------------
+bibliography: ../references.bib # Fichier BibTeX contenant vos références
+csl: ../assets/csl/apa.csl      # Style des citations (CSL) : ex. APA, MLA, Chicago
+
+# -------------------------------------------------------------------
+# EXÉCUTION DU CODE — Paramètres pour les chunks R/Python (si utilisés)
+# -------------------------------------------------------------------
+execute:
+   echo: false                 # Affiche le code source (false = uniquement les résultats)
+   warning: false              # Masque les avertissements dans le rendu
+   error: true                 # Affiche les erreurs s’il y en a (utile pour déboguer)
+   message: false              # Masque les messages d'exécution
+
+# -------------------------------------------------------------------
+# OPTIONS AVANCÉES — À décommenter si besoin
+# -------------------------------------------------------------------
+# logo: logo.png                      # Ajoute un logo en haut de la présentation
+# title-slide-attributes:             # Permet d'ajouter des éléments spécifiques à la diapo titre
+#   data-background-color: "#f0f0f0"  # Par exemple, changer la couleur de fond de la diapo titre

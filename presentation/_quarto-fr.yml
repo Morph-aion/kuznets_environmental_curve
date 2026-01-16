@@ -1,0 +1,24 @@
+# presentation/_quarto-fr.yml
+
+# -------------------------------------------------------------------
+# Configuration spécifique à la présentation FRANÇAISE
+# -------------------------------------------------------------------
+project:
+  render:
+    - fr/index.qmd                              # Fichier .qmd à rendre (slide principal)
+  output-dir: ../output/slides                  # Répertoire de sortie pour les fichiers générés (HTML, etc.)
+
+# -------------------------------------------------------------------
+# Métadonnées linguistiques et documentaires
+# -------------------------------------------------------------------
+lang: fr
+
+title: "La Courbe Environnementale de Kuznets"  # Titre global de la présentation (affiché par certains moteurs de rendu)
+date: today                                     # Date affichée, 'today' insère automatiquement la date du rendu
+
+# -------------------------------------------------------------------
+# Personnalisation reveal.js spécifique FR
+# -------------------------------------------------------------------
+format:
+  revealjs:
+    toc-title: "Contenu"                        # Titre affiché pour la table des matières

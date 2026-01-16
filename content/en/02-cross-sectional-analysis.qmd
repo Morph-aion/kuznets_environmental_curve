@@ -1,0 +1,628 @@
+---
+title: "Cross-sectional analysis: Snapshot of the world"
+execute:
+  cache: false
+---
+
+{{< include _setup.qmd >}}
+{{< include _footnotes.qmd >}}
+
+```{python}
+#| label: setup-english-mapping
+#| echo: false
+
+# MAPPING VARIABLES (pour éviter NameError car _setup.qmd est en français)
+if 'ANNEE_CROSS' in locals():
+    YEAR_CROSS = ANNEE_CROSS
+if 'N_PAYS' in locals():
+    N_COUNTRIES = N_PAYS
+if 'ANNEE_DEBUT_DATA' in locals():
+    START_YEAR_DATA = ANNEE_DEBUT_DATA
+if 'ANNEE_FIN' in locals():
+    END_YEAR = ANNEE_FIN
+```
+
+```{python}
+#| label: estimation-cross
+#| output: false
+
+if DATA_LOADED and not df_cross.empty:
+    # Estimation of the three models
+    m_lin = smf.ols('log_co2 ~ log_gdp_c', data=df_cross).fit(cov_type='HC3')
+    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+    m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_cross).fit(cov_type='HC3')
+
+    # Key statistics
+    BETA3 = m_cub.params.get('I(log_gdp_c ** 3)', 0)
+    PVAL3 = m_cub.pvalues.get('I(log_gdp_c ** 3)', 1)
+    R2_CUB = m_cub.rsquared_adj
+    AIC_QUAD = m_quad.aic
+    AIC_CUB = m_cub.aic
+```
+
+## Overview
+
+::: {.callout-important}
+### Methodological note: Why two representations?
+
+Before analyzing the data, it is crucial to understand **the difference 
+between the model's view and physical reality**:
+
+- **Left (Log-Log)**: Working space of the econometric model. 
+  Relative variations (%) are comparable.
+
+- **Right (Log-Linear)**: Climate reality in absolute tons. 
+  A ton of CO$_2$ remains a ton, regardless of the logarithm.
+
+**Why is this important?** The model can capture the "average dynamics" 
+(left), but underestimate the **extreme heterogeneity** at high incomes (right).
+:::
+
+```{python}
+#| label: fig-comparison-scales
+#| fig-cap: "Comparison of scales: The model's view vs. Physical reality"
+#| warning: false
+#| fig-width: 12
+#| fig-height: 6
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# STRATEGIC SELECTION: 1 or 2 countries per economic "type" to avoid overload
+COUNTRIES_TO_DISPLAY = {
+    'United States': 'USA',   # The rich polluting giant
+    'China': 'CHN',           # The emerging giant
+    'India': 'IND',           # The developing giant
+    'Qatar': 'QAT',           # The extreme oil producer (The point that shoots up in Linear)
+    'France': 'FRA',          # The nuclear/energy-efficient model
+    'Sweden': 'SWE',          # The Nordic model
+    'Germany': 'DEU',         # The European industrial powerhouse
+    'Brazil': 'BRA',          # The emerging South American powerhouse
+    'Singapore': 'SGP',       # The wealthy city-state (Contrast with QAT)
+    'Russia': 'RUS'           # The fossil fuel economy
+}
+
+if 'df_cross' in locals() and not df_cross.empty:
+    # Secure retrieval of metadata for the title
+    year_str = str(YEAR_CROSS) if 'YEAR_CROSS' in locals() else str(df_cross['year'].max())
+    count_str = str(N_COUNTRIES) if 'N_COUNTRIES' in locals() else str(len(df_cross))
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+    # --- ADD GLOBAL TITLE (Date + N) ---
+    fig.suptitle(f"Global Distribution of Emissions: {count_str} Countries in {year_str}", 
+                 fontsize=14, fontweight='bold', y=0.98)
+
+    # ---------------------------------------------------------
+    # LEFT GRAPH: Log-Log (Model view)
+    # ---------------------------------------------------------
+    sns.scatterplot(ax=axes[0], data=df_cross, x='gdp_pc', y='co2_per_capita', 
+                    color='#34495e', alpha=0.5, s=50, edgecolor='white')
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_title("A. Log-Log Scale\n(Econometric View)", fontweight='bold', fontsize=11)
+    axes[0].set_xlabel("GDP per capita (Log)")
+    axes[0].set_ylabel("CO2 per capita (Log)")
+    axes[0].grid(True, which="both", ls="--", alpha=0.2)
+
+    # ---------------------------------------------------------
+    # RIGHT GRAPH: Log-Lin (Physical reality)
+    # ---------------------------------------------------------
+    sns.scatterplot(ax=axes[1], data=df_cross, x='gdp_pc', y='co2_per_capita', 
+                    color='#c0392b', alpha=0.5, s=50, edgecolor='white')
+
+    # LOWESS trend to guide the eye
+    sns.regplot(ax=axes[1], data=df_cross, x='gdp_pc', y='co2_per_capita', 
+                scatter=False, lowess=True, 
+                line_kws={'color': 'black', 'linewidth': 1.5, 'linestyle': '--', 'label': 'Average trend'})
+    axes[1].set_xscale('log')
+    # Y remains linear! This is where the magic happens.
+    axes[1].set_title("B. Log-Linear Scale\n(Physical Reality)", fontweight='bold', fontsize=11)
+    axes[1].set_xlabel("GDP per capita (Log)")
+    axes[1].set_ylabel("CO2 per capita (Tons)")
+    axes[1].grid(True, which="both", ls="--", alpha=0.2)
+
+    # ---------------------------------------------------------
+    # ANNOTATIONS
+    # ---------------------------------------------------------
+    for country, code in COUNTRIES_TO_DISPLAY.items():
+        row = df_cross[df_cross['country'] == country]
+        if not row.empty:
+            x = row['gdp_pc'].values[0]
+            y = row['co2_per_capita'].values[0]
+            
+            # Left: Discreet black text
+            axes[0].text(x, y, f" {code}", fontsize=8, fontweight='bold', 
+                         color='#2c3e50', va='bottom')
+
+            # Right: Red or offset text for extremes
+            # Tip: offset the Qatar text to the left because it is at the edge of the frame
+            ha = 'right' if y > 30 else 'left' 
+            axes[1].text(x, y, f"{code} " if ha=='right' else f" {code}", 
+                         fontsize=8, fontweight='bold', 
+                         color='#c0392b', va='center', ha=ha)
+
+    plt.tight_layout()
+    plt.show()
+```
+
+**Empirical observations:**
+
+1. In log-log: relatively linear relationship → justifies the polynomial model
+2. In log-lin: explosive dispersion on the right → Qatar soars, Sweden plateaus
+3. Conclusion: The average EKC masks **radically divergent trajectories**
+
+## Predictive performance
+
+### Cross-validation k=5
+
+```{python}
+#| label: cross-validation
+#| output: false
+
+if DATA_LOADED and not df_cross.empty:
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    rmse_results = {'Linear': [], 'Quadratic': [], 'Cubic': []}
+
+    for train_idx, test_idx in kf.split(df_cross):
+        train_data = df_cross.iloc[train_idx]
+        test_data = df_cross.iloc[test_idx]
+
+        m1 = smf.ols('log_co2 ~ log_gdp_c', data=train_data).fit()
+        m2 = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=train_data).fit()
+        m3 = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=train_data).fit()
+
+        rmse_results['Linear'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m1.predict(test_data))))
+        rmse_results['Quadratic'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m2.predict(test_data))))
+        rmse_results['Cubic'].append(np.sqrt(mean_squared_error(test_data['log_co2'], m3.predict(test_data))))
+
+    RMSE_LIN = np.mean(rmse_results['Linear'])
+    RMSE_QUAD = np.mean(rmse_results['Quadratic'])
+    RMSE_CUB = np.mean(rmse_results['Cubic'])
+    GAIN_VS_QUAD = (RMSE_QUAD - RMSE_CUB) / RMSE_QUAD * 100
+```
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if GAIN_VS_QUAD > 0:
+        interpretation = f"improves prediction by {GAIN_VS_QUAD:.1f}%"
+        recommendation = "Prefer the **cubic** model."
+    else:
+        interpretation = f"degrades prediction by {abs(GAIN_VS_QUAD):.1f}%"
+        recommendation = "Prefer the **quadratic** model (more parsimonious)."
+    
+    display(Markdown(f"""
+**Cross-validation (k=5)**
+
+| Model | Average RMSE | Difference vs quadratic |
+|-------|--------------|-------------------------|
+| Linear | {RMSE_LIN:.4f} | {(RMSE_LIN - RMSE_QUAD) / RMSE_QUAD * 100:+.1f}% |
+| Quadratic | {RMSE_QUAD:.4f} | reference |
+| Cubic | {RMSE_CUB:.4f} | {GAIN_VS_QUAD:+.1f}% |
+
+**Interpretation**: The cubic model {interpretation}.
+
+**Recommendation**: {recommendation}
+"""))
+```
+
+### Diagnosis of prediction errors
+
+::: {.callout-note}
+### Objective
+Identify which types of countries are **systematically mispredicted** by the cubic model. This reveals the structural limitations of the EKC.
+:::
+
+```{python}
+#| label: fig-diagnostic-errors-cross
+#| fig-cap: "Prediction error analysis: Who does the model miss?"
+#| warning: false
+#| fig-width: 14
+#| fig-height: 10
+
+if DATA_LOADED and not df_cross.empty:
+    # Predictions and residuals
+    df_cross['pred_cub'] = m_cub.predict(df_cross)
+    df_cross['resid_cub'] = df_cross['log_co2'] - df_cross['pred_cub']
+    df_cross['resid_abs'] = np.abs(df_cross['resid_cub'])
+
+    # Conversion to tons for interpretation
+    df_cross['co2_pred'] = np.exp(df_cross['pred_cub'])
+    df_cross['error_tons'] = df_cross['co2_per_capita'] - df_cross['co2_pred']
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    # ═══════════════════════════════════════════════════════════════
+    # A. RESIDUALS vs PREDICTIONS (detection of systematic bias)
+    # ═══════════════════════════════════════════════════════════════
+    sns.scatterplot(ax=axes[0,0], data=df_cross, x='pred_cub', y='resid_cub',
+                    alpha=0.6, s=60, color='#34495e', edgecolor='white')
+
+    axes[0,0].axhline(0, color='red', linestyle='--', linewidth=2, label='Zero bias')
+    axes[0,0].set_xlabel("Predictions $\ln(\mathrm{CO}_2)$")
+    axes[0,0].set_ylabel("Residuals")
+    axes[0,0].set_title("A. Residuals vs Predictions\n(Bias Detection)", fontweight='bold')
+    axes[0,0].legend()
+    axes[0,0].grid(True, alpha=0.3)
+
+    # Annotation of the 3 worst positive and negative residuals
+    top_resid = df_cross.nlargest(3, 'resid_cub')
+    bot_resid = df_cross.nsmallest(3, 'resid_cub')
+
+    for _, row in pd.concat([top_resid, bot_resid]).iterrows():
+        axes[0,0].annotate(row['country'], 
+                          xy=(row['pred_cub'], row['resid_cub']),
+                          xytext=(5, 5), textcoords='offset points',
+                          fontsize=8, color='darkred', fontweight='bold',
+                          bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.3))
+
+    # ═══════════════════════════════════════════════════════════════
+    # B. ABSOLUTE ERROR vs GDP (heteroscedasticity)
+    # ═══════════════════════════════════════════════════════════════
+    sns.scatterplot(ax=axes[0,1], data=df_cross, x='gdp_pc', y='resid_abs',
+                    alpha=0.6, s=60, color='#e74c3c')
+
+    # LOWESS trend
+    from statsmodels.nonparametric.smoothers_lowess import lowess
+    lowess_result = lowess(df_cross['resid_abs'], np.log(df_cross['gdp_pc']), frac=0.3)
+    axes[0,1].plot(np.exp(lowess_result[:, 0]), lowess_result[:, 1], 
+                   color='black', linewidth=2, linestyle='--', label='Trend')
+
+    axes[0,1].set_xscale('log')
+    axes[0,1].set_xlabel("GDP per capita (Log)")
+    axes[0,1].set_ylabel("Absolute error")
+    axes[0,1].set_title("B. Error vs Wealth\n(Heteroscedasticity)", fontweight='bold')
+    axes[0,1].legend()
+    axes[0,1].grid(True, alpha=0.3)
+
+    # ═══════════════════════════════════════════════════════════════
+    # C. DISTRIBUTION OF ERRORS (normality)
+    # ═══════════════════════════════════════════════════════════════
+    axes[1,0].hist(df_cross['resid_cub'], bins=20, color='#3498db', 
+                   alpha=0.7, edgecolor='black')
+    axes[1,0].axvline(0, color='red', linestyle='--', linewidth=2)
+    axes[1,0].set_xlabel("Residuals")
+    axes[1,0].set_ylabel("Frequency")
+    axes[1,0].set_title("C. Distribution of Residuals\n(Normality Test)", fontweight='bold')
+    axes[1,0].grid(True, alpha=0.3)
+
+    # Jarque-Bera statistic
+    from scipy.stats import jarque_bera
+    jb_stat, jb_pval = jarque_bera(df_cross['resid_cub'])
+    axes[1,0].text(0.05, 0.95, f'Jarque-Bera: {jb_stat:.2f}\np = {jb_pval:.3f}',
+                   transform=axes[1,0].transAxes, fontsize=10,
+                   verticalalignment='top',
+                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    
+    # ═══════════════════════════════════════════════════════════════
+    # D. TOP 10 COUNTRIES WITH THE WORST FORECASTS (in absolute terms)
+    # ═══════════════════════════════════════════════════════════════
+    top_errors = df_cross.nlargest(10, 'resid_abs')[['country', 'error_tons', 'gdp_pc']]
+    top_errors = top_errors.sort_values('error_tons')
+
+    colors = ['red' if x > 0 else 'green' for x in top_errors['error_tons']]
+    axes[1,1].barh(range(len(top_errors)), top_errors['error_tons'], color=colors, alpha=0.7)
+    axes[1,1].set_yticks(range(len(top_errors)))
+    axes[1,1].set_yticklabels(top_errors['country'], fontsize=9)
+    axes[1,1].axvline(0, color='black', linewidth=1)
+    axes[1,1].set_xlabel("Error (tons of CO₂/capita)")
+    axes[1,1].set_title("D. Top 10 Countries with Poor Predictions\n(Red=overestimated, Green=underestimated)", fontweight='bold')
+    axes[1,1].grid(True, alpha=0.3, axis='x')
+
+    plt.tight_layout()
+    plt.show()
+```
+
+### Profiles of poorly predicted countries
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    # resid = observed - predicted
+    # If resid > 0 → observed > predicted → country pollutes MORE than expected
+    # If resid < 0 → observed < predicted → country pollutes LESS than expected
+
+    # Identification of error profiles
+    countries_polluting_more = df_cross[df_cross['resid_cub'] > 0.5]  # Observed > Predicted
+    countries_polluting_less = df_cross[df_cross['resid_cub'] < -0.5]  # Observed < Predicted
+
+    display(Markdown(f"""
+#### Countries that pollute **LESS** than expected (**overestimated** model)
+*(Negative residuals: the model predicts too much CO$_2$)*
+
+- **Number**: {len(countries_polluting_less)}
+- **Examples**: {', '.join(countries_polluting_less.nsmallest(5, 'resid_cub')['country'].tolist())}
+- **Average GDP**: {int(countries_polluting_less['gdp_pc'].mean())} $/capita
+- **Interpretation**: Countries that have decarbonized **faster** than the global average 
+  thanks to low-carbon energy choices:
+  - France (70% nuclear power in the mix)
+  - Iceland, Norway, Sweden (hydroelectricity)
+  - Switzerland (energy efficiency + services)
+
+#### Countries that pollute **MORE** than expected (**underestimated** model)
+*(Positive residuals: the model predicts too little CO₂)*
+
+- **Number**: {len(countries_polluting_more)}
+- **Examples**: {', '.join(countries_polluting_more.nlargest(5, 'resid_cub')['country'].tolist())}
+- **Average GDP**: {int(countries_polluting_more['gdp_pc'].mean())} $/capita
+- **Interpretation**: Countries structurally dependent on **fossil fuels** 
+  despite their wealth:
+  - Oil economies (Qatar, Kuwait, Bahrain): carbon rents
+  - Coal exporters (Australia, South Africa)
+  - Countries with extreme climates (intensive air conditioning: Saudi Arabia)
+"""))
+```
+
+## Model estimation and selection
+
+```{python}
+#| label: tbl-results-cross
+#| tbl-cap: 'OLS estimation — Dependent variable: $\ln(\mathrm{CO}_2/\text{inhab})$'
+
+if DATA_LOADED and not df_cross.empty:
+    def format_coef(model, var):
+        try:
+            coef = model.params[var]
+            se = model.bse[var]
+            pval = model.pvalues[var]
+            stars = '***' if pval < 0.01 else '**' if pval < 0.05 else '*' if pval < 0.1 else ''
+            # Escape stars for Markdown compatibility
+            stars_escaped = stars.replace('*', '\\*')
+            return f"{coef:.4f}{stars_escaped} ({se:.4f})"
+        except KeyError:
+            return "—"
+
+    display(Markdown(f"""
+| Variable | Linear | Quadratic | Cubic |
+|----------|--------|-----------|-------|
+| $\ln(\text{{GDP}})$ centered | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
+| $[\ln(\text{{GDP}})]^2$ | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
+| $[\ln(\text{{GDP}})]^3$ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
+| **Adjusted $R^2$** | {m_lin.rsquared_adj:.3f} | {m_quad.rsquared_adj:.3f} | {m_cub.rsquared_adj:.3f} |
+| **AIC** | {m_lin.aic:.1f} | {m_quad.aic:.1f} | {m_cub.aic:.1f} |
+| **$N$** | {int(m_lin.nobs)} | {int(m_quad.nobs)} | {int(m_cub.nobs)} |
+
+*HC3 robust standard errors in parentheses. $^{*}p<0.1$, $^{{**}}p<0.05$, $^{{***}}p<0.01$*
+"""))
+```
+
+### Embedded F test[^test-f]: is the cubic term necessary?
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    rss_quad = m_quad.ssr
+    rss_cub = m_cub.ssr
+    df_diff = m_quad.df_resid - m_cub.df_resid
+    df_resid = m_cub.df_resid
+
+    F_STAT = ((rss_quad - rss_cub) / df_diff) / (rss_cub / df_resid)
+    P_VAL_F = 1 - stats.f.cdf(F_STAT, df_diff, df_resid)
+
+    conclusion = "statistically necessary" if P_VAL_F < 0.05 else "not significant"
+
+    display(Markdown(f"""
+**Nested F-test** ($H_0: \\beta_3 = 0$)
+
+- Statistic: $F = {F_STAT:.2f}$
+- p-value: ${P_VAL_F:.4f}$
+- **Conclusion**: The cubic term is **{conclusion}**
+
+**AIC criterion**[^aic]: Cubic ({AIC_CUB:.1f}) vs Quadratic ({AIC_QUAD:.1f})
+
+- Gain: **{AIC_QUAD - AIC_CUB:.1f}** points
+"""))
+```
+
+## Key result 1 : The quadratic model is sufficient
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if BETA3 < 0 and PVAL3 < 0.05:
+        display(Markdown(f"""
+**Coefficient $\\beta_3$ = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- The cubic term is **negative and significant** (p < 0.05).
+- The relationship follows an **enhanced inverted U**: at very high incomes, 
+  the decoupling **accelerates** (decline faster than the quadratic model).
+- This result suggests a **potentially sustainable decoupling** beyond 
+  the turning point, consistent with the optimistic EKC hypothesis.
+"""))
+    elif BETA3 > 0 and PVAL3 < 0.05:
+        display(Markdown(f"""
+**Coefficient $\\beta_3$ = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- The cubic term is **positive and significant** (p < 0.05).
+- **Diagnosis: N-shaped curve detected.**
+- The decoupling is **temporary**: the data suggest a **structural rebound** in emissions at very high income levels (re-coupling).
+"""))
+    else:
+        display(Markdown(f"""
+**Coefficient $\\beta_3$ = {BETA3:.4f}** (p = {PVAL3:.4f})
+
+- The cubic term is **not significant** (p > 0.05).
+- **Conclusion:** The hypothesis of linearity or complex rebound is rejected. 
+- The **quadratic model (classical inverted U)** is sufficient to describe the data: the principle of parsimony applies.
+"""))
+```
+
+## Visualization of the fitted curve
+
+```{python}
+#| label: fig-fitted-curve
+#| fig-cap: "Fitted cubic model with 95% CI"
+
+if DATA_LOADED and not df_cross.empty:
+    gdp_grid = np.linspace(df_cross['gdp_pc'].min(), df_cross['gdp_pc'].max(), 200)
+    log_gdp_grid_c = np.log(gdp_grid) - GDP_MEAN
+
+    pred_df = pd.DataFrame({'log_gdp_c': log_gdp_grid_c})
+    predictions = m_cub.get_prediction(pred_df)
+    pred_summary = predictions.summary_frame(alpha=0.05)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+               alpha=0.3, s=40, c='gray', label='Observations')
+
+    ax.plot(gdp_grid, np.exp(pred_summary['mean']), 
+            color='#c0392b', linewidth=2.5, label='Cubic model')
+
+    ax.fill_between(gdp_grid,
+                    np.exp(pred_summary['mean_ci_lower']),
+                    np.exp(pred_summary['mean_ci_upper']),
+                    color='#c0392b', alpha=0.15, label='95% CI')
+
+    ax.set_xscale('log')
+    ax.set_xlabel("GDP per capita (USD PPP 2017)")
+    ax.set_ylabel("CO₂ per capita (tons)")
+    if BETA3 < 0:
+        title = "Reinforced inverted U: classic EKC confirmed"
+    else:
+        title = "N-shaped curve: classic EKC rejected"
+
+    ax.set_title(title)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+```
+
+::: {.callout-important}
+### Bias-variance dilemma: Why favor quadratic?
+
+We are faced with a classic trade-off in modeling:
+
+1. **Statistical significance**: The $F$ test ($p = 0.994$) and the coefficient $\beta_3$  
+   ($p = 0.995$) indicate that **the cubic term does not significantly improve** the fit  
+   to the 2020 data.
+
+2. **Predictive power**: Cross-validation reveals that the cubic model  
+   slightly degrades generalization (+1.4% RMSE).
+
+**Interpretation**: The cubic term probably captures specific characteristics  
+of ultra-rich countries (Qatar, Kuwait, Singapore)—rentier economies or city-states—  
+rather than a generalizable structural trend.
+
+**Methodological decision**: In accordance with the principle of parsimony  
+(Occam's Razor) and the priority given to predictive robustness,  
+**we retain the quadratic model for projections** (Section 5.6).
+
+However, we recognize that the 2020 cross-sectional data do not allow us to  
+definitively rule out an accelerated decline ($\beta_3 < 0$) at very high incomes.  
+Future work with multi-country time panels would allow us to resolve  
+this issue structurally.
+:::
+
+## Interpretation: GDP-CO$_2$ relationship models
+
+```{python}
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    if BETA3 > 0 and PVAL3 < 0.05:
+        # Curve in N → calculate and display the 3 phases
+        b1 = m_cub.params['log_gdp_c']
+        b2 = m_cub.params['I(log_gdp_c ** 2)']
+        b3 = m_cub.params['I(log_gdp_c ** 3)']
+
+        a, b, c = 3 * b3, 2 * b2, b1
+        discriminant = b**2 - 4*a*c
+
+        if discriminant >= 0 and a != 0:
+            x1 = (-b - np.sqrt(discriminant)) / (2*a)
+            x2 = (-b + np.sqrt(discriminant)) / (2*a)            
+
+            THRESHOLD1 = np.exp(min(x1, x2) + GDP_MEAN)
+            THRESHOLD2 = np.exp(max(x1, x2) + GDP_MEAN)
+
+            display(Markdown(f"""
+**Three distinct regimes** (N-shaped curve):
+
+| Phase | GDP per capita range | Dynamics |
+|-------|----------------------|----------|
+| 1. Industrialization | < {THRESHOLD1:,.0f} $ | Growth |
+| 2. Transition | {THRESHOLD1:,.0f} - {THRESHOLD2:,.0f} $ | Temporary decline |
+| 3. Rebound | > {THRESHOLD2:,.0f} $ | Recovery |
+
+**Key message**: Decoupling is **temporary**, not permanent.
+"""))
+        else:
+            display(Markdown("""
+**Unable to calculate inflection points.**
+
+The estimated coefficients do not allow two real roots to be derived.  
+This may be due to numerical instability or an incorrectly identified specification.
+"""))
+
+    elif BETA3 < 0 and PVAL3 < 0.05:
+        # Reinforced inverted U → NO phase 3
+        display(Markdown(f"""
+**Two distinct regimes** (reinforced inverted U):
+
+| Phase | Dynamics | Interpretation |
+|-------|----------|----------------|
+| 1. Industrialization | Growth | Emissions increase with GDP |
+| 2. Sustainable decoupling | Accelerated decline | Emissions decrease faster and faster |
+
+**Key message**: No rebound detected — decoupling appears to be **permanent**.
+"""))
+    else:
+        display(Markdown(f"""
+**The cubic term is not significant** (p = {PVAL3:.3f}) — the quadratic model is sufficient.
+
+- No statistical evidence of an N-shaped curve (rebound) or accelerated decline.
+- The classic EKC (quadratic form) remains the most **parsimonious, robust, and interpretable** specification.
+- Recommendation: favor the quadratic model for projections and policy analysis.
+"""))
+```
+
+## Assessment of the cross-sectional approach
+
+The data from `{python} YEAR_CROSS` validate the classic EKC **on average**: 
+decoupling exists on a global scale.
+
+**However, this static snapshot does not answer three dynamic questions:**
+
+1. Is this decoupling **sustainable** over time, or is it only temporary?
+2. Does the inertia of energy systems allow for a **rapid transition**?
+3. Can a country **reverse course** (re-coupling) after a phase of decoupling?
+
+**Part III answers these questions** through a temporal analysis of the American case (1991-2020).
+
+```{python}
+#| label: save-cross-results
+#| echo: false
+#| output: false
+
+import json
+from pathlib import Path
+
+if DATA_LOADED and not df_cross.empty:
+    current = Path.cwd()
+    while not (current / '_quarto.yml').exists() and current != current.parent:
+        current = current.parent
+
+    shared_dir = current / '_shared'
+    shared_dir.mkdir(exist_ok=True)
+    # Important : conserver le nom de fichier original si d'autres scripts dépendent de lui
+    output_file = shared_dir / 'resultats_cross.json'
+
+    data = {
+        "BETA3": BETA3,
+        "PVAL3": PVAL3,
+        "N_PAYS": N_COUNTRIES, # variable mappée
+        "ANNEE_CROSS": YEAR_CROSS, # variable mappée
+        "R2_CUB": R2_CUB
+    }
+
+    with open(output_file, 'w') as f:
+        json.dump(data, f)
+```

@@ -1,0 +1,186 @@
+# Approche Transversale {background-color="#16A085"}
+
+## Photographie du monde en 2020
+
+---
+
+## 🌍 Vue d'ensemble : Log-log vs Log-lin
+
+::: {.columns}
+::: {.column width="50%"}
+![Vision du modèle (log-log)](../../artifacts/figures/kuznets_diachronic.png)
+
+**Espace de travail économétrique**
+
+- Variations relatives comparables
+- Relation relativement linéaire
+:::
+
+::: {.column width="50%"}
+![Réalité physique (log-lin)](../../artifacts/figures/kuznets_diachronic_enhanced.png)
+
+**Réalité climatique en tonnes absolues**
+
+- Dispersion explosive aux hauts revenus
+- Qatar s'envole, Suède plafonne
+:::
+:::
+
+::: {.callout-warning}
+## Message clé
+L'EKC **moyenne** masque des trajectoires **radicalement divergentes**
+:::
+
+---
+
+## 📊 Résultat clé n°1 : Le modèle quadratique suffit
+
+::: {.columns}
+::: {.column width="50%"}
+![Modèle cubique ajusté](../../artifacts/figures/cross_section_model_2019.png)
+:::
+
+::: {.column width="50%"}
+::: {.callout-tip icon=false}
+## Verdict statistique
+**Le terme cubique est NON significatif**
+
+- $\beta_3 = -0.0138$ (p = 0.995)
+- Test F emboîté : p = 0.994
+- AIC favorise quadratique (-2 pts)
+:::
+
+**Décision méthodologique**
+
+✅ Modèle retenu : **Quadratique**
+
+❌ Courbe en N : **rejetée**
+
+⚖️ Performance : cubique **dégrade** de +1.4% RMSE
+:::
+:::
+
+::: {.notes}
+Le terme cubique capture probablement les spécificités de pays rentiers (Qatar, Koweït) plutôt qu'une tendance structurelle. Principe de parcimonie appliqué.
+:::
+
+---
+
+## 📈 Résultats de l'estimation OLS
+
+::: {style="font-size: 0.75em;"}
+| Variable | Linéaire | Quadratique | Cubique |
+|----------|----------|-------------|---------|
+| $\ln(\text{PIB})$ centré | 1.1000*** | 1.0698*** | 1.0703*** |
+|  | (0.0427) | (0.0431) | (0.0825) |
+| $[\ln(\text{PIB})]^2$ | — | -0.0832*** | -0.0833** |
+|  |  | (0.0315) | (0.0400) |
+| $[\ln(\text{PIB})]^3$ | — | — | -0.0002 |
+|  |  |  | (0.0268) |
+| **$R^2$ ajusté** | 0.836 | 0.842 | 0.841 |
+| **AIC** | 279.6 | 274.0 | 276.0 |
+| **N** | 159 | 159 | 159 |
+:::
+
+*Erreurs-types robustes HC3 entre parenthèses. \*p<0.1, \*\*p<0.05, \*\*\*p<0.01*
+
+::: {.callout-note}
+## Interprétation
+- Modèle quadratique : meilleur compromis $R^2$ / AIC
+- $\beta_2 < 0$ significatif → U inversé validé
+- $\beta_3$ non significatif → pas de rebond détecté
+:::
+
+---
+
+## 🎯 Performance prédictive : Validation croisée (k=5)
+
+::: {style="text-align: center; font-size: 1.5em; margin: 2em 0;"}
+**RMSE moyen**
+
+| Modèle | RMSE | Δ vs quadratique |
+|--------|------|------------------|
+| Linéaire | 0.5798 | +2.0% |
+| **Quadratique** | **0.5683** | **référence** |
+| Cubique | 0.5796 | **-2.0%** ⚠️ |
+:::
+
+::: {.callout-warning}
+## Interprétation
+Le modèle cubique **sur-apprend** les données de 2020
+
+→ Quadratique généralise mieux à de nouveaux pays
+
+→ **Parcimonie confirmée**
+:::
+
+---
+
+## 🔍 Diagnostic des erreurs : Qui le modèle rate-t-il ?
+
+![Analyse des erreurs de prédiction](../../artifacts/figures/cross_section_model_2019.png)
+
+---
+
+## 🗺️ Profils des pays mal prédits
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.callout-note collapse="false"}
+## 🔴 Pays **sous-estimés** (polluent PLUS)
+**30 pays** | PIB moyen : 18 275 \$/hab
+
+**Profil** : Économies fossiles
+
+- 🛢️ Qatar, Koweït, Bahreïn (rente pétrolière)
+- ⛏️ Australie, Afrique du Sud (exportateurs charbon)
+- 🌡️ Arabie Saoudite (climatisation intensive)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.callout-note collapse="false"}
+## 🟢 Pays **surestimés** (polluent MOINS)
+**26 pays** | PIB moyen : 17 398 \$/hab
+
+**Profil** : Décarbonés volontaristes
+
+- ⚡ France, Suède (nucléaire 70%, hydro 45%)
+- 🌱 Islande, Norvège (100% renouvelables)
+- 🏔️ Suisse (efficacité énergétique)
+:::
+:::
+:::
+
+::: {.callout-important}
+## Message clé
+À **PIB égal**, la Suède émet **9 fois moins** que le Qatar
+
+→ Les **choix politiques** comptent plus que la richesse seule
+:::
+
+---
+
+## 📝 Bilan de l'approche transversale
+
+::: {.incremental}
+✅ **EKC classique validée** : relation en U inversé confirmée ($\beta_2 < 0$, p < 0.001)
+
+✅ **Courbe en N rejetée** : pas de rebond aux très hauts revenus ($\beta_3 \approx 0$, p = 0.995)
+
+✅ **Découplage possible** : les pays riches émettent moins (turning point franchi pour OCDE)
+
+⚠️ **Hétérogénéité masquée** : l'EKC moyenne cache 3 clubs de pays (décarbonés / sur-carbonés / en transition)
+
+❓ **Questions restantes** :
+
+- Ce découplage est-il **durable** dans le temps ?
+- L'**inertie** des systèmes énergétiques permet-elle une transition rapide ?
+- Un pays peut-il **revenir en arrière** après découplage ?
+:::
+
+::: {.fragment}
+::: {style="text-align: center; font-size: 1.3em; color: #16A085; margin-top: 1em;"}
+**→ Partie III : Analyse temporelle du cas américain (1990-2020)**
+:::
+:::

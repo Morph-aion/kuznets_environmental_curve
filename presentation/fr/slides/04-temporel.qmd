@@ -1,0 +1,330 @@
+# Approche Temporelle {background-color="#E74C3C"}
+
+## Le film américain (1990-2020)
+
+---
+
+## 🇺🇸 Pourquoi les États-Unis ?
+
+::: {.incremental}
+- 🏭 **Premier émetteur historique cumulé** 
+  - ~25% du CO₂ mondial depuis 1850
+  
+- 💰 **Économie mature post-industrielle**
+  - 76 000 \$/hab en 2020
+  - Services = 77% du PIB
+  
+- 📊 **Données complètes et fiables**
+  - Série 1990-2020 (T=30)
+  - Qualité EPA/NOAA
+  
+- 🎯 **Cas test idéal pour l'EKC**
+  - Pays ayant théoriquement franchi le turning point
+  - Permet d'observer la phase descendante
+:::
+
+---
+
+## 🧪 Tests de stationnarité (ADF)
+
+::: {style="font-size: 0.85em;"}
+| Variable | ADF (niveaux) | p-value | ADF (différences) | p-value | Conclusion |
+|----------|---------------|---------|-------------------|---------|------------|
+| $\ln(\text{CO}_2)$ | -1.15 | 0.921 | -3.27 | **0.016** | **I(1)** |
+| $\ln(\text{PIB})$ | -1.40 | 0.860 | -2.44 | 0.132 | Ambigu |
+:::
+
+::: {.callout-warning}
+## Diagnostic
+- $\ln(\text{CO}_2)$ : clairement **I(1)** (non-stationnaire)
+- $\ln(\text{PIB})$ : résultat **ambigu** (petit échantillon T=30)
+
+**Causes possibles** : faible puissance du test, break structurel (2008, COVID)
+
+**Solution adoptée** : Modèle **ARDL** (robuste aux variables I(0)/I(1) mixtes)
+:::
+
+::: {.notes}
+Rappel : H₀ du test ADF = "présence de racine unitaire". Si p < 0.05, on rejette H₀ → série stationnaire.
+:::
+
+---
+
+## 📐 Modèles ARDL estimés
+
+::: {style="font-size: 0.7em;"}
+| Variable | AR(1) | ARDL lin. | ARDL quad. | ARDL cub. |
+|----------|-------|-----------|------------|-----------|
+| $\ln(\text{CO}_2)_{t-1}$ | 1.0523*** | 1.0032*** | 1.0974*** | 1.0324*** |
+|  | (0.0619) | (0.0779) | (0.0533) | (0.0897) |
+| $\ln(\text{PIB})_t$ | — | -0.0638* | -0.1223* | -0.1881*** |
+|  |  | (0.0329) | (0.0627) | (0.0493) |
+| $[\ln(\text{PIB})_t]^2$ | — | — | -0.4220 | 0.0626 |
+|  |  |  | (0.3978) | (0.5913) |
+| $[\ln(\text{PIB})_t]^3$ | — | — | — | 3.5947 |
+|  |  |  |  | (2.2296) |
+| **$R^2$** | 0.935 | 0.938 | 0.939 | 0.941 |
+| **AIC** | -121.5 | -120.8 | -119.3 | -118.2 |
+:::
+
+*Erreurs-types Newey-West (3 lags). \*p<0.1, \*\*p<0.05, \*\*\*p<0.01*
+
+::: {.callout-note}
+## Observations préliminaires
+- $R^2$ augmente avec la complexité (0.935 → 0.941)
+- **MAIS** $\beta_3$ non significatif (p = 0.107)
+- AIC favorise AR(1) (plus parcimonieux)
+
+→ Validation hors-échantillon va trancher
+:::
+
+---
+
+## 🎯 Validation hors-échantillon (2016-2020)
+
+::: {.columns}
+::: {.column width="50%"}
+![Prédictions hors-échantillon](../../artifacts/figures/time_series_usa_forecast.png)
+:::
+
+::: {.column width="50%"}
+::: {style="font-size: 0.8em;"}
+| Modèle | RMSE | MAE | MAPE |
+|--------|------|-----|------|
+| **ARDL Linéaire** | **0.0473** | 0.0326 | 3.34 |
+| ARDL AR(1) | 0.0474 | 0.0333 | 3.41 |
+| ARDL Quadratique | 0.0475 | 0.0345 | 3.49 |
+| ARDL Cubique | 0.0492 | 0.0352 | 3.62 |
+| **Marche aléatoire** | 0.0568 | 0.0442 | 4.57 |
+| ARIMA(1,1,1) | 0.0617 | 0.0414 | — |
+| Moyenne mobile | 0.0682 | 0.0527 | 5.51 |
+:::
+:::
+:::
+
+::: {.callout-tip}
+## Résultat clé n°2
+**ARDL Linéaire** offre la meilleure performance
+
+- ✅ RMSE = 0.0473 (**+18.6%** vs marche aléatoire)
+- ✅ Bat tous les benchmarks
+- ✅ Modèle le plus parcimonieux des ARDL
+:::
+
+---
+
+## 🤔 Décision de sélection de modèle
+
+| Critère | ARDL Linéaire | ARDL Quadratique | ARDL Cubique |
+|---------|---------------|------------------|--------------|
+| **RMSE Test** | **0.0473** ✅ | 0.0475 (+0.5%) | 0.0492 (+4.0%) ⚠️ |
+| **Coefficient clé** | — | $\beta_2$ : p=0.289 | $\beta_3$ : p=0.107 |
+| **Statut** | — | Non significatif | Non significatif |
+| **AIC** | **-120.8** ✅ | -119.3 | -118.2 |
+
+::: {.callout-important}
+## Modèle retenu
+**ARDL Linéaire** pour la performance
+
+**ARDL Quadratique** pour l'analyse structurelle (cohérence avec approche transversale)
+
+**Verdict sur l'EKC temporelle** :
+- $\beta_2$ non significatif (p=0.289) → relation **linéaire** sur 1990-2020
+- Interprétation : USA déjà dans **phase descendante** de l'EKC
+- Pas de rebond détecté ($\beta_3$ rejeté)
+:::
+
+---
+
+## 📊 Diagnostics du modèle ARDL quadratique
+
+![Diagnostics résidus](../../artifacts/figures/time_series_usa_forecast.png)
+
+---
+
+## ✅ Tests de spécification
+
+| Test | Statistique | p-value | Verdict |
+|------|-------------|---------|---------|
+| **Jarque-Bera** (normalité) | 8.35 | 0.015 | ⚠️ Non-normalité légère |
+| **Durbin-Watson** (autocorr.) | 1.89 | — | ✅ Pas d'autocorrélation |
+
+::: {.callout-note}
+## Interprétation
+- ✅ Résidus non autocorrélés (DW ≈ 2)
+- ⚠️ Légère déviation de la normalité (acceptable sur T=30)
+- ✅ Pas de pattern systématique exploitable
+:::
+
+---
+
+## ⏱️ Résultat clé n°3 : Inertie structurelle extrême
+
+::: {style="text-align: center; font-size: 2em; margin: 1em 0; color: #E74C3C;"}
+$\rho = 1.003 \approx 1$
+:::
+
+::: {.callout-warning icon=false}
+## Qu'est-ce que cela signifie concrètement ?
+
+**Coefficient d'inertie** : $\rho = 1.003$ (proche de la racine unitaire)
+
+**Demi-vie** : $H = \frac{\ln(0.5)}{\ln(\rho)}$ → **Non calculable** (diverge mathématiquement)
+
+**Interprétation** : Les chocs sur les émissions sont **quasi-permanents**
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+**Causes structurelles**
+
+- 🏭 Centrale charbon → 40 ans
+- 🚗 Flotte automobile → 15 ans
+- 🏘️ Bâtiments → 50+ ans
+- ⚡ Réseau électrique → 30 ans
+:::
+
+::: {.column width="50%"}
+**Implication politique**
+
+::: {.callout-tip}
+Le découplage **ne s'accélère pas spontanément**
+
+Attendre le turning point "naturel" = **stratégie à haut risque climatique**
+:::
+:::
+:::
+
+---
+
+## 📉 Élasticités : Court terme vs Long terme
+
+::: {.columns}
+::: {.column width="50%"}
+### Court terme (CT)
+
+$$\varepsilon_{CT} = \beta_0 = -0.122$$
+
+**Interprétation**
+
++1% de croissance du PIB  
+→ **-0.12%** d'émissions l'année 1
+
+::: {.callout-note}
+## Faible élasticité
+Il faudrait **+8.3%** de croissance annuelle pour réduire les émissions de **1%** par an
+
+→ Rythme insuffisant pour Paris (−7%/an requis)
+:::
+:::
+
+::: {.column width="50%"}
+### Long terme (LT)
+
+$$\varepsilon_{LT} = \frac{\beta_0}{1 - \rho}$$
+
+**Problème**
+
+Avec $\rho = 1.003 \geq 1$, la formule **diverge**
+
+::: {.callout-warning}
+## Non calculable
+Pas d'équilibre de long terme défini
+
+**Causes possibles** :
+- Petit échantillon (T=30)
+- Instabilité structurelle post-2010
+- Processus non-stationnaire
+:::
+:::
+:::
+
+---
+
+## 🎯 Turning point
+
+::: {style="text-align: center; font-size: 1.5em; margin: 1.5em 0;"}
+**Turning point : Non calculable** ($\rho \approx 1$ → pas d'équilibre de LT)
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+**Observation empirique**
+
+![Pic USA](../../artifacts/figures/time_series_usa_forecast.png)
+
+- Pic historique : **~2005-2007**
+- Émissions pic : **~20 t/hab**
+- Baisse depuis : **-30%**
+:::
+
+::: {.column width="50%"}
+**Question de stabilité**
+
+::: {.callout-warning}
+## Ce déclin est-il durable ?
+
+**Facteurs de doute** :
+- COVID-19 (choc temporaire ?)
+- Délocalisation industrielle
+- Gaz de schiste (substitution charbon)
+
+**Incertitude** :
+Découplage **structurel** ou **conjoncturel** ?
+:::
+:::
+:::
+
+---
+
+## 🔮 Projection 2021-2025
+
+::: {.columns}
+::: {.column width="50%"}
+![Projection avec IC 95%](../../artifacts/figures/time_series_usa_forecast.png)
+:::
+
+::: {.column width="50%"}
+**Hypothèse** : Croissance PIB **+2%/an**
+
+| Année | CO₂ prédit | IC 95% | Δ cumulé |
+|-------|------------|--------|----------|
+| 2021 | 13.32 t | [12.84 ; 13.83] | -3.6% |
+| 2022 | 12.78 t | [12.28 ; 13.31] | -7.5% |
+| 2023 | 12.19 t | [11.66 ; 12.74] | -11.8% |
+| 2024 | 11.56 t | [11.00 ; 12.14] | -16.4% |
+| 2025 | **10.89 t** | [10.30 ; 11.50] | **-21.2%** |
+:::
+:::
+
+::: {.callout-warning}
+## ⚠️ Limites de cette projection
+- IC s'élargit (+0.6 t en 2025) → incertitude croissante
+- Scénario **unique** (pas de chocs COVID/politiques)
+- Stabilité structurelle **supposée** ($\rho < 1$ non garanti)
+- Pas de rupture technologique modélisée
+:::
+
+---
+
+## 📝 Bilan de l'approche temporelle
+
+::: {.incremental}
+✅ **Modèle retenu** : ARDL Quadratique (cohérence transversale) / Linéaire (performance)
+
+✅ **Courbe en N rejetée** : $\beta_3$ non significatif (p = 0.107)
+
+⚠️ **Inertie extrême** : $\rho = 1.003 \approx 1$ → demi-vie non calculable
+
+⚠️ **Découplage lent** : $\varepsilon_{CT} = -0.12$ (faible élasticité)
+
+📉 **Projection 2025** : -21.2% vs 2020 (mais loin des -50% requis pour Paris)
+
+❓ **Question centrale** : Découplage **structurel** ou **conjoncturel** ?
+:::
+
+::: {.fragment}
+::: {style="text-align: center; font-size: 1.3em; color: #E74C3C; margin-top: 1em;"}
+**→ Partie IV : Confrontation des deux approches**
+:::
+:::

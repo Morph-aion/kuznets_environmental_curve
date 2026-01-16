@@ -1,0 +1,169 @@
+# Annexes {background-color="#7F8C8D"}
+
+---
+
+## 📊 A1. Statistiques descriptives
+
+::: {style="font-size: 0.8em;"}
+| Variable | Moyenne | Écart-type | Min | Q1 | Médiane | Q3 | Max |
+|----------|---------|------------|-----|-----|---------|-----|-----|
+| CO₂/hab (t) | 4.95 | 5.12 | 0.03 | 1.21 | 3.08 | 6.89 | 37.29 |
+| PIB/hab (\$) | 18,473 | 20,115 | 661 | 3,892 | 11,045 | 26,384 | 116,935 |
+| ln(CO₂) | 1.18 | 1.23 | -3.51 | 0.19 | 1.13 | 1.93 | 3.62 |
+| ln(PIB) | 9.41 | 1.35 | 6.49 | 8.27 | 9.31 | 10.18 | 11.67 |
+:::
+
+**Échantillon** : 159 pays, année 2020
+
+---
+
+## 🧮 A2. Formules des estimateurs
+
+::: {.panel-tabset}
+
+### OLS
+
+**Estimateur**
+
+$$\hat{\beta} = (X'X)^{-1}X'Y$$
+
+**Variance HC3**
+
+$$\widehat{\text{Var}}_{HC3}(\hat{\beta}) = (X'X)^{-1} \left(\sum_{i=1}^n \frac{\hat{\varepsilon}_i^2}{(1-h_{ii})^2} x_i x_i'\right) (X'X)^{-1}$$
+
+où $h_{ii}$ = levier de l'observation $i$
+
+### Newey-West
+
+**Variance HAC**
+
+$$\widehat{\text{Var}}_{NW}(\hat{\beta}) = (X'X)^{-1} \hat{\Omega} (X'X)^{-1}$$
+
+avec
+
+$$\hat{\Omega} = \hat{\Gamma}_0 + \sum_{j=1}^L \left(1 - \frac{j}{L+1}\right) (\hat{\Gamma}_j + \hat{\Gamma}_j')$$
+
+**Choix de L** : $L \approx \lfloor 4(T/100)^{2/9} \rfloor$ → L=3 pour T=30
+
+### ARDL
+
+**Spécification ARDL(1,1)**
+
+$$Y_t = \rho Y_{t-1} + \beta_0 X_t + \beta_1 X_{t-1} + \varepsilon_t$$
+
+**Paramètres structurels**
+
+- Élasticité CT : $\varepsilon_{CT} = \beta_0$
+- Élasticité LT : $\varepsilon_{LT} = \frac{\beta_0 + \beta_1}{1 - \rho}$ (si $|\rho| < 1$)
+- Demi-vie : $H = \frac{\ln(0.5)}{\ln(\rho)}$
+
+:::
+
+---
+
+## 📉 A3. Tests de spécification
+
+::: {.panel-tabset}
+
+### Test ADF
+
+**Régression auxiliaire**
+
+$$\Delta y_t = \alpha + \beta t + \gamma y_{t-1} + \sum_{i=1}^p \delta_i \Delta y_{t-i} + \varepsilon_t$$
+
+**Hypothèses**
+
+- $H_0$ : $\gamma = 0$ (racine unitaire → non-stationnaire)
+- $H_1$ : $\gamma < 0$ (stationnaire)
+
+**Règle** : Si stat. t < valeur critique (ou p < 0.05) → rejeter $H_0$
+
+### Test F emboîté
+
+**Statistique**
+
+$$F = \frac{(SSR_r - SSR_u)/q}{SSR_u/(n-k-1)} \sim F(q, n-k-1)$$
+
+où :
+- $SSR_r$ = somme carrés résidus (modèle contraint)
+- $SSR_u$ = somme carrés résidus (modèle non-contraint)
+- $q$ = nombre de contraintes
+
+### AIC
+
+**Formule**
+
+$$AIC = 2k - 2\ln(\hat{L})$$
+
+où :
+- $k$ = nombre de paramètres
+- $\hat{L}$ = vraisemblance maximale
+
+**Interprétation** : Plus bas = meilleur (pénalise la complexité)
+
+:::
+
+---
+
+## 🔬 A4. Validation Box-Cox
+
+**Principe** : Déterminer la transformation optimale de $Y$
+
+$$Y^{(\lambda)} = \begin{cases}
+\frac{Y^\lambda - 1}{\lambda} & \text{si } \lambda \neq 0 \\
+\ln(Y) & \text{si } \lambda = 0
+\end{cases}$$
+
+**Résultats**
+
+| Paramètre | Valeur |
+|-----------|--------|
+| $\lambda$ optimal | 0.15 |
+| Distance à log ($\lambda=0$) | 0.15 |
+| Distance à linéaire ($\lambda=1$) | 0.85 |
+
+**Conclusion** : Transformation **logarithmique** fortement justifiée
+
+---
+
+## 📐 A5. Validation non-paramétrique (LOWESS)
+
+![Modèles paramétriques vs LOWESS](../../artifacts/figures/kuznets_diachronic_enhanced.png)
+
+**Objectif** : Vérifier que la forme quadratique n'est pas trop restrictive
+
+**Méthode** : LOWESS (Locally Weighted Scatterplot Smoothing)
+
+**Résultat** : Le modèle quadratique **suit bien** la tendance LOWESS
+
+---
+
+## 🌍 A6. Carte des résidus (facultatif)
+
+::: {.callout-note}
+## Extension possible
+Visualisation géographique des pays sur/sous-estimés par l'EKC
+
+**Outils** : `plotly`, `geopandas`
+:::
+
+---
+
+## 📚 Références clés
+
+::: {style="font-size: 0.75em;"}
+**Fondations théoriques**
+- Grossman, G. M., & Krueger, A. B. (1995). *Economic Growth and the Environment*. QJE.
+- Stern, D. I. (2004). *The Rise and Fall of the Environmental Kuznets Curve*. World Development.
+
+**Critiques méthodologiques**
+- Wagner, M. (2008). *The Carbon Kuznets Curve: A Cloudy Picture Emitted by Bad Econometrics?*. Resource and Energy Economics.
+- Peters, G. P., et al. (2011). *Growth in emission transfers via international trade*. PNAS.
+
+**Extensions récentes**
+- Allard, A., et al. (2018). *The N-shaped environmental Kuznets curve*. Economics Letters.
+
+**Méthodes économétriques**
+- Pesaran, M. H., et al. (2001). *Bounds testing approaches to the analysis of level relationships*. Journal of Applied Econometrics.
+- Newey, W. K., & West, K. D. (1987). *A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix*. Econometrica.
+:::

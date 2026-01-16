@@ -1,0 +1,74 @@
+---
+title: "Strategic Discussion"
+subtitle: "Reconciling Temporal Inertia and Spatial Heterogeneity"
+---
+
+## The Confrontation: Space vs. Time
+
+Our two approaches converge on a central point: **the quadratic model (inverted U) 
+is sufficient**. The cubic term is significant neither cross-sectionally ($p = 0.995$) nor 
+temporally ($p > 0.10$). The hypothesis of an emissions rebound at very high income levels 
+(N-shaped curve) is **rejected** by our data.
+
+However, the two approaches reveal **complementary dynamics**:
+
+| Dimension | Cross-sectional (2020) | Temporal (USA 1990-2020) |
+|-----------|------------------------|--------------------------|
+| **Question** | Do the rich pollute less? | Does a country decarbonize as it gets richer? |
+| **Answer** | **Yes** ($\beta_2 < 0$ significant) | **Yes, but slowly** ($\rho \approx 1$) |
+| **Limitation** | Static snapshot | Unique case (generalizability?) |
+
+**Interpretation**: The 2020 global snapshot shows decoupling **already achieved** 
+in rich countries. But the American "movie" reveals that this decoupling was **slow, progressive, 
+and potentially fragile**.
+
+## Lesson 1: Structural Inertia
+
+The temporal analysis reveals **extreme persistence** in emission levels ($\rho \approx 1.00$).
+
+**What does $\rho \approx 1$ mean concretely?**
+
+- Shocks to emissions are **quasi-permanent**
+- A coal plant built today will emit for 40 years
+- Energy infrastructure locks in emission trajectories
+
+**Policy implication**:
+
+> *Decoupling does not accelerate spontaneously.*
+> Waiting for the "natural turning point" of the EKC is a high-risk strategy.
+> Every year of delay locks in future emissions.
+
+**Key figure**: With a short-term elasticity of $-0.12$, it would take **$+8\%$ 
+annual growth** to reduce emissions by $1\%$ per year — a pace insufficient 
+for the Paris goals.
+
+## Lesson 2: Heterogeneity of Trajectories
+
+Residual analysis (Section 4.2.3) reveals that the "average" EKC masks 
+**three clubs of countries**:
+
+| Profile | Examples | Position vs EKC | Characteristic |
+|---------|----------|-----------------|----------------|
+| **Decarbonized** | France, Sweden, Switzerland | Below the curve | Low-carbon mix (nuclear, hydro) |
+| **Carbon-intensive** | Qatar, Kuwait, Australia | Above the curve | Fossil rent, extreme climate |
+| **In transition** | China, India, Brazil | Ascending phase | Ongoing industrialization |
+
+**Why is Sweden $\neq$ Qatar at comparable GDP?**
+
+At $\approx 50,000\text{ \$/capita}$, Sweden emits $\approx 4\text{ tCO}_2/\text{capita}$ while Qatar emits $\approx 35\text{ tCO}_2/\text{capita}$.
+This **factor of 9** difference is explained by:
+
+1. **Energy mix**: Hydropower (Sweden) vs. Natural Gas (Qatar)
+2. **Economic structure**: Services (Sweden) vs. Extraction (Qatar)
+3. **Climate**: Efficient heating (Sweden) vs. Intensive air conditioning (Qatar)
+4. **Policies**: Carbon tax since 1991 (Sweden) vs. Fossil fuel subsidies (Qatar)
+
+**Conclusion**: The EKC describes a **conditional trend**, not a universal law.
+Decoupling depends on technological and institutional choices, not just income.
+
+## Technological "Tunneling"
+
+Can developing countries **avoid** the emission peak of industrialized nations?
+
+**Concept**: "Tunneling" (Munasinghe, 1999) refers to the possibility of "digging a tunnel"
+under the EKC curve by directly adopting clean technologies.

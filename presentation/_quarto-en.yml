@@ -1,0 +1,24 @@
+# presentation/_quarto-en.yml
+
+# -------------------------------------------------------------------
+# Configuration spécifique à la présentation ANGLAISE
+# -------------------------------------------------------------------
+project:
+  render: 
+    - en/index.qmd
+  output-dir: ../output/slides
+
+# -------------------------------------------------------------------
+# Métadonnées linguistiques et documentaires
+# -------------------------------------------------------------------
+lang: en
+
+title: "The Environmental Kuznets Curve"
+date: today
+
+# -------------------------------------------------------------------
+# Personnalisation reveal.js spécifique EN
+# -------------------------------------------------------------------
+format:
+  revealjs:
+    toc-title: "Content"

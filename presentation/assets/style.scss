@@ -1,0 +1,39 @@
+/*-- scss:defaults --*/
+
+/*-- scss:headings --*/
+.reveal section h1 {
+  color: #1F4EB6;
+}
+.reveal section h2 {
+  color: #00A3FF;
+}
+.reveal section h3 {
+  color: #0099CC;
+}
+
+/*-- scss:rules --*/
+nav[role="doc-toc"] {
+  font-size: 1.6em;
+}
+
+.reveal .arrow-list > ul > li::marker {
+  content: "⮚ ";
+  color: #008C7E;
+  font-size: 1.2em;
+}
+
+a {
+  color: #007ACC;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: darken(#007ACC, 10%);
+}
+
+.reveal pre code {
+  max-height: 945px;
+}
+
+/*-- scss:uses --*/
+// @use 'modules/colors.scss';

@@ -63,7 +63,7 @@ book:
   # Organization: Introduction → Development (4 parts) → Conclusion
   chapters:
     - index.qmd
-    - content/en/01-introduction.qmd
+    - content/en/00-introduction.qmd
     
     # PART 1: Theoretical and Methodological Framework
     - part: "Theoretical and Methodological Framework"

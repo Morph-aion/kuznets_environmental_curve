@@ -13,6 +13,7 @@ project:
     - "!notebooks/"                            # Ignorer le dossier notebooks
     - "!data/"
     - "!models/"
+    - "!presentation/"
     
 # ===================================================================
 # DÉFINITION DES FORMATS DE SORTIE

@@ -1,0 +1,139 @@
+# La Courbe Environnementale de Kuznets pour le CO₂ {background-image="../../artifacts/figures/trajectories_by_group.svg" background-opacity="0.2"}
+
+## Une évaluation empirique par approches transversale et temporelle
+
+---
+
+## 🎯 La question au cœur du débat climat
+
+::: {.callout-important icon=false}
+## Question de recherche
+> **« La croissance économique finit-elle par réduire la pollution ? »**
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+**L'hypothèse EKC**
+
+- Relation en **U inversé** entre richesse et émissions
+- Phase 1 : Industrialisation → ↗️ pollution
+- Phase 2 : Services + tech → ↘️ pollution
+- Débat depuis **30 ans** sans consensus
+:::
+
+::: {.column width="50%"}
+**Notre approche originale**
+
+✅ **Double validation empirique**
+
+- 🌍 Espace : 159 pays en 2020
+- 📈 Temps : USA 1990-2020
+
+✅ **Double objectif**
+
+- 🔍 Estimer la forme
+- 🎯 Prédire le futur
+:::
+:::
+
+::: {.notes}
+L'EKC est née en 1991. Elle a été utilisée pour justifier l'inaction climatique ("la croissance résoudra le problème"). Nous testons si cette promesse tient empiriquement.
+:::
+
+---
+
+## 📊 Données mobilisées
+
+::: {.columns}
+::: {.column width="45%"}
+**Source et périmètre**
+
+- 📦 **Our World in Data** (OWID)
+  - Global Carbon Project
+  - Banque Mondiale
+- 📅 **Période** : 1990-2020 (30 ans)
+- 🌍 **Échantillon** : 159 pays
+- 📈 **Observations** : ~4770 lignes
+:::
+
+::: {.column width="55%"}
+**Variables retenues**
+
+| Variable | Unité | Justification |
+|----------|-------|---------------|
+| **CO₂/hab** | tonnes/an | Empreinte carbone territoriale |
+| **PIB/hab** | \$ PPA 2017 | Comparabilité internationale |
+
+::: {.callout-warning collapse="true"}
+## Limite assumée
+**Émissions territoriales** uniquement
+
+→ Biais du *pollution haven* possible (délocalisation de la production polluante)
+:::
+:::
+:::
+
+---
+
+## 🗺️ Trajectoires des pays par groupe de revenu
+
+![Évolution des émissions par groupe (1990-2020)](../../artifacts/figures/trajectories_by_group.svg)
+
+::: {.notes}
+Ce graphique montre l'hétérogénéité des trajectoires : les pays riches ont amorcé leur déclin, les émergents sont en croissance exponentielle, les pays pauvres stagnent.
+:::
+
+---
+
+## 🎯 Stratégie empirique : Double approche
+
+::: {style="font-size: 0.85em;"}
+| Dimension | 📸 Transversale | 🎬 Temporelle |
+|-----------|----------------|---------------|
+| **Échantillon** | 159 pays | USA |
+| **Période** | 2020 (photo) | 1990-2020 (film) |
+| **Question** | Les riches polluent-ils **moins** ? | Un pays se décarbone-t-il **en s'enrichissant** ? |
+| **Méthode** | OLS + validation croisée (k=5) | ARDL + test hors-échantillon |
+| **Objectif** | Forme fonctionnelle | Dynamique temporelle |
+:::
+
+::: {.callout-tip}
+## Triangulation méthodologique
+Si les deux approches **convergent** → robustesse structurelle
+
+Si elles **divergent** → analyse de l'hétérogénéité spatiale vs inertie temporelle
+:::
+
+---
+
+## 📋 Structure de la présentation
+
+::: {.columns}
+::: {.column width="50%"}
+**Partie I : Méthodologie**
+
+- Choix de spécification
+- Estimateurs utilisés
+- Protocoles de validation
+
+**Partie II : Approche transversale**
+
+- Modèle quadratique vs cubique
+- Performance prédictive
+- Analyse des erreurs
+:::
+
+::: {.column width="50%"}
+**Partie III : Approche temporelle**
+
+- Modèle ARDL USA
+- Inertie structurelle
+- Projections 2021-2025
+
+**Partie IV : Confrontation**
+
+- Convergence des résultats
+- Hétérogénéité masquée
+- Implications politiques
+:::
+:::

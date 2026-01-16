@@ -1,0 +1,159 @@
+---
+title: "Introduction"
+---
+
+{{< include _setup.qmd >}}
+{{< include _footnotes.qmd >}}
+
+## The promise of the EKC
+
+Since 1991, one hypothesis has influenced political discourse on climate and development:
+
+> **"Economic growth ultimately reduces pollution."**
+
+This **Environmental Kuznets Curve** (EKC[^ekc]) posits that CO$_2$ emissions 
+follow an inverted U-shape: they increase during industrialization, peak, and then 
+spontaneously decline as countries become wealthier.
+
+*Some policymakers have interpreted the EKC as justifying a wait-and-see approach: if 
+growth spontaneously reduces emissions beyond a certain threshold, regulatory constraints 
+would be unnecessary (Beckerman, 1992). However, this interpretation remains 
+controversial, as it overlooks the underlying institutional mechanisms.*
+
+## Data used
+
+### Source and justification
+
+To test the EKC hypothesis, we use the **consolidated dataset from Our World in Data (OWID)**[^owid], 
+which aggregates two reference sources:
+
+- **Global Carbon Project** for CO$_2$ emissions
+- **World Bank** for economic indicators (PPP-adjusted GDP[^ppa])
+
+::: {.callout-note}
+## Why OWID rather than the World Bank API?
+
+Initially, we attempted to extract data directly via the `wbgapi` API for standard indicators 
+(`EN.ATM.CO2E.PC` and `NY.GDP.PCAP.PP.KD`). However, technical instabilities 
+(timeouts, JSON decoding errors) led us to favor the OWID repository, 
+which offers the same source data in a consolidated and stable format.
+:::
+
+### Variables selected
+
+| Variable | Description | Unit |
+|----------|-------------|-------|
+| `co2_per_capita` | CO$_2$ emissions per capita | tons/capita/year |
+| `gdp_per_capita` | GDP per capita | international $ (PPP, constant prices) |
+| `country` | Country name | — |
+| `iso_code` | ISO-3 code | — |
+| `year` | Year of observation | — |
+
+### Scope of the analysis
+
+```{python}
+#| echo: false
+
+# ATTENTION : Vérifiez que les variables ci-dessous (START_YEAR, etc.) 
+# sont bien définies dans votre environnement Python. 
+# Sinon, remplacez-les par les noms français (ANNEE_DEBUT_DATA, etc.)
+
+if DATA_LOADED:
+    display(Markdown(f"""
+| Dimension | Value | Justification |
+|-----------|-------|---------------|
+| **Period** | {START_YEAR}–{END_YEAR} | Dense and consistent coverage post-Cold War |
+| **Countries** | {N_COUNTRIES} countries | Exclusion of continental aggregates (filtering on `iso_code`) |
+| **Observations** | ~{N_COUNTRIES * (END_YEAR - START_YEAR_DATA)} rows | Cross-section ({CROSS_YEAR}) + US time series ({START_YEAR_DATA}-{END_YEAR}) |
+"""))
+```
+
+::: {.callout-warning icon=false}
+## Structural limitations of the data
+
+**What we gain:**
+- Consistency of sources (OWID harmonizes Global Carbon Project + World Bank)
+- International comparability (GDP in purchasing power parity)
+
+**What we concede:**
+- **Territorial emissions only**: the *pollution haven* bias remains possible
+- **National aggregation**: regional disparities are masked
+:::
+
+## The problem: thirty years without consensus
+
+The EKC hypothesis owes its name to an analogy with Kuznets' (1955) curve on inequality. Grossman and Krueger (1991) transposed it to local pollutants, without claiming it to be a universal law. However, this methodological caveat has been lost along the way.
+
+After thirty years of research, **no consensus has emerged**:
+
+| Study | Main result | Identified limitation |
+|-------|-------------|-----------------------|
+| Stern (2004) | Results highly sensitive to econometric choices | Massive heterogeneity of specifications |
+| Wagner (2008, 2015) | Flawed regressions due to non-stationarity | Untreated time series issues |
+| Peters et al. (2011) | Territorial emissions mask relocations | Pollution haven bias |
+| Allard et al. (2018) | Possible **N** curve at very high incomes | Post-decoupling rebound |
+
+This heterogeneity justifies our approach: testing the EKC with **explicit, rigorous, and reproducible** methodological choices.
+
+**Our strategy corrects three major biases identified in the literature:**
+
+| Identified limitation | Source | Our methodological correction | Section |
+|-----------------------|--------|-------------------------------|---------|
+| Fallacious regressions (non-stationarity) | Wagner (2015) | ADF tests + ARDL model | 5.2, 5.3 |
+| Untested rebound (N-shaped curve) | Allard et al. (2018) | Cubic specification with empirical validation | 4.2, 4.3 |
+| Heterogeneity of specifications | Stern (2004) | Robustness tests (Box-Cox, cross-validation, LOWESS) | 8.1, 8.2, 4.4 |
+
+## Our empirical strategy
+
+We test the EKC using **two complementary approaches** and **two distinct objectives**:
+
+```{python}
+#| echo: false
+
+if DATA_LOADED:
+    display(Markdown(f"""
+### Dual approach: Space and Time
+
+| Approach | Sample | Period | Key question |
+|----------|--------|--------|--------------|
+| **Cross-sectional** | {N_COUNTRIES} countries | {CROSS_YEAR} | Do rich countries pollute less *today*? |
+| **Temporal** | United States | {START_DATA_YEAR}–{END_DATA_YEAR} | Does a country reduce its emissions *as it becomes richer*? |
+"""))
+```
+
+### Dual objective: Estimate and Predict
+
+| Objective | Question | Validation method |
+|-----------|----------|-------------------|
+| **Estimation** | What functional form describes the GDP-CO₂ relationship? | Nested F tests, AIC, coefficient significance |
+| **Prediction** | Does the model generalize to unused data? | Cross-validation (k=5), out-of-sample test, benchmark vs. random walk |
+
+**Triangulation strategy**: 
+
+1. **Convergence of forms**: If the two approaches (cross-sectional/temporal) 
+   converge toward the same specification, this reinforces structural robustness.
+
+2. **Estimation/prediction convergence**: A statistically significant 
+   but predictively weak model would indicate overfitting. We favor 
+   models that **perform well on both dimensions**.
+
+3. **In case of divergence**: We will analyze whether the discrepancies stem from 
+   spatial heterogeneity, temporal inertia, or overfitting.
+
+## Report Structure
+
+The content is organized into four analytical sections, followed by a conclusion:
+
+1. **Theoretical and Methodological Framework**  
+   Foundations of the EKC hypothesis, choice of specification, and econometric strategy adopted.
+
+2. **The Synchronic Approach: Snapshot of the World (2020)**  
+   Global cross-section: is there a "structural law" between wealth and pollution?
+
+3. **The Diachronic Approach: The Trajectory of the United States (1990-2020)**  
+   US time series: is decoupling really emerging over time?
+
+4. **Comparing Results — The Political Dilemma**  
+   Space versus time: what are the implications for Southern countries and global climate policies?
+
+Each chapter combines **hypothesis testing**, **econometric diagnostics**, and **recommendations based on the results**.

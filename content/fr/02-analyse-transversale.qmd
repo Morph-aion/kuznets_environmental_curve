@@ -366,16 +366,15 @@ if DATA_LOADED and not df_cross.empty:
     display(Markdown(f"""
 | Variable | Linéaire | Quadratique | Cubique |
 |----------|----------|-------------|---------|
-| ln(PIB) centré | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
-| [ln(PIB)]² | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
-| [ln(PIB)]³ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
+| $\\ln(\\text{PIB})$ centré | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
+| $[\\ln(\\text{PIB})]^2$ | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
+| $[\\ln(\\text{PIB})]^3$ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
 | **R² ajusté** | {m_lin.rsquared_adj:.3f} | {m_quad.rsquared_adj:.3f} | {m_cub.rsquared_adj:.3f} |
 | **AIC** | {m_lin.aic:.1f} | {m_quad.aic:.1f} | {m_cub.aic:.1f} |
 | **N** | {int(m_lin.nobs)} | {int(m_quad.nobs)} | {int(m_cub.nobs)} |
 
-*Erreurs-types robustes HC3 entre parenthèses. \\*p<0.1, \\*\\*p<0.05, \\*\\*\\*p<0.01*
+*Erreurs-types robustes HC3 entre parenthèses. $^*$p<0.1, $^{**}$p<0.05, $^{***}$p<0.01*
 """))
-```
 
 ### Test F emboîté[^test-f] : le terme cubique est-il nécessaire ?
 
@@ -427,7 +426,7 @@ if DATA_LOADED and not df_cross.empty:
 **Coefficient $\\beta_3$ = {BETA3:.4f}** (p = {PVAL3:.4f})
 
 - Le terme cubique est **positif et significatif** (p < 0.05).
-- ⚠️ **Diagnostic : Courbe en N détectée.**
+- **Diagnostic : Courbe en N détectée.**
 - Le découplage est **temporaire** : les données suggèrent un **rebond structurel** des émissions aux très hauts niveaux de revenu (re-couplage).
 """))
     else:
