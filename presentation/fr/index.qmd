@@ -1,3 +1,5 @@
+{{< include ../../content/fr/_setup.qmd >}}
+
 {{< include slides/01-introduction.qmd >}}
 {{< include slides/02-methodologie.qmd >}}
 {{< include slides/03-transversal.qmd >}}

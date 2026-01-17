@@ -128,23 +128,105 @@ $$Y^{(\lambda)} = \begin{cases}
 
 ## 📐 A5. Validation non-paramétrique (LOWESS)
 
-![Modèles paramétriques vs LOWESS](../../artifacts/figures/kuznets_diachronic_enhanced.png)
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "📂 Voir le code de validation"
+
+from statsmodels.nonparametric.smoothers_lowess import lowess
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Modèles paramétriques (si pas déjà estimés)
+if 'm_quad' not in locals():
+    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+    m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_cross).fit(cov_type='HC3')
+
+# LOWESS (non-paramétrique)
+lowess_result = lowess(df_cross['log_co2'], df_cross['log_gdp_c'], frac=0.3)
+```
+
+```{python}
+#| echo: false
+#| fig-width: 11
+#| fig-height: 5
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 5))
+
+# ═══════════════════════════════════════════════════════════════
+# GAUCHE : LOG-LOG (espace de travail du modèle)
+# ═══════════════════════════════════════════════════════════════
+
+axes[0].scatter(df_cross['log_gdp_c'], df_cross['log_co2'], 
+                alpha=0.3, s=30, color='gray', label='Observations')
+
+# Grille de prédiction
+log_gdp_grid = np.linspace(df_cross['log_gdp_c'].min(), df_cross['log_gdp_c'].max(), 200)
+pred_df = pd.DataFrame({'log_gdp_c': log_gdp_grid})
+
+# Courbes paramétriques
+pred_quad = m_quad.predict(pred_df)
+pred_cub = m_cub.predict(pred_df)
+
+axes[0].plot(log_gdp_grid, pred_quad, 
+             color='#2ecc71', linewidth=2.5, label='Quadratique', linestyle='--')
+axes[0].plot(log_gdp_grid, pred_cub, 
+             color='#e74c3c', linewidth=2.5, label='Cubique', linestyle='-')
+
+# LOWESS
+axes[0].plot(lowess_result[:, 0], lowess_result[:, 1], 
+             'b:', linewidth=3, label='LOWESS (non-paramétrique)')
+
+axes[0].set_xlabel("$\\ln(\\mathrm{PIB})$ centré", fontsize=11)
+axes[0].set_ylabel("$\\ln(\\mathrm{CO}_2)$", fontsize=11)
+axes[0].set_title("A. Échelle Log-Log\n(Espace de modélisation)", fontweight='bold', fontsize=12)
+axes[0].legend(loc='upper left', fontsize=10)
+axes[0].grid(True, alpha=0.3)
+
+# ═══════════════════════════════════════════════════════════════
+# DROITE : ÉCHELLE ORIGINALE (tonnes réelles)
+# ═══════════════════════════════════════════════════════════════
+
+# Reconversion en échelle originale
+gdp_grid_original = np.exp(log_gdp_grid + GDP_MEAN)
+
+axes[1].scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+                alpha=0.3, s=30, color='gray')
+
+axes[1].plot(gdp_grid_original, np.exp(pred_quad), 
+             color='#2ecc71', linewidth=2.5, label='Quadratique', linestyle='--')
+axes[1].plot(gdp_grid_original, np.exp(pred_cub), 
+             color='#e74c3c', linewidth=2.5, label='Cubique', linestyle='-')
+
+# LOWESS en échelle originale
+lowess_gdp_original = np.exp(lowess_result[:, 0] + GDP_MEAN)
+axes[1].plot(lowess_gdp_original, np.exp(lowess_result[:, 1]), 
+             'b:', linewidth=3, label='LOWESS')
+
+axes[1].set_xscale('log')
+axes[1].set_xlabel("PIB par habitant (USD PPA 2017)", fontsize=11)
+axes[1].set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=11)
+axes[1].set_title("B. Échelle Originale\n(Réalité physique)", fontweight='bold', fontsize=12)
+axes[1].legend(loc='upper left', fontsize=10)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-tip}
+## Résultat de la validation
 
 **Objectif** : Vérifier que la forme quadratique n'est pas trop restrictive
 
-**Méthode** : LOWESS (Locally Weighted Scatterplot Smoothing)
+**Méthode** : LOWESS (Locally Weighted Scatterplot Smoothing) — régression non-paramétrique qui laisse les données "parler d'elles-mêmes"
 
-**Résultat** : Le modèle quadratique **suit bien** la tendance LOWESS
+**Résultat** : 
+- ✅ Le modèle **quadratique suit bien** la tendance LOWESS
+- ✅ Le modèle **cubique** n'apporte rien (superposition quasi-parfaite)
+- ⚠️ Aux très hauts revenus (>80k $/hab), légère divergence → hétérogénéité masquée
 
----
-
-## 🌍 A6. Carte des résidus (facultatif)
-
-::: {.callout-note}
-## Extension possible
-Visualisation géographique des pays sur/sous-estimés par l'EKC
-
-**Outils** : `plotly`, `geopandas`
+**Conclusion** : La spécification quadratique est **robuste et parcimonieuse**
 :::
 
 ---

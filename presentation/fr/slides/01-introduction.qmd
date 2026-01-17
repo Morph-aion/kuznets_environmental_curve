@@ -1,4 +1,4 @@
-# La Courbe Environnementale de Kuznets pour le CO₂ {background-image="../../artifacts/figures/trajectories_by_group.svg" background-opacity="0.2"}
+# La Courbe Environnementale de Kuznets pour le CO₂ {background-image="../../../assets/images/Courbe_environnement.png" background-opacity="0.2"}
 
 ## Une évaluation empirique par approches transversale et temporelle
 
@@ -77,10 +77,68 @@ L'EKC est née en 1991. Elle a été utilisée pour justifier l'inaction climati
 
 ## 🗺️ Trajectoires des pays par groupe de revenu
 
-![Évolution des émissions par groupe (1990-2020)](../../artifacts/figures/trajectories_by_group.svg)
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "📂 Voir le code de génération"
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Calcul des moyennes par groupe et année
+trajectories = df.groupby(['year', 'income_group'])['co2_per_capita'].mean().reset_index()
+```
+
+```{python}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 5
+
+# Palette de couleurs par groupe
+palette = {
+    'High income': '#e74c3c',
+    'Upper middle income': '#f39c12', 
+    'Lower middle income': '#3498db',
+    'Low income': '#2ecc71'
+}
+
+# Graphique
+fig, ax = plt.subplots(figsize=(10, 5))
+
+for group, color in palette.items():
+    subset = trajectories[trajectories['income_group'] == group]
+    ax.plot(subset['year'], subset['co2_per_capita'], 
+            color=color, linewidth=2.5, label=group, marker='o', markersize=3)
+
+ax.set_xlabel("Année", fontsize=12)
+ax.set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=12)
+ax.set_title("Évolution des émissions par groupe de revenu (1990-2020)", fontweight='bold', fontsize=13)
+ax.legend(loc='upper left', fontsize=11)
+ax.grid(True, alpha=0.3)
+ax.axhline(y=0, color='black', linewidth=0.8, linestyle='-')
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-note}
+## Message clé
+
+**Trois trajectoires divergentes** :
+
+- 🔴 **Pays riches** : Pic ~2005, déclin depuis (-30%)
+- 🟠 **Émergents** : Croissance exponentielle (+150%)
+- 🔵 **Pays pauvres** : Stagnation (~1 t/hab)
+
+→ L'EKC ne décrit pas une loi universelle, mais une **tendance conditionnelle**
+:::
 
 ::: {.notes}
-Ce graphique montre l'hétérogénéité des trajectoires : les pays riches ont amorcé leur déclin, les émergents sont en croissance exponentielle, les pays pauvres stagnent.
+**Pour l'oral** :
+
+Ce graphique montre pourquoi l'analyse transversale (photo 2020) ne suffit pas.
+Les pays riches ont **déjà** découpé, les émergents sont **en pleine ascension**.
+L'EKC moyenne masque ces dynamiques hétérogènes.
 :::
 
 ---

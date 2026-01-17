@@ -23,14 +23,49 @@ sns.set_theme(style="whitegrid", context="paper", palette="colorblind")
 plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['font.size'] = 11
 
+
+# ═══════════════════════════════════════════════════════════════════
+# DÉTECTION AUTOMATIQUE DU CHEMIN (fonctionne depuis content/ ET presentation/)
+# ═══════════════════════════════════════════════════════════════════
+
+def find_data_file():
+    """Cherche le fichier de données en remontant l'arborescence"""
+    from pathlib import Path
+    
+    current = Path.cwd()
+    
+    # Liste des chemins possibles (ordre de probabilité)
+    possible_paths = [
+        current / "data/01_raw/kuznets_data_final.csv",              # Depuis racine
+        current.parent / "data/01_raw/kuznets_data_final.csv",       # 1 niveau
+        current.parent.parent / "data/01_raw/kuznets_data_final.csv" # 2 niveaux (content/fr ou presentation/fr)
+    ]
+    
+    for path in possible_paths:
+        if path.exists():
+            return path
+    
+    raise FileNotFoundError(
+        f"❌ Impossible de trouver kuznets_data_final.csv.\n"
+        f"Chemins testés :\n" + 
+        "\n".join([f"  - {p}" for p in possible_paths])
+    )
+
 # ═══════════════════════════════════════════════════════════════════
 # CHARGEMENT ET PRÉPARATION DES DONNÉES
 # ═══════════════════════════════════════════════════════════════════
 
 DATA_LOADED = False
 
+#try:
+#    df = pd.read_csv("../../data/01_raw/kuznets_data_final.csv")
+#    DATA_LOADED = True
+
 try:
-    df = pd.read_csv("../../data/01_raw/kuznets_data_final.csv")
+    data_path = find_data_file()
+    print(f"✅ Données chargées depuis : {data_path}")
+    
+    df = pd.read_csv(data_path)
     DATA_LOADED = True
     
     # ─────────────────────────────────────────────────────────────────

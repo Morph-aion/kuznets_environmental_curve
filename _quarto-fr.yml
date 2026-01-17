@@ -6,7 +6,7 @@
 # Définit le type de projet, les fichiers à compiler, et le dossier de sortie.
 # -------------------------------------------------------------------
 project:
-  output-dir: output/fr/_book                  # Dossier de sortie spécifique au rapport FR (où Quarto génère le livre)
+  output-dir: output/_book                  # Dossier de sortie spécifique au rapport FR (où Quarto génère le livre)
 
 # ===================================================================
 # PARAMÈTRES RÉGIONAUX ET LINGUISTIQUES

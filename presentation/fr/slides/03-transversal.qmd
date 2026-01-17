@@ -6,62 +6,216 @@
 
 ## 🌍 Vue d'ensemble : Log-log vs Log-lin
 
-::: {.columns}
-::: {.column width="50%"}
-![Vision du modèle (log-log)](../../artifacts/figures/kuznets_diachronic.png)
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "📂 Voir le code de génération"
 
-**Espace de travail économétrique**
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-- Variations relatives comparables
-- Relation relativement linéaire
-:::
+# Sélection de pays à annoter
+PAYS_LABELS = {
+    'United States': 'USA', 'China': 'CHN', 'India': 'IND', 
+    'Qatar': 'QAT', 'France': 'FRA', 'Sweden': 'SWE', 
+    'Germany': 'DEU', 'Brazil': 'BRA'
+}
+```
 
-::: {.column width="50%"}
-![Réalité physique (log-lin)](../../artifacts/figures/kuznets_diachronic_enhanced.png)
+```{python}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 5
 
-**Réalité climatique en tonnes absolues**
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-- Dispersion explosive aux hauts revenus
-- Qatar s'envole, Suède plafonne
-:::
-:::
+# ═══════════════════════════════════════════════════════════════════
+# A. GRAPHIQUE LOG-LOG (Vision économétrique)
+# ═══════════════════════════════════════════════════════════════════
+
+axes[0].scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+                alpha=0.4, s=50, color='#34495e', edgecolor='white')
+
+axes[0].set_xscale('log')
+axes[0].set_yscale('log')
+axes[0].set_xlabel("PIB par habitant (USD PPA 2017)", fontsize=11)
+axes[0].set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=11)
+axes[0].set_title("A. Échelle Log-Log\n(Vision Économétrique)", fontweight='bold', fontsize=12)
+axes[0].grid(True, which="both", ls="--", alpha=0.3)
+
+# Annotations
+for pays, code in PAYS_LABELS.items():
+    row = df_cross[df_cross['country'] == pays]
+    if not row.empty:
+        x = row['gdp_pc'].values[0]
+        y = row['co2_per_capita'].values[0]
+        axes[0].text(x, y, f" {code}", fontsize=8, fontweight='bold', 
+                     color='#2c3e50', va='bottom')
+
+# ═══════════════════════════════════════════════════════════════════
+# B. GRAPHIQUE LOG-LIN (Réalité physique)
+# ═══════════════════════════════════════════════════════════════════
+
+axes[1].scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+                alpha=0.4, s=50, color='#c0392b', edgecolor='white')
+
+# Tendance LOWESS
+from statsmodels.nonparametric.smoothers_lowess import lowess
+lowess_result = lowess(df_cross['co2_per_capita'], np.log(df_cross['gdp_pc']), frac=0.3)
+axes[1].plot(np.exp(lowess_result[:, 0]), lowess_result[:, 1], 
+             color='black', linewidth=2, linestyle='--', label='Tendance moyenne')
+
+axes[1].set_xscale('log')
+axes[1].set_xlabel("PIB par habitant (USD PPA 2017)", fontsize=11)
+axes[1].set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=11)
+axes[1].set_title("B. Échelle Log-Linéaire\n(Réalité Physique)", fontweight='bold', fontsize=12)
+axes[1].legend(loc='upper left', fontsize=10)
+axes[1].grid(True, which="both", ls="--", alpha=0.3)
+
+# Annotations
+for pays, code in PAYS_LABELS.items():
+    row = df_cross[df_cross['country'] == pays]
+    if not row.empty:
+        x = row['gdp_pc'].values[0]
+        y = row['co2_per_capita'].values[0]
+        ha = 'right' if y > 30 else 'left'
+        axes[1].text(x, y, f"{code} " if ha == 'right' else f" {code}", 
+                     fontsize=8, fontweight='bold', 
+                     color='#c0392b', va='center', ha=ha)
+
+plt.tight_layout()
+plt.show()
+```
 
 ::: {.callout-warning}
 ## Message clé
-L'EKC **moyenne** masque des trajectoires **radicalement divergentes**
+
+**L'EKC moyenne masque des trajectoires radicalement divergentes**
+
+À PIB comparable (~50 000 $/hab) :
+- 🇸🇪 **Suède** : 4 t $\mathrm{CO}_2$/hab (nucléaire + hydro)
+- 🇶🇦 **Qatar** : 35 t $\mathrm{CO}_2$/hab (gaz + climatisation)
+
+→ **Facteur 9** de différence → Les choix politiques comptent plus que la richesse
+:::
+
+::: {.notes}
+**Pour l'oral** :
+
+Gauche : En log-log, la relation semble assez linéaire (c'est l'espace de travail du modèle).
+
+Droite : En échelle réelle, on voit l'**hétérogénéité explosive** aux hauts revenus.
+Le Qatar s'envole, la Suède plafonne → preuve que l'EKC n'est pas déterministe.
 :::
 
 ---
 
 ## 📊 Résultat clé n°1 : Le modèle quadratique suffit
 
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "📂 Voir le code d'estimation"
+
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Estimation avec erreurs-types robustes HC3
+m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_cross).fit(cov_type='HC3')
+
+# Extraction des statistiques clés
+beta3 = m_cub.params['I(log_gdp_c ** 3)']
+pval3 = m_cub.pvalues['I(log_gdp_c ** 3)']
+aic_diff = m_quad.aic - m_cub.aic
+```
+
 ::: {.columns}
-::: {.column width="50%"}
-![Modèle cubique ajusté](../../artifacts/figures/cross_section_model_2019.png)
+
+::: {.column width="55%"}
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 5
+
+# Génération de la grille de prédiction
+log_gdp_c_grid = np.linspace(df_cross['log_gdp_c'].min(), df_cross['log_gdp_c'].max(), 200)
+pred_df = pd.DataFrame({'log_gdp_c': log_gdp_c_grid})
+
+# Prédictions des modèles ESTIMÉS (pas de ré-estimation)
+pred_quad = m_quad.predict(pred_df)
+pred_cub = m_cub.predict(pred_df)
+
+# Graphique
+fig, ax = plt.subplots(figsize=(6, 5))
+
+# Points (données réelles)
+ax.scatter(df_cross['log_gdp_c'], df_cross['log_co2'], 
+           alpha=0.3, color='gray', s=30, label='Observations', zorder=1)
+
+# Courbe Quadratique (Rouge - retenu)
+ax.plot(log_gdp_c_grid, pred_quad, 
+        color='#d62728', linewidth=2.5, label='Quadratique (retenu)', zorder=3)
+
+# Courbe Cubique (Verte pointillée - rejeté)
+ax.plot(log_gdp_c_grid, pred_cub, 
+        color='#2ca02c', linewidth=2, linestyle='--', label='Cubique (rejeté)', zorder=2)
+
+ax.set_xlabel("$\\ln(\\mathrm{PIB})$ centré", fontsize=11)
+ax.set_ylabel("$\\ln(\\mathrm{CO}_2)$", fontsize=11)
+ax.legend(loc='upper left', fontsize=10)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
 :::
 
-::: {.column width="50%"}
-::: {.callout-tip icon=false}
-## Verdict statistique
-**Le terme cubique est NON significatif**
+::: {.column width="45%"}
 
-- $\beta_3 = -0.0138$ (p = 0.995)
-- Test F emboîté : p = 0.994
-- AIC favorise quadratique (-2 pts)
+```{python}
+#| echo: false
+
+# Verdict conditionnel
+verdict = "significatif" if pval3 < 0.05 else "non significatif"
+conclusion_aic = "Quadratique" if m_quad.aic < m_cub.aic else "Cubique"
+emoji_verdict = "✅" if pval3 < 0.05 else "❌"
+
+display(Markdown(f"""
+::: {{.callout-tip icon=false}}
+## Verdict Statistique
+
+Le terme cubique est **{verdict.upper()}**.
+
+| Statistique | Valeur |
+|-------------|--------|
+| $\\beta_3$ | ${beta3:.4f}$ |
+| $p$-value | **{pval3:.3f}** |
+| $\\mathrm{{AIC}}_{{\\text{{quad}}}}$ | {m_quad.aic:.1f} |
+| $\\mathrm{{AIC}}_{{\\text{{cub}}}}$ | {m_cub.aic:.1f} |
 :::
 
 **Décision méthodologique**
 
-✅ Modèle retenu : **Quadratique**
+✅ Modèle retenu : **{conclusion_aic}**
 
-❌ Courbe en N : **rejetée**
+{emoji_verdict} Courbe en N : **{'Détectée' if pval3 < 0.05 else 'Rejetée'}**
 
-⚖️ Performance : cubique **dégrade** de +1.4% RMSE
+⚖️ Gain en parcimonie : **${abs(aic_diff):.1f}$** points de $\\Delta \\mathrm{{AIC}}$
+"""))
+```
 :::
 :::
 
 ::: {.notes}
-Le terme cubique capture probablement les spécificités de pays rentiers (Qatar, Koweït) plutôt qu'une tendance structurelle. Principe de parcimonie appliqué.
+**Notes pour l'oral** :
+
+À gauche : Les deux courbes (rouge et verte) se superposent presque parfaitement. 
+Le cubique n'apporte rien visuellement.
+
+À droite : Statistiquement, $\beta_3 \approx 0$ ($p = 0.995$), donc le terme cubique est inutile.
+
+**Principe de parcimonie** : On garde le modèle le plus simple (quadratique).
 :::
 
 ---
@@ -118,7 +272,134 @@ Le modèle cubique **sur-apprend** les données de 2020
 
 ## 🔍 Diagnostic des erreurs : Qui le modèle rate-t-il ?
 
-![Analyse des erreurs de prédiction](../../artifacts/figures/cross_section_model_2019.png)
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "📂 Voir le code d'analyse des résidus"
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Calcul des résidus (si modèle pas déjà estimé)
+if 'm_quad' not in locals():
+    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+
+# Prédictions et résidus
+df_cross['pred_quad'] = m_quad.predict(df_cross)
+df_cross['resid'] = df_cross['log_co2'] - df_cross['pred_quad']
+df_cross['resid_abs'] = np.abs(df_cross['resid'])
+
+# Identification des pays extrêmes
+top_over = df_cross.nlargest(5, 'resid')   # Sous-estimés (polluent PLUS)
+top_under = df_cross.nsmallest(5, 'resid') # Surestimés (polluent MOINS)
+```
+
+::: {.panel-tabset}
+
+### 📊 Carte des erreurs
+
+```{python}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Points : taille proportionnelle à l'erreur absolue
+scatter = ax.scatter(df_cross['log_gdp_c'], df_cross['log_co2'], 
+                     c=df_cross['resid'], 
+                     s=df_cross['resid_abs']*200 + 20,  # Taille = magnitude erreur
+                     cmap='RdYlGn_r',  # Rouge = sous-estimé, Vert = surestimé
+                     alpha=0.6, 
+                     edgecolor='black', 
+                     linewidth=0.5)
+
+# Courbe ajustée
+log_gdp_grid = np.linspace(df_cross['log_gdp_c'].min(), df_cross['log_gdp_c'].max(), 200)
+pred_grid = m_quad.predict(pd.DataFrame({'log_gdp_c': log_gdp_grid}))
+ax.plot(log_gdp_grid, pred_grid, 'b-', linewidth=2.5, label='Modèle quadratique')
+
+# Annotations des pays extrêmes
+for _, row in pd.concat([top_over.head(3), top_under.head(3)]).iterrows():
+    ax.annotate(row['country'], 
+                (row['log_gdp_c'], row['log_co2']),
+                xytext=(5, 5), textcoords='offset points',
+                fontsize=8, fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.3', 
+                         facecolor='yellow' if row['resid'] > 0 else 'lightgreen', 
+                         alpha=0.7))
+
+# Colorbar
+cbar = plt.colorbar(scatter, ax=ax)
+cbar.set_label('Résidu (rouge = pollue PLUS que prévu)', fontsize=10)
+
+ax.set_xlabel("$\\ln(\\mathrm{PIB})$ centré", fontsize=12)
+ax.set_ylabel("$\\ln(\\mathrm{CO}_2)$", fontsize=12)
+ax.set_title("Analyse des erreurs de prédiction", fontweight='bold', fontsize=13)
+ax.legend(loc='upper left')
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+### 🔴 Top 5 sous-estimés
+
+```{python}
+#| echo: false
+
+# Conversion en tonnes pour interprétation
+top_over['co2_obs'] = np.exp(top_over['log_co2'])
+top_over['co2_pred'] = np.exp(top_over['pred_quad'])
+top_over['erreur_tonnes'] = top_over['co2_obs'] - top_over['co2_pred']
+
+display(Markdown(f"""
+**Pays qui polluent PLUS que prévu** (modèle sous-estime) :
+
+| Pays | CO₂ observé | CO₂ prédit | Erreur |
+|------|-------------|------------|--------|
+""" + "\n".join([
+    f"| {row['country']} | {row['co2_obs']:.1f} t | {row['co2_pred']:.1f} t | **+{row['erreur_tonnes']:.1f} t** |"
+    for _, row in top_over.head(5).iterrows()
+]) + """
+
+**Profil** : Économies pétrolières (Qatar, Koweït), exportateurs de charbon (Australie), climat extrême (Arabie Saoudite).
+"""))
+```
+
+### 🟢 Top 5 surestimés
+
+```{python}
+#| echo: false
+
+top_under['co2_obs'] = np.exp(top_under['log_co2'])
+top_under['co2_pred'] = np.exp(top_under['pred_quad'])
+top_under['erreur_tonnes'] = top_under['co2_obs'] - top_under['co2_pred']
+
+display(Markdown(f"""
+**Pays qui polluent MOINS que prévu** (modèle surestime) :
+
+| Pays | CO₂ observé | CO₂ prédit | Erreur |
+|------|-------------|------------|--------|
+""" + "\n".join([
+    f"| {row['country']} | {row['co2_obs']:.1f} t | {row['co2_pred']:.1f} t | **{row['erreur_tonnes']:.1f} t** |"
+    for _, row in top_under.head(5).iterrows()
+]) + """
+
+**Profil** : Décarbonés volontaristes (France, Suède : nucléaire/hydro), champions de l'efficacité énergétique (Suisse, Islande).
+"""))
+```
+
+:::
+
+::: {.callout-important}
+## Message clé
+
+À **PIB égal**, la Suède émet **9 fois moins** que le Qatar
+
+→ Les **choix politiques** comptent plus que la richesse seule
+:::
 
 ---
 

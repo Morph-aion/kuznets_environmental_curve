@@ -38,6 +38,10 @@ author:                            # Liste des auteurs — affichée sur la diap
 # -------------------------------------------------------------------
 format:
   revealjs:                        # Utilisation de Reveal.js comme moteur de présentation
+    # --- Contenu autonome ---
+    embed-resources: true
+    standalone: true
+    
     # --- Apparence générale ---
     theme:
       - default                    # Thème graphique de la présentation (peut être 'solarized', 'white', etc.)
@@ -64,7 +68,7 @@ format:
     # --- Fonctionnalités ---
     transition: slide             # Type de transition entre slides : 'slide', 'fade', 'none'
     #incremental: true            # Fait apparaître les listes à puces une à une (effet progressif)
-    chalkboard: true              # Active un tableau noir interactif sur les slides (utile avec un stylet)
+    chalkboard: false             # Active un tableau noir interactif sur les slides (utile avec un stylet)
 
     # --- Code ---
     # Style de coloration syntaxique pour les blocs de code
@@ -74,7 +78,8 @@ format:
     code-overflow: scroll        # Si le code dépasse la zone, une barre de défilement apparaît
 
     # --- Math ---
-    math: mathjax
+    #math: mathjax
+    html-math-method: katex
 
 
     # Plugins Reveal.js à activer (nécessite parfois inclusion manuelle dans HTML)
