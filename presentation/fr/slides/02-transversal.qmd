@@ -1,0 +1,349 @@
+# Approche Transversale {background-color="#00796B"}
+
+::: {style="text-align: center; margin-top: 3em;"}
+## 📸 Partie I : Validation spatiale
+
+**159 pays (2020)** | Quelle forme prend l'EKC dans l'espace ?
+:::
+
+::: {.notes}
+Durée : ~7 minutes. 
+Objectif : Montrer que le modèle quadratique suffit + hétérogénéité massive.
+:::
+
+---
+
+## 🌍 Données et contexte empirique
+
+::: {.panel-tabset}
+
+### Vue d'ensemble 2020
+
+```{python}
+#| echo: false
+#| fig-width: 14
+#| fig-height: 6
+#| fig-dpi: 300
+
+import matplotlib.pyplot as plt
+import numpy as np
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Sélection de pays à annoter
+PAYS_LABELS = {
+    'United States': 'USA', 'China': 'CHN', 'India': 'IND', 
+    'Qatar': 'QAT', 'France': 'FRA', 'Sweden': 'SWE', 
+    'Germany': 'DEU', 'Brazil': 'BRA'
+}
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# ═══════════════════════════════════════════════════════════════════
+# A. GRAPHIQUE LOG-LOG (Vision économétrique)
+# ═══════════════════════════════════════════════════════════════════
+
+axes[0].scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+                alpha=0.5, s=60, color='#34495e', edgecolor='white', linewidth=0.5)
+
+axes[0].set_xscale('log')
+axes[0].set_yscale('log')
+axes[0].set_xlabel("PIB par habitant (USD PPA 2017)", fontsize=12)
+axes[0].set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=12)
+axes[0].set_title("A. Échelle Log-Log (Vision Économétrique)", fontweight='bold', fontsize=13)
+axes[0].grid(True, which="both", ls="--", alpha=0.3)
+
+# Annotations
+for pays, code in PAYS_LABELS.items():
+    row = df_cross[df_cross['country'] == pays]
+    if not row.empty:
+        x = row['gdp_pc'].values[0]
+        y = row['co2_per_capita'].values[0]
+        axes[0].text(x, y, f" {code}", fontsize=9, fontweight='bold', 
+                     color='#2c3e50', va='bottom')
+
+# ═══════════════════════════════════════════════════════════════════
+# B. GRAPHIQUE LOG-LIN (Réalité physique)
+# ═══════════════════════════════════════════════════════════════════
+
+axes[1].scatter(df_cross['gdp_pc'], df_cross['co2_per_capita'], 
+                alpha=0.5, s=60, color='#c0392b', edgecolor='white', linewidth=0.5)
+
+# Tendance LOWESS
+lowess_result = lowess(df_cross['co2_per_capita'], np.log(df_cross['gdp_pc']), frac=0.3)
+axes[1].plot(np.exp(lowess_result[:, 0]), lowess_result[:, 1], 
+             color='black', linewidth=2.5, linestyle='--', label='Tendance LOWESS')
+
+axes[1].set_xscale('log')
+axes[1].set_xlabel("PIB par habitant (USD PPA 2017)", fontsize=12)
+axes[1].set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=12)
+axes[1].set_title("B. Échelle Log-Linéaire (Réalité Physique)", fontweight='bold', fontsize=13)
+axes[1].legend(loc='upper left', fontsize=10)
+axes[1].grid(True, which="both", ls="--", alpha=0.3)
+
+# Annotations
+for pays, code in PAYS_LABELS.items():
+    row = df_cross[df_cross['country'] == pays]
+    if not row.empty:
+        x = row['gdp_pc'].values[0]
+        y = row['co2_per_capita'].values[0]
+        ha = 'right' if y > 30 else 'left'
+        axes[1].text(x, y, f"{code} " if ha == 'right' else f" {code}", 
+                     fontsize=9, fontweight='bold', 
+                     color='#c0392b', va='center', ha=ha)
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.callout-note appearance="minimal"}
+## Panel A : Justification log-log
+Relation quasi-**linéaire** en échelle log  
+→ Interprétation en **élasticités**
+:::
+:::
+
+::: {.column width="50%"}
+::: {.callout-warning appearance="minimal"}
+## Panel B : Hétérogénéité
+Qatar (35 t) vs Suède (4 t) à PIB égal  
+→ **Facteur 9** : les politiques comptent
+:::
+:::
+:::
+
+### Trajectoires 1990-2020
+
+```{python}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| fig-dpi: 300
+
+import matplotlib.pyplot as plt
+
+# Calcul des moyennes par groupe et année
+trajectories = df.groupby(['year', 'income_group'])['co2_per_capita'].mean().reset_index()
+
+# Palette de couleurs
+palette = {
+    'High income': '#e74c3c',
+    'Upper middle income': '#f39c12', 
+    'Lower middle income': '#3498db',
+    'Low income': '#2ecc71'
+}
+
+# Graphique
+fig, ax = plt.subplots(figsize=(12, 6))
+
+for group, color in palette.items():
+    subset = trajectories[trajectories['income_group'] == group]
+    ax.plot(subset['year'], subset['co2_per_capita'], 
+            color=color, linewidth=3, label=group, marker='o', markersize=5)
+
+ax.set_xlabel("Année", fontsize=14)
+ax.set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=14)
+ax.set_title("Évolution des émissions par groupe de revenu (1990-2020)", fontweight='bold', fontsize=15)
+ax.legend(loc='upper left', fontsize=12)
+ax.grid(True, alpha=0.3)
+ax.axhline(y=0, color='black', linewidth=0.8, linestyle='-')
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-note appearance="minimal"}
+## Trois clubs divergents
+🔴 **Pays riches** : Pic ~2005, déclin -30%  
+🟠 **Émergents** : Croissance exponentielle +150%  
+🔵 **Pays pauvres** : Stagnation ~1 t/hab
+
+→ L'EKC ne décrit **pas** une loi universelle
+:::
+
+### Données mobilisées
+
+::: {.columns}
+::: {.column width="50%"}
+**Source**
+
+- Our World in Data (2020)
+- Global Carbon Project
+- Banque Mondiale
+
+**Échantillon**
+
+- **159 pays** (>95% PIB mondial)
+- Période : **1990-2020** (30 ans)
+- ~4770 observations
+:::
+
+::: {.column width="50%"}
+**Variables clés**
+
+| Variable | Unité | Transformation |
+|----------|-------|----------------|
+| CO₂/hab | tonnes/an | $\ln(\text{CO}_2)$ |
+| PIB/hab | $ PPA 2017 | $\ln(\text{PIB})$ centré |
+
+**Exclusions** : 12 micro-États et paradis fiscaux  
+(Liechtenstein, Monaco, Luxembourg, Singapour...)
+
+**Justification log** : Test Box-Cox → λ = 0.15 ≈ 0
+:::
+:::
+
+:::
+
+::: {.notes}
+**Pour l'oral** :
+
+**Onglet 1 (Vue d'ensemble)** :
+- Panel A : "En log-log, la relation devient quasi-linéaire → justifie notre spécification"
+- Panel B : "En échelle réelle, on voit l'hétérogénéité explosive : Qatar vs Suède = facteur 9"
+
+**Onglet 2 (Trajectoires)** :
+- "Cette hétérogénéité n'est pas statique : 3 clubs évoluent différemment depuis 30 ans"
+- "Pays riches ont DÉJÀ découplé, émergents en pleine ascension, pauvres stagnent"
+
+**Onglet 3 (Données)** :
+- Mentionner rapidement si question sur la méthodologie
+- "Échantillon robuste, 159 pays couvrant >95% du PIB mondial"
+:::
+
+---
+
+## 📈 Résultat n°1 : Le modèle quadratique suffit
+
+::: {.columns}
+::: {.column width="55%"}
+```{python}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 7
+#| fig-dpi: 300
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+# Note : Le code suppose que df_cross est chargé en mémoire
+# Estimation des modèles
+m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_cross).fit(cov_type='HC3')
+m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_cross).fit(cov_type='HC3')
+
+# Grille de prédiction
+log_gdp_c_grid = np.linspace(df_cross['log_gdp_c'].min(), df_cross['log_gdp_c'].max(), 200)
+pred_df = pd.DataFrame({'log_gdp_c': log_gdp_c_grid})
+
+pred_quad = m_quad.predict(pred_df)
+pred_cub = m_cub.predict(pred_df)
+
+# Graphique
+fig, ax = plt.subplots(figsize=(10, 7))
+
+ax.scatter(df_cross['log_gdp_c'], df_cross['log_co2'], 
+           alpha=0.3, color='gray', s=30, label='Observations (N=159)', zorder=1)
+
+ax.plot(log_gdp_c_grid, pred_quad, 
+        color='#c0392b', linewidth=2.5, label='Quadratique (retenu)', zorder=3)
+
+ax.plot(log_gdp_c_grid, pred_cub, 
+        color='#27ae60', linewidth=2, linestyle='--', label='Cubique (rejeté)', zorder=2)
+
+ax.set_xlabel("$\\ln(\\mathrm{PIB})$ centré", fontsize=11)
+ax.set_ylabel("$\\ln(\\mathrm{CO}_2)$", fontsize=11)
+ax.legend(loc='upper left', fontsize=10)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+:::
+
+::: {.column width="45%"}
+**Résultats d'estimation**
+
+| Coefficient | Quadratique | Cubique |
+|-------------|-------------|---------|
+| $\beta_1$ | 1.070*** | 1.070*** |
+| $\beta_2$ | **-0.083***| -0.083** |
+| $\beta_3$ | — | -0.0002 |
+| | | (p=0.995) |
+
+**Performance prédictive (CV k=5)**
+
+| Modèle | RMSE |
+|--------|------|
+| **Quadratique** | **0.568** ✅ |
+| Cubique | 0.580 ❌ |
+
+::: {.fragment}
+::: {.callout-tip}
+## Verdict
+✅ EKC classique validée ($\beta_2 < 0$)
+
+❌ Courbe en N rejetée ($\beta_3 \approx 0$)
+:::
+:::
+:::
+:::
+
+::: {.notes}
+Les deux courbes se superposent presque parfaitement. Le cubique n'apporte rien visuellement ni statistiquement. Principe de parcimonie : on garde le quadratique.
+:::
+
+---
+
+## 🔍 L'hétérogénéité masquée : Trois clubs de pays
+
+::: {.columns}
+::: {.column width="33%"}
+::: {.callout-warning}
+## 🔴 Sur-carbonés
+**Au-dessus de l'EKC**
+
+- 🇶🇦 Qatar : 35 t
+- 🇰🇼 Koweït : 25 t
+- 🇦🇺 Australie : 17 t
+
+*Rente fossile*
+:::
+:::
+
+::: {.column width="33%"}
+::: {.callout-note}
+## 🟡 Sur la courbe
+**Trajectoire moyenne**
+
+- 🇺🇸 USA : 14 t
+- 🇩🇪 Allemagne : 8 t
+- 🇯🇵 Japon : 9 t
+
+*Transition en cours*
+:::
+:::
+
+::: {.column width="33%"}
+::: {.callout-tip}
+## 🟢 Décarbonés
+**Sous l'EKC**
+
+- 🇸🇪 Suède : 4 t
+- 🇫🇷 France : 5 t
+- 🇨🇭 Suisse : 4 t
+
+*Nucléaire + hydro*
+:::
+:::
+:::
+
+::: {.fragment}
+::: {.callout-important}
+## Message clé
+À **PIB égal** (~50k $/hab) : 🇸🇪 Suède = **4 t** | 🇶🇦 Qatar = **35 t** → **Facteur 9**
+
+→ Les **choix politiques** comptent plus que la richesse seule
+:::
+:::

@@ -1,0 +1,215 @@
+# Approche Temporelle {background-color="#1976D2"}
+
+::: {style="text-align: center; margin-top: 3em;"}
+## 🎬 Partie II : Validation temporelle
+
+**USA (1990-2020)** | Le découplage observé est-il structurel ou conjoncturel ?
+:::
+
+::: {.notes}
+Durée : ~7 minutes.
+Objectif : Montrer l'inertie extrême + projection insuffisante pour Paris.
+:::
+
+---
+
+## 🇺🇸 Le cas américain : Série et modèle ARDL
+
+::: {.columns}
+::: {.column width="55%"}
+```{python}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 7
+#| fig-dpi: 300
+
+# Note : suppose df_usa chargé
+fig, ax = plt.subplots(figsize=(10, 7))
+
+ax.plot(df_usa['year'], df_usa['co2_per_capita'], 
+        'o-', color='#2c3e50', linewidth=2.5, markersize=6, label='Émissions observées')
+
+# Identification du pic
+idx_max = df_usa['co2_per_capita'].idxmax()
+year_max = df_usa.loc[idx_max, 'year']
+co2_max = df_usa.loc[idx_max, 'co2_per_capita']
+
+ax.axvline(year_max, color='#c0392b', linestyle='--', linewidth=2, alpha=0.7, label=f'Pic ({int(year_max)})')
+ax.plot(year_max, co2_max, 'r*', markersize=20, zorder=5)
+
+ax.text(year_max + 1, co2_max, 
+        f'{co2_max:.1f} t/hab', 
+        fontsize=11, fontweight='bold', 
+        bbox=dict(boxstyle='round,pad=0.5', facecolor='#f1c40f', alpha=0.8))
+
+ax.set_xlabel("Année", fontsize=12)
+ax.set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=12)
+ax.set_title("Évolution des émissions USA (1990-2020)", fontweight='bold', fontsize=13)
+ax.legend(loc='upper right', fontsize=10)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+:::
+
+::: {.column width="45%"}
+**Modèle ARDL(1,1)**
+
+$$\ln(\text{CO}_2)_t = \rho \ln(\text{CO}_2)_{t-1} + \beta \ln(\text{PIB})_t + \varepsilon_t$$
+
+**Résultats clés**
+
+| Paramètre | Valeur | Interprétation |
+|-----------|--------|----------------|
+| $\rho$ | **1.003*** | Inertie extrême |
+| $\varepsilon_{CT}$ | -0.122* | Faible élasticité |
+| Pic | **2005** | Turning point |
+| Baisse | **-21%** | 2005→2020 |
+
+::: {.fragment}
+::: {.callout-warning}
+## ⚠️ Inertie structurelle
+$\rho \approx 1$ → Chocs **quasi-permanents**
+
+Demi-vie : **Non calculable**
+:::
+:::
+:::
+:::
+
+---
+
+## 🔮 Projection 2025 et validation hors-échantillon
+
+::: {.panel-tabset}
+
+### Projection
+
+```{python}
+#| echo: false
+#| code-fold: true
+#| code-summary: "📂 Code de projection ARDL"
+#| fig-width: 10
+#| fig-height: 7
+#| fig-dpi: 300
+
+import statsmodels.formula.api as smf
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# ═══════════════════════════════════════════════════════════════════
+# ÉTAPE 1 : Estimation du modèle ARDL quadratique
+# ═══════════════════════════════════════════════════════════════════
+
+m_ardl_quad = smf.ols(
+    'log_co2 ~ lag_log_co2 + log_gdp_c + I(log_gdp_c**2)', 
+    data=df_usa
+).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+
+# ═══════════════════════════════════════════════════════════════════
+# ÉTAPE 2 : Projection itérative 2021-2025
+# ═══════════════════════════════════════════════════════════════════
+
+last_obs = df_usa.iloc[-1]
+future_years = list(range(ANNEE_FIN + 1, ANNEE_FIN + 6))  # 2021-2025
+
+future_df = []
+curr_log_co2 = last_obs['log_co2']
+curr_log_gdp = last_obs['log_gdp']
+
+TAUX_CROISSANCE_ANNUEL = 0.02  # Hypothèse : +2% PIB/an
+
+for year in future_years:
+    # Mise à jour du PIB
+    curr_log_gdp += np.log(1 + TAUX_CROISSANCE_ANNUEL)
+    curr_log_gdp_c = curr_log_gdp - GDP_MEAN_USA
+    
+    # Construction de la matrice de prédiction
+    X_fut = pd.DataFrame({
+        'lag_log_co2': [curr_log_co2],
+        'log_gdp_c': [curr_log_gdp_c],
+        'I(log_gdp_c ** 2)': [curr_log_gdp_c ** 2]
+    })
+    
+    # Prédiction avec intervalle de confiance
+    pred = m_ardl_quad.get_prediction(X_fut)
+    pred_summary = pred.summary_frame(alpha=0.05)
+    
+    # Stockage des résultats (en échelle originale)
+    future_df.append({
+        'year': year,
+        'co2_pred': np.exp(pred_summary['mean'].values[0]),
+        'co2_lower': np.exp(pred_summary['mean_ci_lower'].values[0]),
+        'co2_upper': np.exp(pred_summary['mean_ci_upper'].values[0]),
+    })
+    
+    # Mise à jour pour l'itération suivante
+    curr_log_co2 = pred_summary['mean'].values[0]
+
+df_future = pd.DataFrame(future_df)
+
+# ═══════════════════════════════════════════════════════════════════
+# ÉTAPE 3 : Graphique projection
+# ═══════════════════════════════════════════════════════════════════
+
+fig, ax = plt.subplots(figsize=(10, 7))
+
+# Historique
+ax.plot(df_usa['year'], df_usa['co2_per_capita'], 
+        'ko-', linewidth=2, markersize=5, label='Historique', zorder=3)
+
+# Projection
+ax.plot(df_future['year'], df_future['co2_pred'], 
+        'r--', linewidth=2.5, marker='s', markersize=7, 
+        label='Projection (+2% PIB/an)', zorder=2)
+
+# Intervalle de confiance 95%
+ax.fill_between(df_future['year'], 
+                df_future['co2_lower'], 
+                df_future['co2_upper'],
+                color='red', alpha=0.2, label='IC 95%', zorder=1)
+
+# Ligne de séparation
+ax.axvline(ANNEE_FIN, color='gray', linestyle=':', linewidth=2, zorder=0)
+
+# Labels et mise en forme
+ax.set_xlabel("Année", fontsize=12)
+ax.set_ylabel("$\\mathrm{CO}_2$/hab (tonnes)", fontsize=12)
+ax.set_title("Projection USA : Scénario tendanciel", fontweight='bold', fontsize=13)
+ax.legend(loc='upper right', fontsize=10)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-important}
+## Écart avec l'Accord de Paris
+| Métrique | Projection 2025 | Objectif 2030 (Paris) |
+|----------|-----------------|-----------------------|
+| Variation vs 2020 | **-8.5%** | **-50%** requis |
+| Niveau | 13.0 t/hab | 7.1 t/hab |
+
+→ Gap de **29 points** : trajectoire insuffisante.
+:::
+
+### Validation
+
+**Performance hors-échantillon (2016-2020)**
+
+| Modèle | RMSE | vs ARDL |
+|--------|------|---------|
+| **ARDL Quadratique** | **0.047** | — |
+| ARIMA(1,1,1) | 0.050 | +6% |
+| Marche aléatoire | 0.052 | +11% |
+
+::: {.callout-tip}
+## ✅ ARDL bat tous les benchmarks
+Sur données **non vues** (2016-2020), l'ARDL offre l'erreur la plus faible.
+
+→ La capacité prédictive du modèle est validée.
+:::
+
+:::

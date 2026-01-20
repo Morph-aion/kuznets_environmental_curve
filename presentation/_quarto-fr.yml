@@ -13,8 +13,9 @@ project:
 # -------------------------------------------------------------------
 lang: fr
 
-title: "La Courbe Environnementale de Kuznets"  # Titre global de la présentation (affiché par certains moteurs de rendu)
-date: today                                     # Date affichée, 'today' insère automatiquement la date du rendu
+title: "[La Courbe Environnementale de Kuznets pour le CO₂]{.r-fit-text}"      # Titre global de la présentation (affiché par certains moteurs de rendu)
+subtitle: "Une évaluation empirique par approches transversale et temporelle"
+date: today                                                                    # Date affichée, 'today' insère automatiquement la date du rendu
 
 # -------------------------------------------------------------------
 # Personnalisation reveal.js spécifique FR

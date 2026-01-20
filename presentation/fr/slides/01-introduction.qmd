@@ -1,24 +1,31 @@
-# La Courbe Environnementale de Kuznets pour le CO₂ {background-image="../../../assets/images/Courbe_environnement.png" background-opacity="0.2"}
-
-## Une évaluation empirique par approches transversale et temporelle
+# Introduction {background-color="#1a5276"}
 
 ---
 
 ## 🎯 La question au cœur du débat climat
 
-::: {.callout-important icon=false}
-## Question de recherche
-> **« La croissance économique finit-elle par réduire la pollution ? »**
+### Problématique
+
+<br>
+
+::: {style="font-size: 1.2em; text-align: center; font-weight: 600; color: #4a5568; margin-top: 0.5em;"}
+« La croissance économique finit-elle par réduire la pollution ? »
 :::
+
+<br>
 
 ::: {.columns}
 ::: {.column width="50%"}
-**L'hypothèse EKC**
+**L'hypothèse EKC (Kuznets, 1991)**
 
-- Relation en **U inversé** entre richesse et émissions
+$$\text{Pollution} = f(\text{Revenu})$$
+
+Relation en **U inversé** :
+
 - Phase 1 : Industrialisation → ↗️ pollution
-- Phase 2 : Services + tech → ↘️ pollution
-- Débat depuis **30 ans** sans consensus
+- Phase 2 : Services + tech &nbsp;&nbsp;&nbsp;→ ↘️ pollution
+
+**Point de retournement** (*turning point*) : $\frac{\partial \text{CO}_2}{\partial \text{PIB}} = 0$
 :::
 
 ::: {.column width="50%"}
@@ -26,172 +33,105 @@
 
 ✅ **Double validation empirique**
 
-- 🌍 Espace : 159 pays en 2020
-- 📈 Temps : USA 1990-2020
+| Dimension | Échantillon | Objectif |
+|-----------|-------------|----------|
+| 📸 Espace | 159 pays (2020) | Forme |
+| 🎬 Temps | USA (1990-2020) | Dynamique |
 
 ✅ **Double objectif**
 
-- 🔍 Estimer la forme
-- 🎯 Prédire le futur
+- 🔍 **Estimer** la relation
+- 🎯 **Prédire** le futur
 :::
 :::
 
 ::: {.notes}
-L'EKC est née en 1991. Elle a été utilisée pour justifier l'inaction climatique ("la croissance résoudra le problème"). Nous testons si cette promesse tient empiriquement.
+L'EKC est née en 1991 avec Grossman & Krueger. Elle a été utilisée pour justifier l'inaction climatique. Nous testons si cette promesse tient empiriquement.
 :::
 
 ---
 
-## 📊 Données mobilisées
+## 📐 Spécification économétrique
+
+::: {.panel-tabset}
+
+### Modèle théorique
+
+**Spécification log-log polynomiale**
+
+$$\ln(\text{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB})]^2 + \beta_3 [\ln(\text{PIB})]^3 + \varepsilon$$
+
+**Interprétation des coefficients**
+
+| Signe de $\beta_2$ | Signe de $\beta_3$ | Forme | Interprétation |
+|--------------------|--------------------|-------|----------------|
+| $\beta_2 < 0$ | $\beta_3 = 0$ | **U inversé** | EKC classique ✅ |
+| $\beta_2 < 0$ | $\beta_3 > 0$ | **N** | Rebond ! ⚠️ |
+| $\beta_2 < 0$ | $\beta_3 < 0$ | **U inversé accéléré** | Déclin rapide |
+
+### Justification log-log
+
+**Pourquoi la transformation logarithmique ?**
+
+1. **Interprétation en élasticités** : $\beta_1$ = % de variation de CO₂ pour 1% de PIB
+
+2. **Validation empirique** : Test de Box-Cox → $\lambda_{\text{optimal}} = 0.15 \approx 0$
+
+3. **Stabilisation de la variance** : Réduit l'hétéroscédasticité
+
+### Estimateurs
+
+**Approche transversale (N=159)**
+
+- OLS avec erreurs-types **HC3** (robustes, N < 250)
+
+**Approche temporelle (T=30)**
+
+- **ARDL(1,1)** avec Newey-West (3 lags)
+
+$$\ln(\text{CO}_2)_t = \rho \ln(\text{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t$$
+
+:::
+
+---
+
+## ⚖️ Stratégie : Estimer vs Prédire
 
 ::: {.columns}
-::: {.column width="45%"}
-**Source et périmètre**
+::: {.column width="50%"}
+### 🔍 Estimation
 
-- 📦 **Our World in Data** (OWID)
-  - Global Carbon Project
-  - Banque Mondiale
-- 📅 **Période** : 1990-2020 (30 ans)
-- 🌍 **Échantillon** : 159 pays
-- 📈 **Observations** : ~4770 lignes
+**Question** : Quelle relation entre X et Y ?
+
+**Critères**
+
+- Significativité ($p < 0.05$)
+- $R^2$ ajusté
+- Tests F emboîtés
+
+**Risque** : Biais de spécification
 :::
 
-::: {.column width="55%"}
-**Variables retenues**
+::: {.column width="50%"}
+### 🎯 Prédiction
 
-| Variable | Unité | Justification |
-|----------|-------|---------------|
-| **CO₂/hab** | tonnes/an | Empreinte carbone territoriale |
-| **PIB/hab** | \$ PPA 2017 | Comparabilité internationale |
+**Question** : Le modèle généralise-t-il ?
 
-::: {.callout-warning collapse="true"}
-## Limite assumée
-**Émissions territoriales** uniquement
+**Critères**
 
-→ Biais du *pollution haven* possible (délocalisation de la production polluante)
+- RMSE hors-échantillon
+- Comparaison benchmarks
+- Validation croisée (CV)
+
+**Risque** : Surapprentissage
 :::
 :::
-:::
 
----
-
-## 🗺️ Trajectoires des pays par groupe de revenu
-
-```{python}
-#| echo: true
-#| code-fold: true
-#| code-summary: "📂 Voir le code de génération"
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Calcul des moyennes par groupe et année
-trajectories = df.groupby(['year', 'income_group'])['co2_per_capita'].mean().reset_index()
-```
-
-```{python}
-#| echo: false
-#| fig-width: 10
-#| fig-height: 5
-
-# Palette de couleurs par groupe
-palette = {
-    'High income': '#e74c3c',
-    'Upper middle income': '#f39c12', 
-    'Lower middle income': '#3498db',
-    'Low income': '#2ecc71'
-}
-
-# Graphique
-fig, ax = plt.subplots(figsize=(10, 5))
-
-for group, color in palette.items():
-    subset = trajectories[trajectories['income_group'] == group]
-    ax.plot(subset['year'], subset['co2_per_capita'], 
-            color=color, linewidth=2.5, label=group, marker='o', markersize=3)
-
-ax.set_xlabel("Année", fontsize=12)
-ax.set_ylabel("$\\mathrm{CO}_2$ par habitant (tonnes)", fontsize=12)
-ax.set_title("Évolution des émissions par groupe de revenu (1990-2020)", fontweight='bold', fontsize=13)
-ax.legend(loc='upper left', fontsize=11)
-ax.grid(True, alpha=0.3)
-ax.axhline(y=0, color='black', linewidth=0.8, linestyle='-')
-
-plt.tight_layout()
-plt.show()
-```
-
-::: {.callout-note}
-## Message clé
-
-**Trois trajectoires divergentes** :
-
-- 🔴 **Pays riches** : Pic ~2005, déclin depuis (-30%)
-- 🟠 **Émergents** : Croissance exponentielle (+150%)
-- 🔵 **Pays pauvres** : Stagnation (~1 t/hab)
-
-→ L'EKC ne décrit pas une loi universelle, mais une **tendance conditionnelle**
-:::
-
-::: {.notes}
-**Pour l'oral** :
-
-Ce graphique montre pourquoi l'analyse transversale (photo 2020) ne suffit pas.
-Les pays riches ont **déjà** découpé, les émergents sont **en pleine ascension**.
-L'EKC moyenne masque ces dynamiques hétérogènes.
-:::
-
----
-
-## 🎯 Stratégie empirique : Double approche
-
-::: {style="font-size: 0.85em;"}
-| Dimension | 📸 Transversale | 🎬 Temporelle |
-|-----------|----------------|---------------|
-| **Échantillon** | 159 pays | USA |
-| **Période** | 2020 (photo) | 1990-2020 (film) |
-| **Question** | Les riches polluent-ils **moins** ? | Un pays se décarbone-t-il **en s'enrichissant** ? |
-| **Méthode** | OLS + validation croisée (k=5) | ARDL + test hors-échantillon |
-| **Objectif** | Forme fonctionnelle | Dynamique temporelle |
-:::
-
+::: {.fragment}
 ::: {.callout-tip}
-## Triangulation méthodologique
-Si les deux approches **convergent** → robustesse structurelle
+## Principe de parcimonie
+Un modèle **statistiquement significatif** mais **prédictivement faible** sera rejeté.
 
-Si elles **divergent** → analyse de l'hétérogénéité spatiale vs inertie temporelle
-:::
-
----
-
-## 📋 Structure de la présentation
-
-::: {.columns}
-::: {.column width="50%"}
-**Partie I : Méthodologie**
-
-- Choix de spécification
-- Estimateurs utilisés
-- Protocoles de validation
-
-**Partie II : Approche transversale**
-
-- Modèle quadratique vs cubique
-- Performance prédictive
-- Analyse des erreurs
-:::
-
-::: {.column width="50%"}
-**Partie III : Approche temporelle**
-
-- Modèle ARDL USA
-- Inertie structurelle
-- Projections 2021-2025
-
-**Partie IV : Confrontation**
-
-- Convergence des résultats
-- Hétérogénéité masquée
-- Implications politiques
+→ Performance hors-échantillon = **arbitre final**.
 :::
 :::

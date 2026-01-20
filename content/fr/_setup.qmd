@@ -138,6 +138,28 @@ try:
     else:
         N_OBS_USA = ANNEE_DEBUT = ANNEE_FIN = 0
 
+    # ─────────────────────────────────────────────────────────────────
+    # CRÉATION DE LA COLONNE INCOME_GROUP (Classification Banque Mondiale)
+    # ─────────────────────────────────────────────────────────────────
+    
+    # Seuils de la Banque Mondiale (en USD PPA 2017)
+    bins = [0, 1085, 4256, 13206, float('inf')]
+    labels = ['Low income', 'Lower middle income', 'Upper middle income', 'High income']
+    
+    df['income_group'] = pd.cut(
+        df['gdp_per_capita'], 
+        bins=bins, 
+        labels=labels, 
+        right=False
+    )
+    
+    # Conversion en string pour compatibilité
+    df['income_group'] = df['income_group'].astype(str)
+    
+    # Vérification
+    if DATA_LOADED:
+        print(f"✅ Groupes de revenu créés : {df['income_group'].value_counts().to_dict()}")
+
 except FileNotFoundError:
     print("⚠️ ERREUR : Fichier data/01_raw/kuznets_data_final.csv introuvable.")
     print("   Vérifiez le chemin relatif depuis le répertoire du notebook.")

@@ -1,0 +1,144 @@
+# Conclusion {background-color="#455A64"}
+
+::: {style="text-align: center; margin-top: 3em;"}
+## 🧩 Confrontation et implications
+
+Les deux approches convergent-elles ? Que faire ?
+:::
+
+::: {.notes}
+Durée : ~4 minutes.
+Message clé : EKC existe mais lente, hétérogène, non garantie.
+:::
+
+---
+
+## ⚖️ Confrontation des deux approches
+
+::: {.columns}
+::: {.column width="50%"}
+### ✅ Convergence
+
+- Modèle **quadratique** suffit
+- Courbe en **N rejetée** ($\beta_3 \approx 0$)
+- EKC classique **validée**
+- Découplage **réel** (pays riches)
+:::
+
+::: {.column width="50%"}
+### ⚠️ Divergence
+
+- **Transversal** : Découplage *possible*
+- **Temporel** : Découplage *lent* ($\rho \approx 1$)
+- Élasticité CT faible : $-0.12$
+- Transition **30+ ans**
+:::
+:::
+
+::: {.callout-important}
+## Synthèse
+L'EKC existe mais elle est :
+
+- **Conditionnelle** (pas automatique)
+- **Hétérogène** (facteur 9 entre pays)  
+- **Lente** (inertie structurelle)
+
+→ Le marché seul **ne sauvera pas** le climat
+:::
+
+---
+
+## 💡 Implications pour l'action climatique
+
+::: {.columns}
+::: {.column width="50%"}
+**1. 🚫 Limites du Marché**
+
+L'EKC n'est **pas automatique** (ex: Suède vs Qatar).
+*Instruments requis* : taxe carbone, normes, R&D.
+
+<br>
+
+**2. ⏳ Inertie Structurelle**
+
+Demi-vie du capital ~5+ ans.  
+*Lock-in* : Les choix d'aujourd'hui nous engagent pour **30 ans**.
+:::
+
+::: {.column width="50%"}
+**3. 📉 Écart Net Zero**
+
+Trajectoire USA : **-21%** (projeté) vs **-50%** (Paris).  
+Besoin de **rupture** politique, pas de continuité.
+
+<br>
+
+**4. 🚀 Opportunité du Sud**
+
+*Tunneling* : Éviter le pic pollueur des pays riches.  
+Transferts technologiques et financiers **essentiels**.
+:::
+:::
+
+---
+
+## 📝 Messages clés
+
+::: {.callout-tip icon=false}
+## Trois enseignements clés
+
+1. **L'EKC existe** → mais elle est **conditionnelle**, pas automatique.
+
+2. **L'inertie est réelle** → $\rho \approx 1$ : chaque année de retard se paie sur 30 ans.
+
+3. **Les politiques sont décisives** → La Suède (4t) prouve que la décarbonation est possible.
+:::
+
+::: {.fragment}
+::: {style="text-align: center; font-size: 1.4em; margin: 1em 0; color: #1a5276;"}
+**« Le marché ne sauvera pas le climat.**
+
+**Seules des politiques publiques ciblées, durables et ambitieuses le feront. »**
+:::
+:::
+
+---
+
+## Merci pour votre attention ! {background-color="#00897B"}
+
+## Questions & Réponses ?
+
+::: {.panel-tabset}
+
+### ❓ Méthodologie
+
+**"Pourquoi écarter le cubique ?"**
+Triple raison :
+
+1. $\beta_3$ non significatif ($p=0.995$)
+2. AIC moins bon (+2 points)
+3. RMSE en validation croisée supérieur.
+
+→ **Parcimonie** validée.
+
+### ❓ Données
+
+**"Biais pollution haven ?"**
+Reconnu. Nous utilisons les émissions **territoriales** (production).
+Les émissions basées sur la **consommation** (empreinte carbone) montreraient un découplage plus lent, mais la tendance reste la même pour les USA depuis 2005.
+
+### ❓ Projections
+
+**"Et après 2025 ?"**
+L'inertie ($\rho \approx 1$) rend les intervalles de confiance explosifs après 5 ans.
+Pour aller plus loin (2030-2050), il faudrait un modèle structurel avec des scénarios technologiques, pas juste économétrique.
+
+### 📞 Contact
+
+**Pour aller plus loin :**
+
+- 📧 morphion.research@univ.fr
+- 💻 Code & Données : GitHub
+- 📄 Rapport complet disponible (51 pages)
+
+:::
