@@ -1,1 +1,137 @@
+# Introduction {background-color="#1a5276"}
 
+---
+
+## 🎯 The Core Question of the Climate Debate
+
+### Problem Statement
+
+<br>
+
+::: {style="font-size: 1.2em; text-align: center; font-weight: 600; color: #4a5568; margin-top: 0.5em;"}
+"Does economic growth eventually reduce pollution?"
+:::
+
+<br>
+
+::: {.columns}
+::: {.column width="50%"}
+**The EKC Hypothesis (Kuznets, 1991)**
+
+$$\text{Pollution} = f(\text{Income})$$
+
+**Inverted-U** relationship:
+
+- Phase 1: Industrialization → ↗️ pollution
+- Phase 2: Services + tech &nbsp;&nbsp;&nbsp;→ ↘️ pollution
+
+**Turning Point**: $\frac{\partial \mathrm{CO}_2}{\partial \text{GDP}} = 0$
+:::
+
+::: {.column width="50%"}
+**Our Original Approach**
+
+✅ **Double Empirical Validation**
+
+| Dimension | Sample | Objective |
+|-----------|--------|-----------|
+| 📸 Cross-section | 159 countries (2020) | Shape |
+| 🎬 Time-series | USA (1990-2020) | Dynamics |
+
+✅ **Double Objective**
+
+- 🔍 **Estimate** the relationship
+- 🎯 **Predict** the future
+:::
+:::
+
+::: {.notes}
+The EKC was born in 1991 with Grossman & Krueger. It has been used to justify climate inaction. We test if this promise holds empirically.
+:::
+
+---
+
+## 📐 Econometric Specification
+
+::: {.panel-tabset}
+
+### Theoretical Model
+
+**Polynomial Log-Log Specification**
+
+$$\ln(\mathrm{CO}_2) = \beta_0 + \beta_1 \ln(\text{GDP}) + \beta_2 [\ln(\text{GDP})]^2 + \beta_3 [\ln(\text{GDP})]^3 + \varepsilon$$
+
+**Coefficient Interpretation**
+
+| Sign of $\beta_2$ | Sign of $\beta_3$ | Shape | Interpretation |
+|-------------------|-------------------|-------|----------------|
+| $\beta_2 < 0$ | $\beta_3 = 0$ | **Inverted-U** | Classic EKC ✅ |
+| $\beta_2 < 0$ | $\beta_3 > 0$ | **N-shaped** | Rebound! ⚠️ |
+| $\beta_2 < 0$ | $\beta_3 < 0$ | **Accelerated Inverted-U** | Rapid decline |
+
+### Log-Log Justification
+
+**Why the logarithmic transformation?**
+
+1. **Elasticity Interpretation**: $\beta_1$ = % change in \mathrm{CO}_2 for a 1% change in GDP
+
+2. **Empirical Validation**: Box-Cox Test → $\lambda_{\text{optimal}} = 0.15 \approx 0$
+
+3. **Variance Stabilization**: Reduces heteroscedasticity
+
+### Estimators
+
+**Cross-sectional Approach (N=159)**
+
+- OLS with **HC3** standard errors (robust, N < 250)
+
+**Time-series Approach (T=30)**
+
+- **ARDL(1,1)** with Newey-West (3 lags)
+
+$$\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{GDP})_t + \beta_1 \ln(\text{GDP})_{t-1} + \varepsilon_t$$
+
+:::
+
+---
+
+## ⚖️ Strategy: Estimate vs. Predict
+
+::: {.columns}
+::: {.column width="50%"}
+### 🔍 Estimation
+
+**Question**: What is the relationship between X and Y?
+
+**Criteria**
+
+- Significance ($p < 0.05$)
+- Adjusted $R^2$
+- Nested F-tests
+
+**Risk**: Specification bias
+:::
+
+::: {.column width="50%"}
+### 🎯 Prediction
+
+**Question**: Does the model generalize?
+
+**Criteria**
+
+- Out-of-sample RMSE
+- Benchmark comparison
+- Cross-validation (CV)
+
+**Risk**: Overfitting
+:::
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## Principle of Parsimony
+A **statistically significant** but **predictively weak** model will be rejected.
+
+→ Out-of-sample performance = **final arbiter**.
+:::
+:::

@@ -1,15 +1,7 @@
----
-# Metadata handled by _quarto-en.yml
----
+{{< include ../../content/fr/_setup.qmd >}}
 
 {{< include slides/01-introduction.qmd >}}
-
-{{< include slides/02-methodology.qmd >}}
-
-{{< include slides/03-cross-sectional.qmd >}}
-
-{{< include slides/04-temporal.qmd >}}
-
-{{< include slides/05-conclusion.qmd >}}
-
-{{< include slides/06-appendix.qmd >}}
+{{< include slides/02-cross-sectional.qmd >}}
+{{< include slides/03-temporal.qmd >}}
+{{< include slides/04-conclusion.qmd >}}
+{{< include slides/05-appendix.qmd >}}

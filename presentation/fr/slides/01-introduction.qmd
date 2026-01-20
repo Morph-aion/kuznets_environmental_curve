@@ -25,7 +25,7 @@ Relation en **U inversé** :
 - Phase 1 : Industrialisation → ↗️ pollution
 - Phase 2 : Services + tech &nbsp;&nbsp;&nbsp;→ ↘️ pollution
 
-**Point de retournement** (*turning point*) : $\frac{\partial \text{CO}_2}{\partial \text{PIB}} = 0$
+**Point de retournement** (*turning point*) : $\frac{\partial \mathrm{CO}_2}{\partial \text{PIB}} = 0$
 :::
 
 ::: {.column width="50%"}
@@ -59,7 +59,7 @@ L'EKC est née en 1991 avec Grossman & Krueger. Elle a été utilisée pour just
 
 **Spécification log-log polynomiale**
 
-$$\ln(\text{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB})]^2 + \beta_3 [\ln(\text{PIB})]^3 + \varepsilon$$
+$$\ln(\mathrm{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB})]^2 + \beta_3 [\ln(\text{PIB})]^3 + \varepsilon$$
 
 **Interprétation des coefficients**
 
@@ -73,7 +73,7 @@ $$\ln(\text{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB}
 
 **Pourquoi la transformation logarithmique ?**
 
-1. **Interprétation en élasticités** : $\beta_1$ = % de variation de CO₂ pour 1% de PIB
+1. **Interprétation en élasticités** : $\beta_1$ = % de variation de \mathrm{CO}_2 pour 1% de PIB
 
 2. **Validation empirique** : Test de Box-Cox → $\lambda_{\text{optimal}} = 0.15 \approx 0$
 
@@ -89,7 +89,7 @@ $$\ln(\text{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB}
 
 - **ARDL(1,1)** avec Newey-West (3 lags)
 
-$$\ln(\text{CO}_2)_t = \rho \ln(\text{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t$$
+$$\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t$$
 
 :::
 

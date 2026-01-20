@@ -1,0 +1,144 @@
+# Conclusion {background-color="#455A64"}
+
+::: {style="text-align: center; margin-top: 3em;"}
+## 🧩 Confrontation and Implications
+
+Do the two approaches converge? What should be done?
+:::
+
+::: {.notes}
+Duration: ~4 minutes.
+Key message: EKC exists but is slow, heterogeneous, not guaranteed.
+:::
+
+---
+
+## ⚖️ Confronting the Two Approaches
+
+::: {.columns}
+::: {.column width="50%"}
+### ✅ Convergence
+
+- **Quadratic** model is sufficient
+- **N-shaped** curve rejected ($\beta_3 \approx 0$)
+- Classic EKC **validated**
+- **Real** decoupling (rich countries)
+:::
+
+::: {.column width="50%"}
+### ⚠️ Divergence
+
+- **Cross-sectional**: Decoupling *possible*
+- **Temporal**: Decoupling *slow* ($\rho \approx 1$)
+- Low short-run elasticity: $-0.12$
+- Transition **30+ years**
+:::
+:::
+
+::: {.callout-important}
+## Synthesis
+The EKC exists but is:
+
+- **Conditional** (not automatic)
+- **Heterogeneous** (factor of 9 between countries)
+- **Slow** (structural inertia)
+
+→ The market alone **will not save** the climate
+:::
+
+---
+
+## 💡 Implications for Climate Action
+
+::: {.columns}
+::: {.column width="50%"}
+**1. 🚫 Market Limits**
+
+The EKC is **not automatic** (e.g., Sweden vs Qatar).
+*Required instruments*: carbon tax, standards, R&D.
+
+<br>
+
+**2. ⏳ Structural Inertia**
+
+Capital half-life ~5+ years.
+*Lock-in*: Today's choices commit us for **30 years**.
+:::
+
+::: {.column width="50%"}
+**3. 📉 Net Zero Gap**
+
+USA Trajectory: **-21%** (projected) vs **-50%** (Paris).
+Need for political **breakthrough**, not continuity.
+
+<br>
+
+**4. 🚀 Opportunity for the Global South**
+
+*Tunneling*: Avoid the polluting peak of rich countries.
+Technological and financial transfers are **essential**.
+:::
+:::
+
+---
+
+## 📝 Key Messages
+
+::: {.callout-tip icon=false}
+## Three Key Takeaways
+
+1. **The EKC exists** → but is **conditional**, not automatic.
+
+2. **Inertia is real** → $\rho \approx 1$: every year of delay costs 30 years.
+
+3. **Policies are decisive** → Sweden (4t) proves decarbonization is possible.
+:::
+
+::: {.fragment}
+::: {style="text-align: center; font-size: 1.4em; margin: 1em 0; color: #1a5276;"}
+**"The market will not save the climate.**
+
+**Only targeted, sustainable, and ambitious public policies will."**
+:::
+:::
+
+---
+
+## Thank you for your attention! {background-color="#00897B"}
+
+## Questions & Answers?
+
+::: {.panel-tabset}
+
+### ❓ Methodology
+
+**"Why reject the cubic model?"**
+Three reasons:
+
+1. $\beta_3$ not significant ($p=0.995$)
+2. Worse AIC (+2 points)
+3. Higher cross-validation RMSE.
+
+→ **Parsimony** validated.
+
+### ❓ Data
+
+**"Pollution Haven Bias?"**
+Acknowledged. We use **territorial** emissions (production).
+**Consumption**-based emissions (carbon footprint) would show slower decoupling, but the trend remains the same for the USA since 2005.
+
+### ❓ Projections
+
+**"What about after 2025?"**
+Inertia ($\rho \approx 1$) causes confidence intervals to explode after 5 years.
+To go further (2030-2050), a structural model with technological scenarios is needed, not just econometrics.
+
+### 📞 Contact
+
+**For further information:**
+
+- 📧 morphion.research@univ.fr
+- 💻 Code & Data: GitHub
+- 📄 Full report available (51 pages)
+
+:::

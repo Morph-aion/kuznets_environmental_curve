@@ -1,19 +1,19 @@
-# Approche Temporelle {background-color="#1976D2"}
+# Time-Series Approach {background-color="#1976D2"}
 
 ::: {style="text-align: center; margin-top: 3em;"}
-## 🎬 Partie II : Validation temporelle
+## 🎬 Part II: Temporal Validation
 
-**USA (1990-2020)** | Le découplage observé est-il structurel ou conjoncturel ?
+**USA (1990-2020)** | Is the observed decoupling structural or cyclical?
 :::
 
 ::: {.notes}
-Durée : ~7 minutes.
-Objectif : Montrer l'inertie extrême + projection insuffisante pour Paris.
+Duration: ~7 minutes.
+Objective: Show extreme inertia + insufficient projection for Paris Agreement.
 :::
 
 ---
 
-## 🇺🇸 Le cas américain : Série et modèle ARDL
+## 🇺🇸 The American Case: Series and ARDL Model
 
 ::: {.columns}
 ::: {.column width="55%"}
@@ -54,25 +54,25 @@ plt.show()
 :::
 
 ::: {.column width="45%"}
-**Modèle ARDL(1,1)**
+**ARDL(1,1) Model**
 
-$$\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t$$
+$$\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{GDP})_t + \beta_1 \ln(\text{GDP})_{t-1} + \varepsilon_t$$
 
-**Résultats clés**
+**Key Results**
 
-| Paramètre | Valeur | Interprétation |
-|-----------|--------|----------------|
-| $\rho$ | **1.003*** | Inertie extrême |
-| $\varepsilon_{CT}$ | -0.122* | Faible élasticité |
-| Pic | **2005** | Turning point |
-| Baisse | **-21%** | 2005→2020 |
+| Parameter | Value | Interpretation |
+|-----------|-------|----------------|
+| $\rho$ | **1.003*** | Extreme Inertia |
+| $\varepsilon_{CT}$ | -0.122* | Low Elasticity |
+| Peak | **2005** | Turning point |
+| Decline | **-21%** | 2005→2020 |
 
 ::: {.fragment}
 ::: {.callout-warning}
-## ⚠️ Inertie structurelle
-$\rho \approx 1$ → Chocs **quasi-permanents**
+## ⚠️ Structural Inertia
+$\rho \approx 1$ → **Quasi-permanent** shocks
 
-Demi-vie : **Non calculable**
+Half-life: **Non-calculable**
 :::
 :::
 :::
@@ -80,7 +80,7 @@ Demi-vie : **Non calculable**
 
 ---
 
-## 🔮 Projection 2025 et validation hors-échantillon
+## 🔮 2025 Projection and Out-of-Sample Validation
 
 ::: {.panel-tabset}
 
@@ -186,30 +186,30 @@ plt.show()
 ```
 
 ::: {.callout-important}
-## Écart avec l'Accord de Paris
-| Métrique | Projection 2025 | Objectif 2030 (Paris) |
-|----------|-----------------|-----------------------|
-| Variation vs 2020 | **-8.5%** | **-50%** requis |
-| Niveau | 13.0 t/hab | 7.1 t/hab |
+## Gap with the Paris Agreement
+| Metric | 2025 Projection | 2030 Target (Paris) |
+|--------|-----------------|---------------------|
+| Change vs 2020 | **-8.5%** | **-50%** required |
+| Level | 13.0 t/capita | 7.1 t/capita |
 
-→ Gap de **29 points** : trajectoire insuffisante.
+→ **29-point** gap: insufficient trajectory.
 :::
 
 ### Validation
 
-**Performance hors-échantillon (2016-2020)**
+**Out-of-Sample Performance (2016-2020)**
 
-| Modèle | RMSE | vs ARDL |
-|--------|------|---------|
-| **ARDL Quadratique** | **0.047** | — |
+| Model | RMSE | vs ARDL |
+|-------|------|---------|
+| **Quadratic ARDL** | **0.047** | — |
 | ARIMA(1,1,1) | 0.050 | +6% |
-| Marche aléatoire | 0.052 | +11% |
+| Random Walk | 0.052 | +11% |
 
 ::: {.callout-tip}
-## ✅ ARDL bat tous les benchmarks
-Sur données **non vues** (2016-2020), l'ARDL offre l'erreur la plus faible.
+## ✅ ARDL beats all benchmarks
+On **unseen data** (2016-2020), ARDL offers the lowest error.
 
-→ La capacité prédictive du modèle est validée.
+→ The model's predictive capacity is validated.
 :::
 
 :::

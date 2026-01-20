@@ -1,23 +1,23 @@
-# Approche Transversale {background-color="#00796B"}
+# Cross-Sectional Approach {background-color="#00796B"}
 
 ::: {style="text-align: center; margin-top: 3em;"}
-## 📸 Partie I : Validation spatiale
+## 📸 Part I: Spatial Validation
 
-**159 pays (2020)** | Quelle forme prend l'EKC dans l'espace ?
+**159 Countries (2020)** | What shape does the EKC take across space?
 :::
 
 ::: {.notes}
-Durée : ~7 minutes. 
-Objectif : Montrer que le modèle quadratique suffit + hétérogénéité massive.
+Duration: ~7 minutes.
+Objective: Show that the quadratic model is sufficient + highlight massive heterogeneity.
 :::
 
 ---
 
-## 🌍 Données et contexte empirique
+## 🌍 Data and Empirical Context
 
 ::: {.panel-tabset}
 
-### Vue d'ensemble 2020
+### 2020 Overview
 
 ```{python}
 #| echo: false
@@ -98,22 +98,22 @@ plt.show()
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.callout-note appearance="minimal"}
-## Panel A : Justification log-log
-Relation quasi-**linéaire** en échelle log  
-→ Interprétation en **élasticités**
+## Panel A: Log-Log Justification
+Quasi-**linear** relationship in log scale  
+→ Interpretation in **elasticities**
 :::
 :::
 
 ::: {.column width="50%"}
 ::: {.callout-warning appearance="minimal"}
-## Panel B : Hétérogénéité
-Qatar (35 t) vs Suède (4 t) à PIB égal  
-→ **Facteur 9** : les politiques comptent
+## Panel B: Heterogeneity
+Qatar (35 t) vs Sweden (4 t) at equal GDP  
+→ **Factor of 9**: policies matter
 :::
 :::
 :::
 
-### Trajectoires 1990-2020
+### Trajectories 1990-2020
 
 ```{python}
 #| echo: false
@@ -154,15 +154,15 @@ plt.show()
 ```
 
 ::: {.callout-note appearance="minimal"}
-## Trois clubs divergents
-🔴 **Pays riches** : Pic ~2005, déclin -30%  
-🟠 **Émergents** : Croissance exponentielle +150%  
-🔵 **Pays pauvres** : Stagnation ~1 t/hab
+## Three Divergent Clubs
+🔴 **Rich Countries**: Peak ~2005, decline -30%  
+🟠 **Emerging Economies**: Exponential growth +150%  
+🔵 **Poor Countries**: Stagnation ~1 t/capita
 
-→ L'EKC ne décrit **pas** une loi universelle
+→ The EKC does **not** describe a universal law
 :::
 
-### Données mobilisées
+### Data Mobilized
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -170,51 +170,51 @@ plt.show()
 
 - Our World in Data (2020)
 - Global Carbon Project
-- Banque Mondiale
+- World Bank
 
-**Échantillon**
+**Sample**
 
-- **159 pays** (>95% PIB mondial)
-- Période : **1990-2020** (30 ans)
+- **159 countries** (>95% of world GDP)
+- Period: **1990-2020** (30 years)
 - ~4770 observations
 :::
 
 ::: {.column width="50%"}
-**Variables clés**
+**Key Variables**
 
-| Variable | Unité | Transformation |
-|----------|-------|----------------|
-| $\mathrm{CO}_2/\text{cap}$ | tonnes/an | $\ln(\mathrm{CO}_2)$ |
-| PIB/hab | $ PPA 2017 | $\ln(\text{PIB})$ centré |
+| Variable | Unit | Transformation |
+|----------|------|----------------|
+| $\mathrm{CO}_2/\text{cap}$ | tonnes/year | $\mathrm{CO}_2$ |
+| GDP/cap | 2017 PPP $ | $\ln(\text{GDP})$ centered |
 
-**Exclusions** : 12 micro-États et paradis fiscaux  
-(Liechtenstein, Monaco, Luxembourg, Singapour...)
+**Exclusions**: 12 micro-states and tax havens  
+(Liechtenstein, Monaco, Luxembourg, Singapore...)
 
-**Justification log** : Test Box-Cox → λ = 0.15 ≈ 0
+**Log Justification**: Box-Cox Test → λ = 0.15 ≈ 0
 :::
 :::
 
 :::
 
 ::: {.notes}
-**Pour l'oral** :
+**Oral Notes**:
 
-**Onglet 1 (Vue d'ensemble)** :
-- Panel A : "En log-log, la relation devient quasi-linéaire → justifie notre spécification"
-- Panel B : "En échelle réelle, on voit l'hétérogénéité explosive : Qatar vs Suède = facteur 9"
+**Tab 1 (Overview)**:
+- Panel A: "In log-log, the relationship becomes quasi-linear → justifies our specification"
+- Panel B: "In real scale, we see explosive heterogeneity: Qatar vs Sweden = factor of 9"
 
-**Onglet 2 (Trajectoires)** :
-- "Cette hétérogénéité n'est pas statique : 3 clubs évoluent différemment depuis 30 ans"
-- "Pays riches ont DÉJÀ découplé, émergents en pleine ascension, pauvres stagnent"
+**Tab 2 (Trajectories)**:
+- "This heterogeneity is not static: 3 clubs have evolved differently over 30 years"
+- "Rich countries have ALREADY decoupled, emerging ones are skyrocketing, poor ones stagnate"
 
-**Onglet 3 (Données)** :
-- Mentionner rapidement si question sur la méthodologie
-- "Échantillon robuste, 159 pays couvrant >95% du PIB mondial"
+**Tab 3 (Data)**:
+- Mention quickly if asked about methodology
+- "Robust sample, 159 countries covering >95% of world GDP"
 :::
 
 ---
 
-## 📈 Résultat n°1 : Le modèle quadratique suffit
+## 📈 Result #1: The Quadratic Model is Sufficient
 
 ::: {.columns}
 ::: {.column width="55%"}
@@ -263,87 +263,87 @@ plt.show()
 :::
 
 ::: {.column width="45%"}
-**Résultats d'estimation**
+**Estimation Results**
 
-| Coefficient | Quadratique | Cubique |
-|-------------|-------------|---------|
+| Coefficient | Quadratic | Cubic |
+|-------------|-----------|-------|
 | $\beta_1$ | 1.070*** | 1.070*** |
 | $\beta_2$ | **-0.083***| -0.083** |
 | $\beta_3$ | — | -0.0002 |
 | | | (p=0.995) |
 
-**Performance prédictive (CV k=5)**
+**Predictive Performance (CV k=5)**
 
-| Modèle | RMSE |
-|--------|------|
-| **Quadratique** | **0.568** ✅ |
-| Cubique | 0.580 ❌ |
+| Model | RMSE |
+|-------|------|
+| **Quadratic** | **0.568** ✅ |
+| Cubic | 0.580 ❌ |
 
 ::: {.fragment}
 ::: {.callout-tip}
 ## Verdict
-✅ EKC classique validée ($\beta_2 < 0$)
+✅ Classic EKC validated ($\beta_2 < 0$)
 
-❌ Courbe en N rejetée ($\beta_3 \approx 0$)
+❌ N-shaped curve rejected ($\beta_3 \approx 0$)
 :::
 :::
 :::
 :::
 
 ::: {.notes}
-Les deux courbes se superposent presque parfaitement. Le cubique n'apporte rien visuellement ni statistiquement. Principe de parcimonie : on garde le quadratique.
+The two curves overlap almost perfectly. The cubic term adds nothing visually or statistically. Principle of Parsimony: we keep the quadratic.
 :::
 
 ---
 
-## 🔍 L'hétérogénéité masquée : Trois clubs de pays
+## 🔍 Hidden Heterogeneity: Three Country Clubs
 
 ::: {.columns}
 ::: {.column width="33%"}
 ::: {.callout-warning}
-## 🔴 Sur-carbonés
-**Au-dessus de l'EKC**
+## 🔴 Carbon-Intensive
+**Above the EKC**
 
-- 🇶🇦 Qatar : 35 t
-- 🇰🇼 Koweït : 25 t
-- 🇦🇺 Australie : 17 t
+- 🇶🇦 Qatar: 35 t
+- 🇰🇼 Kuwait: 25 t
+- 🇦🇺 Australia: 17 t
 
-*Rente fossile*
+*Fossil Rent*
 :::
 :::
 
 ::: {.column width="33%"}
 ::: {.callout-note}
-## 🟡 Sur la courbe
-**Trajectoire moyenne**
+## 🟡 On the Curve
+**Average Trajectory**
 
-- 🇺🇸 USA : 14 t
-- 🇩🇪 Allemagne : 8 t
-- 🇯🇵 Japon : 9 t
+- 🇺🇸 USA: 14 t
+- 🇩🇪 Germany: 8 t
+- 🇯🇵 Japan: 9 t
 
-*Transition en cours*
+*Transition underway*
 :::
 :::
 
 ::: {.column width="33%"}
 ::: {.callout-tip}
-## 🟢 Décarbonés
-**Sous l'EKC**
+## 🟢 Decarbonized
+**Below the EKC**
 
-- 🇸🇪 Suède : 4 t
-- 🇫🇷 France : 5 t
-- 🇨🇭 Suisse : 4 t
+- 🇸🇪 Sweden: 4 t
+- 🇫🇷 France: 5 t
+- 🇨🇭 Switzerland: 4 t
 
-*Nucléaire + hydro*
+*Nuclear + Hydro*
 :::
 :::
 :::
 
 ::: {.fragment}
 ::: {.callout-important}
-## Message clé
-À **PIB égal** (~50k $/hab) : 🇸🇪 Suède = **4 t** | 🇶🇦 Qatar = **35 t** → **Facteur 9**
+## Key Message
+At **equal GDP** (~50k $/capita): 🇸🇪 Sweden = **4 t** | 🇶🇦 Qatar = **35 t** → **Factor of 9**
 
-→ Les **choix politiques** comptent plus que la richesse seule
+→ **Political choices** matter more than wealth alone.
 :::
 :::

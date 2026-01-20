@@ -74,15 +74,7 @@ format:
         \usepackage{twemojis}
         
         % ===================================================================
-        % 3. TYPOGRAPHIE FRANÇAISE
-        % ===================================================================
-        % Configuration des guillemets français pour le package babel.
-        % og = opening guillemet (ouvrant), fg = closing guillemet (fermant).
-        % -------------------------------------------------------------------
-        \frenchbsetup{og=«, fg=»}
-        
-        % ===================================================================
-        % 4. INTERLIGNE
+        % 3. INTERLIGNE
         % ===================================================================
         % Augmente l'interligne à 1.5× pour améliorer la lisibilité.
         % Alternatives : \singlespacing (1×) ou \doublespacing (2×).
@@ -91,7 +83,7 @@ format:
         \onehalfspacing
         
         % ===================================================================
-        % 5. ESPACEMENT DES TITRES DE CHAPITRES (KOMA-Script)
+        % 4. ESPACEMENT DES TITRES DE CHAPITRES (KOMA-Script)
         % ===================================================================
         % Par défaut, scrreprt laisse un grand espace vide avant les titres.
         % beforeskip : espace AVANT le titre (valeur négative = remonte)
@@ -104,7 +96,7 @@ format:
         ]{chapter}
         
         % ===================================================================
-        % 6. CONTRÔLE DU PLACEMENT DES FLOTTANTS
+        % 5. CONTRÔLE DU PLACEMENT DES FLOTTANTS
         % ===================================================================
         % float    : ajoute l'option [H] (Here) pour forcer le placement exact
         % needspace: évite les titres orphelins en bas de page (réserve de l'espace)
@@ -113,7 +105,7 @@ format:
         \usepackage{needspace}
         
         % ===================================================================
-        % 7. COMPORTEMENT PAR DÉFAUT DES FIGURES ET TABLEAUX
+        % 6. COMPORTEMENT PAR DÉFAUT DES FIGURES ET TABLEAUX
         % ===================================================================
         % Force LaTeX à placer TOUS les flottants exactement là où ils
         % apparaissent dans le code source (pas de déplacement automatique).

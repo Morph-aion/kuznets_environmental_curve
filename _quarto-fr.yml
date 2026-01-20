@@ -6,7 +6,7 @@
 # Définit le type de projet, les fichiers à compiler, et le dossier de sortie.
 # -------------------------------------------------------------------
 project:
-  output-dir: output/_book                  # Dossier de sortie spécifique au rapport FR (où Quarto génère le livre)
+  output-dir: output/_book/fr                  # Dossier de sortie spécifique au rapport FR (où Quarto génère le livre)
 
 # ===================================================================
 # PARAMÈTRES RÉGIONAUX ET LINGUISTIQUES
@@ -45,6 +45,25 @@ crossref:
   thm-prefix: "Théorème"
   lem-prefix: "Lemme"
   def-prefix: "Définition"
+
+# ===================================================================
+# DÉFINITION DES FORMATS DE SORTIE
+# ===================================================================
+# Personnalise l'apparence et les options pour chaque format de sortie (HTML, PDF...).
+# -------------------------------------------------------------------
+format:
+  # --- FORMAT PDF (rendu académique imprimable) ---
+  pdf:
+    toc-title: "Table des matières"
+    include-in-header:
+      text: |
+        % ===================================================================
+        % TYPOGRAPHIE FRANÇAISE
+        % ===================================================================
+        % Configuration des guillemets français pour le package babel.
+        % og = opening guillemet (ouvrant), fg = closing guillemet (fermant).
+        % -------------------------------------------------------------------
+        \frenchbsetup{og=«, fg=»}
 
 
 # ===================================================================

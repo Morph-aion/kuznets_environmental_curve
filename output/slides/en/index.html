@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="../fr"><head>
+<html lang="../en"><head>
 <script>/*!
  * clipboard.js v2.0.11
  * https://clipboardjs.com/
@@ -446,7 +446,7 @@
   <meta name="author" content="A.Sylla">
   <meta name="author" content="D.Adjenia">
   <meta name="dcterms.date" content="2026-01-20">
-  <title>La Courbe Environnementale de Kuznets pour le CO₂</title>
+  <title>The Environmental Kuznets Curve</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -1043,8 +1043,7 @@ margin-right: 0; }
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title"><span class="r-fit-text">La Courbe Environnementale de Kuznets pour le CO₂</span></h1>
-  <p class="subtitle">Une évaluation empirique par approches transversale et temporelle</p>
+  <h1 class="title">The Environmental Kuznets Curve</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -1072,13 +1071,13 @@ D.Adjenia
   <p class="date">2026-01-20</p>
 </section><section id="TOC">
 <nav role="doc-toc"> 
-<h2 id="toc-title">Contenu</h2>
+<h2 id="toc-title">Content</h2>
 <ul>
 <li><a href="#/introduction" id="/toc-introduction">Introduction</a></li>
-<li><a href="#/approche-transversale" id="/toc-approche-transversale">Approche Transversale</a></li>
-<li><a href="#/approche-temporelle" id="/toc-approche-temporelle">Approche Temporelle</a></li>
+<li><a href="#/cross-sectional-approach" id="/toc-cross-sectional-approach">Cross-Sectional Approach</a></li>
+<li><a href="#/time-series-approach" id="/toc-time-series-approach">Time-Series Approach</a></li>
 <li><a href="#/conclusion" id="/toc-conclusion">Conclusion</a></li>
-<li><a href="#/annexes" id="/toc-annexes">Annexes</a></li>
+<li><a href="#/appendix" id="/toc-appendix">Appendix</a></li>
 </ul>
 </nav>
 </section>
@@ -1087,56 +1086,56 @@ D.Adjenia
 <h1>Introduction</h1>
 
 </section>
-<section id="la-question-au-cœur-du-débat-climat" class="slide level2 center">
-<h2>🎯 La question au cœur du débat climat</h2>
-<h3 id="problématique">Problématique</h3>
+<section id="the-core-question-of-the-climate-debate" class="slide level2 center">
+<h2>🎯 The Core Question of the Climate Debate</h2>
+<h3 id="problem-statement">Problem Statement</h3>
 <p><br></p>
 <div style="font-size: 1.2em; text-align: center; font-weight: 600; color: #4a5568; margin-top: 0.5em;">
-<p>« La croissance économique finit-elle par réduire la pollution ? »</p>
+<p>“Does economic growth eventually reduce pollution?”</p>
 </div>
 <p><br></p>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>L’hypothèse EKC (Kuznets, 1991)</strong></p>
-<p><span class="math display">\text{Pollution} = f(\text{Revenu})</span></p>
-<p>Relation en <strong>U inversé</strong> :</p>
+<p><strong>The EKC Hypothesis (Kuznets, 1991)</strong></p>
+<p><span class="math display">\text{Pollution} = f(\text{Income})</span></p>
+<p><strong>Inverted-U</strong> relationship:</p>
 <ul>
-<li>Phase 1 : Industrialisation → ↗️ pollution</li>
-<li>Phase 2 : Services + tech    → ↘️ pollution</li>
+<li>Phase 1: Industrialization → ↗️ pollution</li>
+<li>Phase 2: Services + tech    → ↘️ pollution</li>
 </ul>
-<p><strong>Point de retournement</strong> (<em>turning point</em>) : <span class="math inline">\frac{\partial \mathrm{CO}_2}{\partial \text{PIB}} = 0</span></p>
+<p><strong>Turning Point</strong>: <span class="math inline">\frac{\partial \mathrm{CO}_2}{\partial \text{GDP}} = 0</span></p>
 </div><div class="column" style="width:50%;">
-<p><strong>Notre approche originale</strong></p>
-<p>✅ <strong>Double validation empirique</strong></p>
+<p><strong>Our Original Approach</strong></p>
+<p>✅ <strong>Double Empirical Validation</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Dimension</th>
-<th>Échantillon</th>
-<th>Objectif</th>
+<th>Sample</th>
+<th>Objective</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>📸 Espace</td>
-<td>159 pays (2020)</td>
-<td>Forme</td>
+<td>📸 Cross-section</td>
+<td>159 countries (2020)</td>
+<td>Shape</td>
 </tr>
 <tr class="even">
-<td>🎬 Temps</td>
+<td>🎬 Time-series</td>
 <td>USA (1990-2020)</td>
-<td>Dynamique</td>
+<td>Dynamics</td>
 </tr>
 </tbody>
 </table>
-<p>✅ <strong>Double objectif</strong></p>
+<p>✅ <strong>Double Objective</strong></p>
 <ul>
-<li>🔍 <strong>Estimer</strong> la relation</li>
-<li>🎯 <strong>Prédire</strong> le futur</li>
+<li>🔍 <strong>Estimate</strong> the relationship</li>
+<li>🎯 <strong>Predict</strong> the future</li>
 </ul>
 </div></div>
 <aside class="notes">
-<p>L’EKC est née en 1991 avec Grossman &amp; Krueger. Elle a été utilisée pour justifier l’inaction climatique. Nous testons si cette promesse tient empiriquement.</p>
+<p>The EKC was born in 1991 with Grossman &amp; Krueger. It has been used to justify climate inaction. We test if this promise holds empirically.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1149,97 +1148,97 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="spécification-économétrique" class="slide level2 center">
-<h2>📐 Spécification économétrique</h2>
+<section id="econometric-specification" class="slide level2 center">
+<h2>📐 Econometric Specification</h2>
 <div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">Modèle théorique</a></li><li><a href="#tabset-1-2">Justification log-log</a></li><li><a href="#tabset-1-3">Estimateurs</a></li></ul>
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-1-1">Theoretical Model</a></li><li><a href="#tabset-1-2">Log-Log Justification</a></li><li><a href="#tabset-1-3">Estimators</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
-<p><strong>Spécification log-log polynomiale</strong></p>
-<p><span class="math display">\ln(\mathrm{CO}_2) = \beta_0 + \beta_1 \ln(\text{PIB}) + \beta_2 [\ln(\text{PIB})]^2 + \beta_3 [\ln(\text{PIB})]^3 + \varepsilon</span></p>
-<p><strong>Interprétation des coefficients</strong></p>
+<p><strong>Polynomial Log-Log Specification</strong></p>
+<p><span class="math display">\ln(\mathrm{CO}_2) = \beta_0 + \beta_1 \ln(\text{GDP}) + \beta_2 [\ln(\text{GDP})]^2 + \beta_3 [\ln(\text{GDP})]^3 + \varepsilon</span></p>
+<p><strong>Coefficient Interpretation</strong></p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 31%">
 <col style="width: 31%">
 <col style="width: 11%">
-<col style="width: 25%">
+<col style="width: 26%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Signe de <span class="math inline">\beta_2</span></th>
-<th>Signe de <span class="math inline">\beta_3</span></th>
-<th>Forme</th>
-<th>Interprétation</th>
+<th>Sign of <span class="math inline">\beta_2</span></th>
+<th>Sign of <span class="math inline">\beta_3</span></th>
+<th>Shape</th>
+<th>Interpretation</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\beta_2 &lt; 0</span></td>
 <td><span class="math inline">\beta_3 = 0</span></td>
-<td><strong>U inversé</strong></td>
-<td>EKC classique ✅</td>
+<td><strong>Inverted-U</strong></td>
+<td>Classic EKC ✅</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\beta_2 &lt; 0</span></td>
 <td><span class="math inline">\beta_3 &gt; 0</span></td>
-<td><strong>N</strong></td>
-<td>Rebond ! ⚠️</td>
+<td><strong>N-shaped</strong></td>
+<td>Rebound! ⚠️</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\beta_2 &lt; 0</span></td>
 <td><span class="math inline">\beta_3 &lt; 0</span></td>
-<td><strong>U inversé accéléré</strong></td>
-<td>Déclin rapide</td>
+<td><strong>Accelerated Inverted-U</strong></td>
+<td>Rapid decline</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="tabset-1-2">
-<p><strong>Pourquoi la transformation logarithmique ?</strong></p>
+<p><strong>Why the logarithmic transformation?</strong></p>
 <ol type="1">
-<li><p><strong>Interprétation en élasticités</strong> : <span class="math inline">\beta_1</span> = % de variation de _2 pour 1% de PIB</p></li>
-<li><p><strong>Validation empirique</strong> : Test de Box-Cox → <span class="math inline">\lambda_{\text{optimal}} = 0.15 \approx 0</span></p></li>
-<li><p><strong>Stabilisation de la variance</strong> : Réduit l’hétéroscédasticité</p></li>
+<li><p><strong>Elasticity Interpretation</strong>: <span class="math inline">\beta_1</span> = % change in _2 for a 1% change in GDP</p></li>
+<li><p><strong>Empirical Validation</strong>: Box-Cox Test → <span class="math inline">\lambda_{\text{optimal}} = 0.15 \approx 0</span></p></li>
+<li><p><strong>Variance Stabilization</strong>: Reduces heteroscedasticity</p></li>
 </ol>
 </div>
 <div id="tabset-1-3">
-<p><strong>Approche transversale (N=159)</strong></p>
+<p><strong>Cross-sectional Approach (N=159)</strong></p>
 <ul>
-<li>OLS avec erreurs-types <strong>HC3</strong> (robustes, N &lt; 250)</li>
+<li>OLS with <strong>HC3</strong> standard errors (robust, N &lt; 250)</li>
 </ul>
-<p><strong>Approche temporelle (T=30)</strong></p>
+<p><strong>Time-series Approach (T=30)</strong></p>
 <ul>
-<li><strong>ARDL(1,1)</strong> avec Newey-West (3 lags)</li>
+<li><strong>ARDL(1,1)</strong> with Newey-West (3 lags)</li>
 </ul>
-<p><span class="math display">\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t</span></p>
+<p><span class="math display">\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{GDP})_t + \beta_1 \ln(\text{GDP})_{t-1} + \varepsilon_t</span></p>
 </div>
 </div>
 </div>
 </section>
-<section id="stratégie-estimer-vs-prédire" class="slide level2 center">
-<h2>⚖️ Stratégie : Estimer vs Prédire</h2>
+<section id="strategy-estimate-vs.-predict" class="slide level2 center">
+<h2>⚖️ Strategy: Estimate vs. Predict</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <h3 id="estimation">🔍 Estimation</h3>
-<p><strong>Question</strong> : Quelle relation entre X et Y ?</p>
-<p><strong>Critères</strong></p>
+<p><strong>Question</strong>: What is the relationship between X and Y?</p>
+<p><strong>Criteria</strong></p>
 <ul>
-<li>Significativité (<span class="math inline">p &lt; 0.05</span>)</li>
-<li><span class="math inline">R^2</span> ajusté</li>
-<li>Tests F emboîtés</li>
+<li>Significance (<span class="math inline">p &lt; 0.05</span>)</li>
+<li>Adjusted <span class="math inline">R^2</span></li>
+<li>Nested F-tests</li>
 </ul>
-<p><strong>Risque</strong> : Biais de spécification</p>
+<p><strong>Risk</strong>: Specification bias</p>
 </div><div class="column" style="width:50%;">
-<h3 id="prédiction">🎯 Prédiction</h3>
-<p><strong>Question</strong> : Le modèle généralise-t-il ?</p>
-<p><strong>Critères</strong></p>
+<h3 id="prediction">🎯 Prediction</h3>
+<p><strong>Question</strong>: Does the model generalize?</p>
+<p><strong>Criteria</strong></p>
 <ul>
-<li>RMSE hors-échantillon</li>
-<li>Comparaison benchmarks</li>
-<li>Validation croisée (CV)</li>
+<li>Out-of-sample RMSE</li>
+<li>Benchmark comparison</li>
+<li>Cross-validation (CV)</li>
 </ul>
-<p><strong>Risque</strong> : Surapprentissage</p>
+<p><strong>Risk</strong>: Overfitting</p>
 </div></div>
 <div class="fragment">
 <div class="callout callout-tip callout-titled callout-style-default">
@@ -1248,27 +1247,27 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Principe de parcimonie</strong></p>
+<p><strong>Principle of Parsimony</strong></p>
 </div>
 <div class="callout-content">
-<p>Un modèle <strong>statistiquement significatif</strong> mais <strong>prédictivement faible</strong> sera rejeté.</p>
-<p>→ Performance hors-échantillon = <strong>arbitre final</strong>.</p>
+<p>A <strong>statistically significant</strong> but <strong>predictively weak</strong> model will be rejected.</p>
+<p>→ Out-of-sample performance = <strong>final arbiter</strong>.</p>
 </div>
 </div>
 </div>
 </div>
 </section></section>
 <section>
-<section id="approche-transversale" class="title-slide slide level1 center" data-background-color="#00796B">
-<h1>Approche Transversale</h1>
+<section id="cross-sectional-approach" class="title-slide slide level1 center" data-background-color="#00796B">
+<h1>Cross-Sectional Approach</h1>
 
 </section>
-<section id="partie-i-validation-spatiale" class="slide level2 center" style="text-align: center; margin-top: 3em;">
-<h2>📸 Partie I : Validation spatiale</h2>
-<p><strong>159 pays (2020)</strong> | Quelle forme prend l’EKC dans l’espace ?</p>
+<section id="part-i-spatial-validation" class="slide level2 center" style="text-align: center; margin-top: 3em;">
+<h2>📸 Part I: Spatial Validation</h2>
+<p><strong>159 Countries (2020)</strong> | What shape does the EKC take across space?</p>
 </section>
 <aside class="notes">
-<p>Durée : ~7 minutes. Objectif : Montrer que le modèle quadratique suffit + hétérogénéité massive.</p>
+<p>Duration: ~7 minutes. Objective: Show that the quadratic model is sufficient + highlight massive heterogeneity.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1280,13 +1279,13 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-<section id="données-et-contexte-empirique" class="slide level2 center">
-<h2>🌍 Données et contexte empirique</h2>
+<section id="data-and-empirical-context" class="slide level2 center">
+<h2>🌍 Data and Empirical Context</h2>
 <div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-2-1">Vue d’ensemble 2020</a></li><li><a href="#tabset-2-2">Trajectoires 1990-2020</a></li><li><a href="#tabset-2-3">Données mobilisées</a></li></ul>
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-2-1">2020 Overview</a></li><li><a href="#tabset-2-2">Trajectories 1990-2020</a></li><li><a href="#tabset-2-3">Data Mobilized</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1">
-<div id="825e0565" class="cell" data-fig-dpi="300" data-fig-height="6" data-fig-width="14" data-execution_count="2">
+<div id="feec9957" class="cell" data-fig-dpi="300" data-fig-height="6" data-fig-width="14" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1300,11 +1299,11 @@ display:block!important;
 <div class="callout callout-note no-icon callout-titled callout-style-simple">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Panel A : Justification log-log</strong></p>
+<p><strong>Panel A: Log-Log Justification</strong></p>
 </div>
 <div class="callout-content">
-<p>Relation quasi-<strong>linéaire</strong> en échelle log<br>
-→ Interprétation en <strong>élasticités</strong></p>
+<p>Quasi-<strong>linear</strong> relationship in log scale<br>
+→ Interpretation in <strong>elasticities</strong></p>
 </div>
 </div>
 </div>
@@ -1312,18 +1311,18 @@ display:block!important;
 <div class="callout callout-warning no-icon callout-titled callout-style-simple">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Panel B : Hétérogénéité</strong></p>
+<p><strong>Panel B: Heterogeneity</strong></p>
 </div>
 <div class="callout-content">
-<p>Qatar (35 t) vs Suède (4 t) à PIB égal<br>
-→ <strong>Facteur 9</strong> : les politiques comptent</p>
+<p>Qatar (35 t) vs Sweden (4 t) at equal GDP<br>
+→ <strong>Factor of 9</strong>: policies matter</p>
 </div>
 </div>
 </div>
 </div></div>
 </div>
 <div id="tabset-2-2">
-<div id="8e76f350" class="cell" data-fig-dpi="300" data-fig-height="6" data-fig-width="12" data-execution_count="3">
+<div id="82c7e5e4" class="cell" data-fig-dpi="300" data-fig-height="6" data-fig-width="12" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1335,13 +1334,13 @@ display:block!important;
 <div class="callout callout-note no-icon callout-titled callout-style-simple">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Trois clubs divergents</strong></p>
+<p><strong>Three Divergent Clubs</strong></p>
 </div>
 <div class="callout-content">
-<p>🔴 <strong>Pays riches</strong> : Pic ~2005, déclin -30%<br>
-🟠 <strong>Émergents</strong> : Croissance exponentielle +150%<br>
-🔵 <strong>Pays pauvres</strong> : Stagnation ~1 t/hab</p>
-<p>→ L’EKC ne décrit <strong>pas</strong> une loi universelle</p>
+<p>🔴 <strong>Rich Countries</strong>: Peak ~2005, decline -30%<br>
+🟠 <strong>Emerging Economies</strong>: Exponential growth +150%<br>
+🔵 <strong>Poor Countries</strong>: Stagnation ~1 t/capita</p>
+<p>→ The EKC does <strong>not</strong> describe a universal law</p>
 </div>
 </div>
 </div>
@@ -1353,49 +1352,49 @@ display:block!important;
 <ul>
 <li>Our World in Data (2020)</li>
 <li>Global Carbon Project</li>
-<li>Banque Mondiale</li>
+<li>World Bank</li>
 </ul>
-<p><strong>Échantillon</strong></p>
+<p><strong>Sample</strong></p>
 <ul>
-<li><strong>159 pays</strong> (&gt;95% PIB mondial)</li>
-<li>Période : <strong>1990-2020</strong> (30 ans)</li>
+<li><strong>159 countries</strong> (&gt;95% of world GDP)</li>
+<li>Period: <strong>1990-2020</strong> (30 years)</li>
 <li>~4770 observations</li>
 </ul>
 </div><div class="column" style="width:50%;">
-<p><strong>Variables clés</strong></p>
+<p><strong>Key Variables</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Variable</th>
-<th>Unité</th>
+<th>Unit</th>
 <th>Transformation</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>_2/hab</td>
-<td>tonnes/an</td>
-<td><span class="math inline">\ln(\mathrm{CO}_2)</span></td>
+<td><span class="math inline">\mathrm{CO}_2/\text{cap}</span></td>
+<td>tonnes/year</td>
+<td><span class="math inline">\mathrm{CO}_2</span></td>
 </tr>
 <tr class="even">
-<td>PIB/hab</td>
-<td>$ PPA 2017</td>
-<td><span class="math inline">\ln(\text{PIB})</span> centré</td>
+<td>GDP/cap</td>
+<td>2017 PPP $</td>
+<td><span class="math inline">\ln(\text{GDP})</span> centered</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Exclusions</strong> : 12 micro-États et paradis fiscaux<br>
-(Liechtenstein, Monaco, Luxembourg, Singapour…)</p>
-<p><strong>Justification log</strong> : Test Box-Cox → λ = 0.15 ≈ 0</p>
+<p><strong>Exclusions</strong>: 12 micro-states and tax havens<br>
+(Liechtenstein, Monaco, Luxembourg, Singapore…)</p>
+<p><strong>Log Justification</strong>: Box-Cox Test → λ = 0.15 ≈ 0</p>
 </div></div>
 </div>
 </div>
 </div>
 <aside class="notes">
-<p><strong>Pour l’oral</strong> :</p>
-<p><strong>Onglet 1 (Vue d’ensemble)</strong> : - Panel A : “En log-log, la relation devient quasi-linéaire → justifie notre spécification” - Panel B : “En échelle réelle, on voit l’hétérogénéité explosive : Qatar vs Suède = facteur 9”</p>
-<p><strong>Onglet 2 (Trajectoires)</strong> : - “Cette hétérogénéité n’est pas statique : 3 clubs évoluent différemment depuis 30 ans” - “Pays riches ont DÉJÀ découplé, émergents en pleine ascension, pauvres stagnent”</p>
-<p><strong>Onglet 3 (Données)</strong> : - Mentionner rapidement si question sur la méthodologie - “Échantillon robuste, 159 pays couvrant &gt;95% du PIB mondial”</p>
+<p><strong>Oral Notes</strong>:</p>
+<p><strong>Tab 1 (Overview)</strong>: - Panel A: “In log-log, the relationship becomes quasi-linear → justifies our specification” - Panel B: “In real scale, we see explosive heterogeneity: Qatar vs Sweden = factor of 9”</p>
+<p><strong>Tab 2 (Trajectories)</strong>: - “This heterogeneity is not static: 3 clubs have evolved differently over 30 years” - “Rich countries have ALREADY decoupled, emerging ones are skyrocketing, poor ones stagnate”</p>
+<p><strong>Tab 3 (Data)</strong>: - Mention quickly if asked about methodology - “Robust sample, 159 countries covering &gt;95% of world GDP”</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1408,11 +1407,11 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="résultat-n1-le-modèle-quadratique-suffit" class="slide level2 center">
-<h2>📈 Résultat n°1 : Le modèle quadratique suffit</h2>
+<section id="result-1-the-quadratic-model-is-sufficient" class="slide level2 center">
+<h2>📈 Result #1: The Quadratic Model is Sufficient</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="49a0e3eb" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="4">
+<div id="6e8bea44" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1422,13 +1421,13 @@ display:block!important;
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<p><strong>Résultats d’estimation</strong></p>
+<p><strong>Estimation Results</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Coefficient</th>
-<th>Quadratique</th>
-<th>Cubique</th>
+<th>Quadratic</th>
+<th>Cubic</th>
 </tr>
 </thead>
 <tbody>
@@ -1454,21 +1453,21 @@ display:block!important;
 </tr>
 </tbody>
 </table>
-<p><strong>Performance prédictive (CV k=5)</strong></p>
+<p><strong>Predictive Performance (CV k=5)</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Modèle</th>
+<th>Model</th>
 <th>RMSE</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>Quadratique</strong></td>
+<td><strong>Quadratic</strong></td>
 <td><strong>0.568</strong> ✅</td>
 </tr>
 <tr class="even">
-<td>Cubique</td>
+<td>Cubic</td>
 <td>0.580 ❌</td>
 </tr>
 </tbody>
@@ -1483,15 +1482,15 @@ display:block!important;
 <p><strong>Verdict</strong></p>
 </div>
 <div class="callout-content">
-<p>✅ EKC classique validée (<span class="math inline">\beta_2 &lt; 0</span>)</p>
-<p>❌ Courbe en N rejetée (<span class="math inline">\beta_3 \approx 0</span>)</p>
+<p>✅ Classic EKC validated (<span class="math inline">\beta_2 &lt; 0</span>)</p>
+<p>❌ N-shaped curve rejected (<span class="math inline">\beta_3 \approx 0</span>)</p>
 </div>
 </div>
 </div>
 </div>
 </div></div>
 <aside class="notes">
-<p>Les deux courbes se superposent presque parfaitement. Le cubique n’apporte rien visuellement ni statistiquement. Principe de parcimonie : on garde le quadratique.</p>
+<p>The two curves overlap almost perfectly. The cubic term adds nothing visually or statistically. Principle of Parsimony: we keep the quadratic.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1504,8 +1503,8 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="lhétérogénéité-masquée-trois-clubs-de-pays" class="slide level2 center">
-<h2>🔍 L’hétérogénéité masquée : Trois clubs de pays</h2>
+<section id="hidden-heterogeneity-three-country-clubs" class="slide level2 center">
+<h2>🔍 Hidden Heterogeneity: Three Country Clubs</h2>
 <div class="columns">
 <div class="column" style="width:33%;">
 <div class="callout callout-warning callout-titled callout-style-default">
@@ -1514,16 +1513,16 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>🔴 Sur-carbonés</strong></p>
+<p><strong>🔴 Carbon-Intensive</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Au-dessus de l’EKC</strong></p>
+<p><strong>Above the EKC</strong></p>
 <ul>
-<li>🇶🇦 Qatar : 35 t</li>
-<li>🇰🇼 Koweït : 25 t</li>
-<li>🇦🇺 Australie : 17 t</li>
+<li>🇶🇦 Qatar: 35 t</li>
+<li>🇰🇼 Kuwait: 25 t</li>
+<li>🇦🇺 Australia: 17 t</li>
 </ul>
-<p><em>Rente fossile</em></p>
+<p><em>Fossil Rent</em></p>
 </div>
 </div>
 </div>
@@ -1534,16 +1533,16 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>🟡 Sur la courbe</strong></p>
+<p><strong>🟡 On the Curve</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Trajectoire moyenne</strong></p>
+<p><strong>Average Trajectory</strong></p>
 <ul>
-<li>🇺🇸 USA : 14 t</li>
-<li>🇩🇪 Allemagne : 8 t</li>
-<li>🇯🇵 Japon : 9 t</li>
+<li>🇺🇸 USA: 14 t</li>
+<li>🇩🇪 Germany: 8 t</li>
+<li>🇯🇵 Japan: 9 t</li>
 </ul>
-<p><em>Transition en cours</em></p>
+<p><em>Transition underway</em></p>
 </div>
 </div>
 </div>
@@ -1554,16 +1553,16 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>🟢 Décarbonés</strong></p>
+<p><strong>🟢 Decarbonized</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Sous l’EKC</strong></p>
+<p><strong>Below the EKC</strong></p>
 <ul>
-<li>🇸🇪 Suède : 4 t</li>
-<li>🇫🇷 France : 5 t</li>
-<li>🇨🇭 Suisse : 4 t</li>
+<li>🇸🇪 Sweden: 4 t</li>
+<li>🇫🇷 France: 5 t</li>
+<li>🇨🇭 Switzerland: 4 t</li>
 </ul>
-<p><em>Nucléaire + hydro</em></p>
+<p><em>Nuclear + Hydro</em></p>
 </div>
 </div>
 </div>
@@ -1575,27 +1574,27 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Message clé</strong></p>
+<p><strong>Key Message</strong></p>
 </div>
 <div class="callout-content">
-<p>À <strong>PIB égal</strong> (~50k $/hab) : 🇸🇪 Suède = <strong>4 t</strong> | 🇶🇦 Qatar = <strong>35 t</strong> → <strong>Facteur 9</strong></p>
-<p>→ Les <strong>choix politiques</strong> comptent plus que la richesse seule</p>
+<p>At <strong>equal GDP</strong> (~50k $/capita): 🇸🇪 Sweden = <strong>4 t</strong> | 🇶🇦 Qatar = <strong>35 t</strong> → <strong>Factor of 9</strong></p>
+<p>→ <strong>Political choices</strong> matter more than wealth alone.</p>
 </div>
 </div>
 </div>
 </div>
 </section></section>
 <section>
-<section id="approche-temporelle" class="title-slide slide level1 center" data-background-color="#1976D2">
-<h1>Approche Temporelle</h1>
+<section id="time-series-approach" class="title-slide slide level1 center" data-background-color="#1976D2">
+<h1>Time-Series Approach</h1>
 
 </section>
-<section id="partie-ii-validation-temporelle" class="slide level2 center" style="text-align: center; margin-top: 3em;">
-<h2>🎬 Partie II : Validation temporelle</h2>
-<p><strong>USA (1990-2020)</strong> | Le découplage observé est-il structurel ou conjoncturel ?</p>
+<section id="part-ii-temporal-validation" class="slide level2 center" style="text-align: center; margin-top: 3em;">
+<h2>🎬 Part II: Temporal Validation</h2>
+<p><strong>USA (1990-2020)</strong> | Is the observed decoupling structural or cyclical?</p>
 </section>
 <aside class="notes">
-<p>Durée : ~7 minutes. Objectif : Montrer l’inertie extrême + projection insuffisante pour Paris.</p>
+<p>Duration: ~7 minutes. Objective: Show extreme inertia + insufficient projection for Paris Agreement.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1607,11 +1606,11 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-<section id="le-cas-américain-série-et-modèle-ardl" class="slide level2 center">
-<h2>🇺🇸 Le cas américain : Série et modèle ARDL</h2>
+<section id="the-american-case-series-and-ardl-model" class="slide level2 center">
+<h2>🇺🇸 The American Case: Series and ARDL Model</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="cdcf7537" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="5">
+<div id="604f8e0d" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1621,35 +1620,35 @@ display:block!important;
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<p><strong>Modèle ARDL(1,1)</strong></p>
-<p><span class="math display">\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})_t + \beta_1 \ln(\text{PIB})_{t-1} + \varepsilon_t</span></p>
-<p><strong>Résultats clés</strong></p>
+<p><strong>ARDL(1,1) Model</strong></p>
+<p><span class="math display">\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{GDP})_t + \beta_1 \ln(\text{GDP})_{t-1} + \varepsilon_t</span></p>
+<p><strong>Key Results</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Paramètre</th>
-<th>Valeur</th>
-<th>Interprétation</th>
+<th>Parameter</th>
+<th>Value</th>
+<th>Interpretation</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\rho</span></td>
 <td><strong>1.003</strong>*</td>
-<td>Inertie extrême</td>
+<td>Extreme Inertia</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\varepsilon_{CT}</span></td>
 <td>-0.122*</td>
-<td>Faible élasticité</td>
+<td>Low Elasticity</td>
 </tr>
 <tr class="odd">
-<td>Pic</td>
+<td>Peak</td>
 <td><strong>2005</strong></td>
 <td>Turning point</td>
 </tr>
 <tr class="even">
-<td>Baisse</td>
+<td>Decline</td>
 <td><strong>-21%</strong></td>
 <td>2005→2020</td>
 </tr>
@@ -1662,24 +1661,24 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>⚠️ Inertie structurelle</strong></p>
+<p><strong>⚠️ Structural Inertia</strong></p>
 </div>
 <div class="callout-content">
-<p><span class="math inline">\rho \approx 1</span> → Chocs <strong>quasi-permanents</strong></p>
-<p>Demi-vie : <strong>Non calculable</strong></p>
+<p><span class="math inline">\rho \approx 1</span> → <strong>Quasi-permanent</strong> shocks</p>
+<p>Half-life: <strong>Non-calculable</strong></p>
 </div>
 </div>
 </div>
 </div>
 </div></div>
 </section>
-<section id="projection-2025-et-validation-hors-échantillon" class="slide level2 center">
-<h2>🔮 Projection 2025 et validation hors-échantillon</h2>
+<section id="projection-and-out-of-sample-validation" class="slide level2 center">
+<h2>🔮 2025 Projection and Out-of-Sample Validation</h2>
 <div class="panel-tabset">
 <ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-3-1">Projection</a></li><li><a href="#tabset-3-2">Validation</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1">
-<div id="d03467e6" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="6">
+<div id="465042b1" class="cell" data-fig-dpi="300" data-fig-height="7" data-fig-width="10" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1694,48 +1693,48 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Écart avec l’Accord de Paris</strong></p>
+<p><strong>Gap with the Paris Agreement</strong></p>
 </div>
 <div class="callout-content">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Métrique</th>
-<th>Projection 2025</th>
-<th>Objectif 2030 (Paris)</th>
+<th>Metric</th>
+<th>2025 Projection</th>
+<th>2030 Target (Paris)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Variation vs 2020</td>
+<td>Change vs 2020</td>
 <td><strong>-8.5%</strong></td>
-<td><strong>-50%</strong> requis</td>
+<td><strong>-50%</strong> required</td>
 </tr>
 <tr class="even">
-<td>Niveau</td>
-<td>13.0 t/hab</td>
-<td>7.1 t/hab</td>
+<td>Level</td>
+<td>13.0 t/capita</td>
+<td>7.1 t/capita</td>
 </tr>
 </tbody>
 </table>
-<p>→ Gap de <strong>29 points</strong> : trajectoire insuffisante.</p>
+<p>→ <strong>29-point</strong> gap: insufficient trajectory.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="tabset-3-2">
-<p><strong>Performance hors-échantillon (2016-2020)</strong></p>
+<p><strong>Out-of-Sample Performance (2016-2020)</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Modèle</th>
+<th>Model</th>
 <th>RMSE</th>
 <th>vs ARDL</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>ARDL Quadratique</strong></td>
+<td><strong>Quadratic ARDL</strong></td>
 <td><strong>0.047</strong></td>
 <td>—</td>
 </tr>
@@ -1745,7 +1744,7 @@ display:block!important;
 <td>+6%</td>
 </tr>
 <tr class="odd">
-<td>Marche aléatoire</td>
+<td>Random Walk</td>
 <td>0.052</td>
 <td>+11%</td>
 </tr>
@@ -1757,11 +1756,11 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>✅ ARDL bat tous les benchmarks</strong></p>
+<p><strong>✅ ARDL beats all benchmarks</strong></p>
 </div>
 <div class="callout-content">
-<p>Sur données <strong>non vues</strong> (2016-2020), l’ARDL offre l’erreur la plus faible.</p>
-<p>→ La capacité prédictive du modèle est validée.</p>
+<p>On <strong>unseen data</strong> (2016-2020), ARDL offers the lowest error.</p>
+<p>→ The model’s predictive capacity is validated.</p>
 </div>
 </div>
 </div>
@@ -1774,12 +1773,12 @@ display:block!important;
 <h1>Conclusion</h1>
 
 </section>
-<section id="confrontation-et-implications" class="slide level2 center" style="text-align: center; margin-top: 3em;">
-<h2>🧩 Confrontation et implications</h2>
-<p>Les deux approches convergent-elles ? Que faire ?</p>
+<section id="confrontation-and-implications" class="slide level2 center" style="text-align: center; margin-top: 3em;">
+<h2>🧩 Confrontation and Implications</h2>
+<p>Do the two approaches converge? What should be done?</p>
 </section>
 <aside class="notes">
-<p>Durée : ~4 minutes. Message clé : EKC existe mais lente, hétérogène, non garantie.</p>
+<p>Duration: ~4 minutes. Key message: EKC exists but is slow, heterogeneous, not guaranteed.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1791,24 +1790,24 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-<section id="confrontation-des-deux-approches" class="slide level2 center">
-<h2>⚖️ Confrontation des deux approches</h2>
+<section id="confronting-the-two-approaches" class="slide level2 center">
+<h2>⚖️ Confronting the Two Approaches</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <h3 id="convergence">✅ Convergence</h3>
 <ul>
-<li>Modèle <strong>quadratique</strong> suffit</li>
-<li>Courbe en <strong>N rejetée</strong> (<span class="math inline">\beta_3 \approx 0</span>)</li>
-<li>EKC classique <strong>validée</strong></li>
-<li>Découplage <strong>réel</strong> (pays riches)</li>
+<li><strong>Quadratic</strong> model is sufficient</li>
+<li><strong>N-shaped</strong> curve rejected (<span class="math inline">\beta_3 \approx 0</span>)</li>
+<li>Classic EKC <strong>validated</strong></li>
+<li><strong>Real</strong> decoupling (rich countries)</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <h3 id="divergence">⚠️ Divergence</h3>
 <ul>
-<li><strong>Transversal</strong> : Découplage <em>possible</em></li>
-<li><strong>Temporel</strong> : Découplage <em>lent</em> (<span class="math inline">\rho \approx 1</span>)</li>
-<li>Élasticité CT faible : <span class="math inline">-0.12</span></li>
-<li>Transition <strong>30+ ans</strong></li>
+<li><strong>Cross-sectional</strong>: Decoupling <em>possible</em></li>
+<li><strong>Temporal</strong>: Decoupling <em>slow</em> (<span class="math inline">\rho \approx 1</span>)</li>
+<li>Low short-run elasticity: <span class="math inline">-0.12</span></li>
+<li>Transition <strong>30+ years</strong></li>
 </ul>
 </div></div>
 <div class="callout callout-important callout-titled callout-style-default">
@@ -1817,121 +1816,117 @@ display:block!important;
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Synthèse</strong></p>
+<p><strong>Synthesis</strong></p>
 </div>
 <div class="callout-content">
-<p>L’EKC existe mais elle est :</p>
+<p>The EKC exists but is:</p>
 <ul>
-<li><strong>Conditionnelle</strong> (pas automatique)</li>
-<li><strong>Hétérogène</strong> (facteur 9 entre pays)<br>
-</li>
-<li><strong>Lente</strong> (inertie structurelle)</li>
+<li><strong>Conditional</strong> (not automatic)</li>
+<li><strong>Heterogeneous</strong> (factor of 9 between countries)</li>
+<li><strong>Slow</strong> (structural inertia)</li>
 </ul>
-<p>→ Le marché seul <strong>ne sauvera pas</strong> le climat</p>
+<p>→ The market alone <strong>will not save</strong> the climate</p>
 </div>
 </div>
 </div>
 </section>
-<section id="implications-pour-laction-climatique" class="slide level2 center">
-<h2>💡 Implications pour l’action climatique</h2>
+<section id="implications-for-climate-action" class="slide level2 center">
+<h2>💡 Implications for Climate Action</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>1. 🚫 Limites du Marché</strong></p>
-<p>L’EKC n’est <strong>pas automatique</strong> (ex: Suède vs Qatar). <em>Instruments requis</em> : taxe carbone, normes, R&amp;D.</p>
+<p><strong>1. 🚫 Market Limits</strong></p>
+<p>The EKC is <strong>not automatic</strong> (e.g., Sweden vs Qatar). <em>Required instruments</em>: carbon tax, standards, R&amp;D.</p>
 <p><br></p>
-<p><strong>2. ⏳ Inertie Structurelle</strong></p>
-<p>Demi-vie du capital ~5+ ans.<br>
-<em>Lock-in</em> : Les choix d’aujourd’hui nous engagent pour <strong>30 ans</strong>.</p>
+<p><strong>2. ⏳ Structural Inertia</strong></p>
+<p>Capital half-life ~5+ years. <em>Lock-in</em>: Today’s choices commit us for <strong>30 years</strong>.</p>
 </div><div class="column" style="width:50%;">
-<p><strong>3. 📉 Écart Net Zero</strong></p>
-<p>Trajectoire USA : <strong>-21%</strong> (projeté) vs <strong>-50%</strong> (Paris).<br>
-Besoin de <strong>rupture</strong> politique, pas de continuité.</p>
+<p><strong>3. 📉 Net Zero Gap</strong></p>
+<p>USA Trajectory: <strong>-21%</strong> (projected) vs <strong>-50%</strong> (Paris). Need for political <strong>breakthrough</strong>, not continuity.</p>
 <p><br></p>
-<p><strong>4. 🚀 Opportunité du Sud</strong></p>
-<p><em>Tunneling</em> : Éviter le pic pollueur des pays riches.<br>
-Transferts technologiques et financiers <strong>essentiels</strong>.</p>
+<p><strong>4. 🚀 Opportunity for the Global South</strong></p>
+<p><em>Tunneling</em>: Avoid the polluting peak of rich countries. Technological and financial transfers are <strong>essential</strong>.</p>
 </div></div>
 </section>
-<section id="messages-clés" class="slide level2 center">
-<h2>📝 Messages clés</h2>
+<section id="key-messages" class="slide level2 center">
+<h2>📝 Key Messages</h2>
 <div class="callout callout-tip no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<p><strong>Trois enseignements clés</strong></p>
+<p><strong>Three Key Takeaways</strong></p>
 </div>
 <div class="callout-content">
 <ol type="1">
-<li><p><strong>L’EKC existe</strong> → mais elle est <strong>conditionnelle</strong>, pas automatique.</p></li>
-<li><p><strong>L’inertie est réelle</strong> → <span class="math inline">\rho \approx 1</span> : chaque année de retard se paie sur 30 ans.</p></li>
-<li><p><strong>Les politiques sont décisives</strong> → La Suède (4t) prouve que la décarbonation est possible.</p></li>
+<li><p><strong>The EKC exists</strong> → but is <strong>conditional</strong>, not automatic.</p></li>
+<li><p><strong>Inertia is real</strong> → <span class="math inline">\rho \approx 1</span>: every year of delay costs 30 years.</p></li>
+<li><p><strong>Policies are decisive</strong> → Sweden (4t) proves decarbonization is possible.</p></li>
 </ol>
 </div>
 </div>
 </div>
 <div class="fragment">
 <div style="text-align: center; font-size: 1.4em; margin: 1em 0; color: #1a5276;">
-<p><strong>« Le marché ne sauvera pas le climat.</strong></p>
-<p><strong>Seules des politiques publiques ciblées, durables et ambitieuses le feront. »</strong></p>
+<p><strong>“The market will not save the climate.</strong></p>
+<p><strong>Only targeted, sustainable, and ambitious public policies will.”</strong></p>
 </div>
 </div>
 </section>
-<section id="merci-pour-votre-attention" class="slide level2 center" data-background-color="#00897B">
-<h2>Merci pour votre attention !</h2>
+<section id="thank-you-for-your-attention" class="slide level2 center" data-background-color="#00897B">
+<h2>Thank you for your attention!</h2>
 </section>
-<section id="questions-réponses" class="slide level2 center">
-<h2>Questions &amp; Réponses ?</h2>
+<section id="questions-answers" class="slide level2 center">
+<h2>Questions &amp; Answers?</h2>
 <div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">❓ Méthodologie</a></li><li><a href="#tabset-4-2">❓ Données</a></li><li><a href="#tabset-4-3">❓ Projections</a></li><li><a href="#tabset-4-4">📞 Contact</a></li></ul>
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default href="#tabset-4-1">❓ Methodology</a></li><li><a href="#tabset-4-2">❓ Data</a></li><li><a href="#tabset-4-3">❓ Projections</a></li><li><a href="#tabset-4-4">📞 Contact</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1">
-<p><strong>“Pourquoi écarter le cubique ?”</strong> Triple raison :</p>
+<p><strong>“Why reject the cubic model?”</strong> Three reasons:</p>
 <ol type="1">
-<li><span class="math inline">\beta_3</span> non significatif (<span class="math inline">p=0.995</span>)</li>
-<li>AIC moins bon (+2 points)</li>
-<li>RMSE en validation croisée supérieur.</li>
+<li><span class="math inline">\beta_3</span> not significant (<span class="math inline">p=0.995</span>)</li>
+<li>Worse AIC (+2 points)</li>
+<li>Higher cross-validation RMSE.</li>
 </ol>
-<p>→ <strong>Parcimonie</strong> validée.</p>
+<p>→ <strong>Parsimony</strong> validated.</p>
 </div>
 <div id="tabset-4-2">
-<p><strong>“Biais pollution haven ?”</strong> Reconnu. Nous utilisons les émissions <strong>territoriales</strong> (production). Les émissions basées sur la <strong>consommation</strong> (empreinte carbone) montreraient un découplage plus lent, mais la tendance reste la même pour les USA depuis 2005.</p>
+<p><strong>“Pollution Haven Bias?”</strong> Acknowledged. We use <strong>territorial</strong> emissions (production). <strong>Consumption</strong>-based emissions (carbon footprint) would show slower decoupling, but the trend remains the same for the USA since 2005.</p>
 </div>
 <div id="tabset-4-3">
-<p><strong>“Et après 2025 ?”</strong> L’inertie (<span class="math inline">\rho \approx 1</span>) rend les intervalles de confiance explosifs après 5 ans. Pour aller plus loin (2030-2050), il faudrait un modèle structurel avec des scénarios technologiques, pas juste économétrique.</p>
+<p><strong>“What about after 2025?”</strong> Inertia (<span class="math inline">\rho \approx 1</span>) causes confidence intervals to explode after 5 years. To go further (2030-2050), a structural model with technological scenarios is needed, not just econometrics.</p>
 </div>
 <div id="tabset-4-4">
-<p><strong>Pour aller plus loin :</strong></p>
+<p><strong>For further information:</strong></p>
 <ul>
 <li>📧 morphion.research@univ.fr</li>
-<li>💻 Code &amp; Données : GitHub</li>
-<li>📄 Rapport complet disponible (51 pages)</li>
+<li>💻 Code &amp; Data: GitHub</li>
+<li>📄 Full report available (51 pages)</li>
 </ul>
 </div>
 </div>
 </div>
 </section></section>
 <section>
-<section id="annexes" class="title-slide slide level1 center" data-background-color="#7f8c8d">
-<h1>Annexes</h1>
+<section id="appendix" class="title-slide slide level1 center" data-background-color="#7f8c8d">
+<h1>Appendix</h1>
 
 </section>
-<section id="a1.-statistiques-descriptives" class="slide level2 center">
-<h2>A1. Statistiques descriptives</h2>
+<section id="a1.-descriptive-statistics" class="slide level2 center">
+<h2>A1. Descriptive Statistics</h2>
 <div style="font-size: 0.85em;">
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Variable</th>
-<th>Moy.</th>
-<th>É.-T.</th>
+<th>Mean</th>
+<th>Std. Dev.</th>
 <th>Min</th>
-<th>Médiane</th>
+<th>Median</th>
 <th>Max</th>
 <th>N</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\mathrm{CO}_2</span>/hab (t)</td>
+<td><span class="math inline">\mathrm{CO}_2</span>/cap (t)</td>
 <td>4.95</td>
 <td>5.12</td>
 <td>0.03</td>
@@ -1940,12 +1935,12 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>159</td>
 </tr>
 <tr class="even">
-<td>PIB/hab ($)</td>
-<td>18 473</td>
-<td>20 115</td>
+<td>GDP/cap ($)</td>
+<td>18,473</td>
+<td>20,115</td>
 <td>661</td>
-<td>11 045</td>
-<td>116 935</td>
+<td>11,045</td>
+<td>116,935</td>
 <td>159</td>
 </tr>
 <tr class="odd">
@@ -1958,7 +1953,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>159</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\ln(\text{PIB})</span></td>
+<td><span class="math inline">\ln(\text{GDP})</span></td>
 <td>9.41</td>
 <td>1.35</td>
 <td>6.49</td>
@@ -1969,23 +1964,23 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 </tbody>
 </table>
 </div>
-<p><strong>Source</strong> : Our World in Data (2020) | <strong>Échantillon</strong> : 159 pays</p>
+<p><strong>Source</strong>: Our World in Data (2020) | <strong>Sample</strong>: 159 countries</p>
 </section>
-<section id="a2.-résultats-complets-ols-transversal" class="slide level2 center">
-<h2>A2. Résultats complets OLS (transversal)</h2>
+<section id="a2.-full-ols-results-cross-section" class="slide level2 center">
+<h2>A2. Full OLS Results (Cross-Section)</h2>
 <div style="font-size: 0.8em;">
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Variable</th>
-<th>Linéaire</th>
-<th>Quadratique</th>
-<th>Cubique</th>
+<th>Linear</th>
+<th>Quadratic</th>
+<th>Cubic</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\ln(\text{PIB})</span></td>
+<td><span class="math inline">\ln(\text{GDP})</span></td>
 <td>1.100***</td>
 <td>1.070***</td>
 <td>1.070***</td>
@@ -1997,7 +1992,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>(0.083)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">[\ln(\text{PIB})]^2</span></td>
+<td><span class="math inline">[\ln(\text{GDP})]^2</span></td>
 <td>—</td>
 <td>-0.083***</td>
 <td>-0.083**</td>
@@ -2009,7 +2004,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>(0.040)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">[\ln(\text{PIB})]^3</span></td>
+<td><span class="math inline">[\ln(\text{GDP})]^3</span></td>
 <td>—</td>
 <td>—</td>
 <td>-0.0002</td>
@@ -2021,7 +2016,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>(0.027)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">R^2</span> adj.</td>
+<td>Adj. <span class="math inline">R^2</span></td>
 <td>0.836</td>
 <td><strong>0.842</strong></td>
 <td>0.841</td>
@@ -2035,18 +2030,18 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 </tbody>
 </table>
 </div>
-<p><em>Erreurs-types HC3. *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01</em></p>
+<p><em>HC3 Standard Errors. *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01</em></p>
 </section>
-<section id="a3.-résultats-complets-ardl-temporel" class="slide level2 center">
-<h2>A3. Résultats complets ARDL (temporel)</h2>
+<section id="a3.-full-ardl-results-time-series" class="slide level2 center">
+<h2>A3. Full ARDL Results (Time-Series)</h2>
 <div style="font-size: 0.8em;">
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th>Variable</th>
 <th>AR(1)</th>
-<th>ARDL lin.</th>
-<th>ARDL quad.</th>
+<th>Linear ARDL</th>
+<th>Quad. ARDL</th>
 </tr>
 </thead>
 <tbody>
@@ -2063,7 +2058,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>(0.053)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\ln(\text{PIB})_t</span></td>
+<td><span class="math inline">\ln(\text{GDP})_t</span></td>
 <td>—</td>
 <td>-0.064*</td>
 <td>-0.122*</td>
@@ -2075,7 +2070,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 <td>(0.063)</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">[\ln(\text{PIB})_t]^2</span></td>
+<td><span class="math inline">[\ln(\text{GDP})_t]^2</span></td>
 <td>—</td>
 <td>—</td>
 <td>-0.422</td>
@@ -2101,7 +2096,7 @@ Transferts technologiques et financiers <strong>essentiels</strong>.</p>
 </tbody>
 </table>
 </div>
-<p><em>Erreurs-types Newey-West (3 lags). *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01</em></p>
+<p><em>Newey-West Standard Errors (3 lags). *p&lt;0.1, **p&lt;0.05, ***p&lt;0.01</em></p>
 
 </section></section>
     </div>
