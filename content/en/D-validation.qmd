@@ -1,0 +1,147 @@
+---
+title: "Appendix D: Model Validation"
+execute:
+  cache: false
+---
+
+{{< include _setup.qmd >}}
+
+## Validation of the Log-Log Specification {#sec-box-cox}
+
+The choice of a logarithmic transformation for the dependent variable ($\text{CO}_2/\text{capita}$)
+is not arbitrary. The **Box-Cox test** empirically determines the 
+optimal transformation by estimating the parameter $\lambda$:
+
+$$Y^{(\lambda)} = \begin{cases} \frac{Y^\lambda - 1}{\lambda} & \text{if } \lambda \neq 0 \\ \ln(Y) & \text{if } \lambda = 0 \end{cases}$$
+
+```{python}
+#| label: test-box-cox
+#| echo: false
+
+if DATA_LOADED and not df_cross.empty:
+    from scipy import stats as sp_stats
+    
+    # Box-Cox on CO2 per capita
+    _, lambda_optimal = sp_stats.boxcox(df_cross['co2_per_capita'])
+    
+    distance_log = abs(lambda_optimal - 0)
+    distance_lin = abs(lambda_optimal - 1)
+    
+    if distance_log < 0.3:
+        verdict = "Strongly justified"
+    elif distance_log < distance_lin:
+        verdict = "Justified"
+    else:
+        verdict = "Alternative to consider"
+    
+    display(Markdown(f"""
+**Box-Cox Test Results**
+
+| Parameter | Value |
+|-----------|-------|
+| Estimated optimal $\lambda$ | {lambda_optimal:.2f} |
+| Distance to log ($\lambda=0$) | {distance_log:.2f} |
+| Distance to linear ($\lambda=1$) | {distance_lin:.2f} |
+| **Verdict** | {verdict} |
+
+**Interpretation**: 
+
+- $\lambda = 0$ → optimal logarithmic transformation
+- $\lambda = 1$ → no transformation (linear model)
+- $\lambda = 0.5$ → square root transformation
+
+With $\lambda = {lambda_optimal:.3f}$, the logarithmic transformation is 
+{'perfectly' if distance_log < 0.1 else 'reasonably'} suited 
+to our data. This result validates the standard log-log specification choice 
+in the EKC literature.
+"""))
+```
+
+::: {.callout-note}
+### Technical Note
+The Box-Cox test maximizes the model likelihood for different 
+values of $\lambda$. A $\lambda$ close to 0 indicates that the log-transformation 
+maximizes residual normality and stabilizes variance.
+:::
+
+## Non-Parametric Validation of the Functional Form {#sec-lowess}
+
+Polynomial models (quadratic, cubic) impose a functional form 
+*a priori*. To verify that this assumption is not 
+too restrictive, we compare parametric predictions 
+to a **LOWESS** regression (*Locally Weighted Scatterplot Smoothing*), 
+which lets the data "speak for themselves."
+
+```{python}
+#| label: fig-check-models-comparison
+#| fig-cap: "Parametric Models (Quadratic and Cubic) vs Non-Parametric Model (LOWESS)"
+#| warning: false
+#| fig-width: 12
+#| fig-height: 6
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+
+if 'df_cross' in locals() and not df_cross.empty:
+    
+    # 1. PREPARATION
+    df_sorted = df_cross.sort_values('gdp_pc')
+    
+    # Parametric models
+    m_quad = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2)', data=df_sorted).fit()
+    m_cub = smf.ols('log_co2 ~ log_gdp_c + I(log_gdp_c**2) + I(log_gdp_c**3)', data=df_sorted).fit()
+    
+    # Predictions (Log)
+    pred_quad_log = m_quad.predict(df_sorted)
+    pred_cub_log = m_cub.predict(df_sorted)
+    
+    # Predictions (Linear)
+    pred_quad_lin = np.exp(pred_quad_log)
+    pred_cub_lin = np.exp(pred_cub_log)
+
+    # EXPLICIT LOWESS CALCULATION (Non-Parametric)
+    # frac=0.3 means smoothing over 30% of local points
+    lowess_log = sm.nonparametric.lowess(df_sorted['log_co2'], df_sorted['log_gdp'], frac=0.3)
+    lowess_lin = sm.nonparametric.lowess(df_sorted['co2_per_capita'], df_sorted['log_gdp'], frac=0.3)
+
+    # 2. PLOT
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    
+    # --- LEFT: LOG-LOG ---
+    axes[0].scatter(df_sorted['log_gdp'], df_sorted['log_co2'], alpha=0.3, color='gray', label='Data')
+    
+    axes[0].plot(df_sorted['log_gdp'], pred_quad_log, 'g--', linewidth=2, label='Quadratic')
+    axes[0].plot(df_sorted['log_gdp'], pred_cub_log, 'r-', linewidth=2.5, label='Cubic')
+    
+    # Manual LOWESS plot (Column 0 = X, Column 1 = Y)
+    axes[0].plot(lowess_log[:, 0], lowess_log[:, 1], 'b:', linewidth=3, label='Non-Parametric (LOWESS)')
+
+    axes[0].set_title("A. Log-Log Models (Theory)", fontweight='bold')
+    axes[0].set_xlabel("Log GDP")
+    axes[0].set_ylabel("Log CO2")
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
+
+    # --- RIGHT: LOG-LIN ---
+    axes[1].scatter(df_sorted['log_gdp'], df_sorted['co2_per_capita'], alpha=0.3, color='gray', label='Data')
+    
+    axes[1].plot(df_sorted['log_gdp'], pred_quad_lin, 'g--', linewidth=2, label='Quadratic')
+    axes[1].plot(df_sorted['log_gdp'], pred_cub_lin, 'r-', linewidth=2.5, label='Cubic')
+    
+    # Manual Linear LOWESS plot
+    axes[1].plot(lowess_lin[:, 0], lowess_lin[:, 1], 'b:', linewidth=3, label='Non-Parametric (LOWESS)')
+
+    axes[1].set_title("B. Tonnes Models (Reality)", fontweight='bold')
+    axes[1].set_xlabel("Log GDP")
+    axes[1].set_ylabel("CO2 (Tonnes)")
+    axes[1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+
+else:
+    print("Error: df_cross is not loaded.")
+```

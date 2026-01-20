@@ -1,0 +1,80 @@
+---
+title: "Appendix E: Data Sources and Processing"
+---
+
+{{< include _setup.qmd >}}
+
+This appendix documents the data origin, applied transformations, and cleaning choices — essential for ensuring **reproducibility** and **methodological transparency**.
+
+## Primary Sources {#sec-sources-primaires}
+
+The data used in this report come from recognized international sources, consolidated by **Our World in Data (OWID)** — an academic platform renowned for its rigorous harmonization.
+
+| Variable | Source | Original Indicator | Period |
+|----------|--------|-------------------|--------|
+| $\text{CO}_2$ emissions per capita | Global Carbon Project | Territorial emissions (Mt$\text{CO}_2$) | 1750–2022 |
+| GDP per capita (PPP) | World Bank | `NY.GDP.PCAP.PP.KD` (USD 2017) | 1990–2022 |
+| Population | UN World Population Prospects | — | 1950–2022 |
+
+→ **Main aggregator**: [Our World in Data](https://ourworldindata.org/) — GitHub repository: https://github.com/owid/co2-data
+
+> **Why OWID?**  
+> Rather than direct extraction via APIs (fragile, error-prone), we use OWID's consolidated datasets, which:  
+> - Harmonize units and definitions across sources,  
+> - Correct data gaps transparently,  
+> - Are regularly updated and versioned.
+
+## Processing Pipeline
+
+The data undergoes five transformation steps before analysis:
+
+| Step | Action | Code | Justification |
+|------|--------|------|---------------|
+| 1 | Filtering | iso_code.notna() | Exclude aggregates (World, EU, etc.) |
+| 2 | Cleaning | dropna() | Complete observations |
+| 3 | Log | np.log(x) | Interpretation as elasticities |
+| 4 | Centering | log_gdp - mean(log_gdp) | Reduce polynomial multicollinearity |
+| 5 | Lags | shift(1) | ARDL model |
+
+## Descriptive Statistics
+
+```{python}
+#| echo: false
+#| tbl-cap: "Descriptive Statistics — 2020 Sample"
+
+if DATA_LOADED and not df_cross.empty:
+    desc = df_cross[['co2_per_capita', 'gdp_pc']].describe()
+    desc.columns = ['CO₂/capita (tonnes)', 'GDP/capita ($)']
+    # ✅ CORRECTION : Wrapper avec Markdown()
+    display(Markdown(desc.round(2).to_markdown()))
+else:
+    display(Markdown("**Data not loaded. Cannot display statistics.**"))
+```
+
+## Reproducibility
+
+All analyses in this report are **fully reproducible**.
+
+**Source code**: Available on [GitHub]({https://github.com/Morph-aion}) — clear structure, commented, with Quarto notebooks (.qmd).
+
+**Technical environment**:
+
+```yaml
+Python       : 3.11.2
+pandas       : 2.3.3
+numpy        : 2.4.1
+statsmodels  : 0.14.6
+Quarto       : 1.7.31
+matplotlib   : 3.10.8
+seaborn      : 0.13.2
+```
+
+**Dependencies**: A `requirements.txt` file is provided to recreate the exact environment.
+
+> **Best practices followed**:
+> - Raw data stored separately from scripts.
+> - All transformations documented.
+> - Library versions frozen.
+> - Outputs (graphs, tables) generated automatically — no manual copy-paste.
+
+→ This report meets FAIR standards: **Findable, Accessible, Interoperable, Reusable**.

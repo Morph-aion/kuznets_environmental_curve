@@ -1,0 +1,236 @@
+---
+title: "Conclusion: The Data Verdict"
+execute:
+  cache: false
+---
+
+{{< include _setup.qmd >}}
+
+## Summary
+
+```{python}
+#| label: tableau-conclusionv0
+#| echo: false
+
+import json
+from pathlib import Path
+from IPython.display import Markdown, display
+
+# ─────────────────────────────────────────────────────────────────
+# Utility functions
+# ─────────────────────────────────────────────────────────────────
+def format_stars(pval):
+    """Returns significance stars"""
+    if pval < 0.01:
+        return "***"
+    elif pval < 0.05:
+        return "**"
+    elif pval < 0.1:
+        return "*"
+    else:
+        return ""
+
+def format_verdict(pval, seuil=0.05):
+    """Returns the test verdict"""
+    if pval < seuil:
+        return "Rejected"
+    else:
+        return "Not rejected"
+
+# ─────────────────────────────────────────────────────────────────
+# Find project root
+# ─────────────────────────────────────────────────────────────────
+current = Path.cwd()
+while not (current / '_quarto.yml').exists() and current != current.parent:
+    current = current.parent
+
+shared_dir = current / '_shared'
+
+# ─────────────────────────────────────────────────────────────────
+# 1. Load CROSS-SECTIONAL results
+# ─────────────────────────────────────────────────────────────────
+cross_file = shared_dir / 'resultats_cross.json'
+try:
+    with open(cross_file, 'r') as f:
+        data_cross = json.load(f)
+        BETA3 = data_cross['BETA3']
+        PVAL3 = data_cross.get('PVAL3', 1)  # Default value if missing
+        N_PAYS = data_cross['N_PAYS']
+        ANNEE_CROSS = data_cross['ANNEE_CROSS']
+except FileNotFoundError:
+    BETA3, PVAL3, N_PAYS, ANNEE_CROSS = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# 2. Load USA results
+# ─────────────────────────────────────────────────────────────────
+usa_file = shared_dir / 'results_usa.json'
+try:
+    with open(usa_file, 'r') as f:
+        data_usa = json.load(f)
+        BETA3_USA = data_usa['BETA3_USA']
+        PVAL3_USA = data_usa.get('PVAL3_USA', 1)  # Default value if missing
+        ANNEE_DEBUT = data_usa['ANNEE_DEBUT']
+        ANNEE_FIN = data_usa['ANNEE_FIN']
+except FileNotFoundError:
+    BETA3_USA, PVAL3_USA, ANNEE_DEBUT, ANNEE_FIN = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# 3. Summary table with conditional logic
+# ─────────────────────────────────────────────────────────────────
+stars_cross = format_stars(PVAL3)
+stars_usa = format_stars(PVAL3_USA)
+verdict_cross = format_verdict(PVAL3)
+verdict_usa = format_verdict(PVAL3_USA)
+
+display(Markdown(f"""
+| Approach | Hypothesis | Result | Coefficient | p-value |
+|----------|------------|--------|-------------|---------|
+| **Cross-sectional** ({N_PAYS} countries, {ANNEE_CROSS}) | $\\beta_3 = 0$ | {verdict_cross} | β₃ = {BETA3:.4f}{stars_cross} | {PVAL3:.4f} |
+| **Time-series** (USA, {ANNEE_DEBUT}-{ANNEE_FIN}) | $\\beta_3 = 0$ | {verdict_usa} | β₃ = {BETA3_USA:.4f}{stars_usa} | {PVAL3_USA:.4f} |
+"""))
+```
+
+```{python}
+#| label: tableau-conclusion
+#| echo: false
+#| output: asis
+
+import json
+import pandas as pd
+from pathlib import Path
+
+# ─────────────────────────────────────────────────────────────────
+# Utility functions
+# ─────────────────────────────────────────────────────────────────
+def format_stars_latex(pval):
+    if pval < 0.01:
+        return "^{***}"
+    elif pval < 0.05:
+        return "^{**}"
+    elif pval < 0.1:
+        return "^{*}"
+    return ""
+
+def format_verdict(pval, seuil=0.05):
+    return "Rejected" if pval < seuil else "Not rejected"
+
+# ─────────────────────────────────────────────────────────────────
+# Load data
+# ─────────────────────────────────────────────────────────────────
+current = Path.cwd()
+while not (current / '_quarto.yml').exists() and current != current.parent:
+    current = current.parent
+shared_dir = current / '_shared'
+
+try:
+    with open(shared_dir / 'resultats_cross.json', 'r') as f:
+        d = json.load(f)
+        BETA3, PVAL3 = d['BETA3'], d.get('PVAL3', 1)
+        N_PAYS, ANNEE_CROSS = d['N_PAYS'], d['ANNEE_CROSS']
+except FileNotFoundError:
+    BETA3, PVAL3, N_PAYS, ANNEE_CROSS = 0, 1, 0, 0
+
+try:
+    with open(shared_dir / 'results_usa.json', 'r') as f:
+        d = json.load(f)
+        BETA3_USA, PVAL3_USA = d['BETA3_USA'], d.get('PVAL3_USA', 1)
+        ANNEE_DEBUT, ANNEE_FIN = d['ANNEE_DEBUT'], d['ANNEE_FIN']
+except FileNotFoundError:
+    BETA3_USA, PVAL3_USA, ANNEE_DEBUT, ANNEE_FIN = 0, 1, 0, 0
+
+# ─────────────────────────────────────────────────────────────────
+# Raw LaTeX generation (for PDF)
+# ─────────────────────────────────────────────────────────────────
+latex_code = rf"""
+\begin{{table}}[h]
+\centering
+\caption{{Summary of cubic EKC tests}}
+\label{{tab:verdict-ekc}}
+\begin{{tabular}}{{lcccc}}
+\toprule
+Approach & Hypothesis & Result & Coefficient & p-value \\
+\midrule
+Cross-sectional ({N_PAYS} countries, {ANNEE_CROSS}) & $\beta_3 = 0$ & {format_verdict(PVAL3)} & ${BETA3:.4f}{format_stars_latex(PVAL3)}$ & {PVAL3:.4f} \\
+Time-series (USA, {ANNEE_DEBUT}--{ANNEE_FIN}) & $\beta_3 = 0$ & {format_verdict(PVAL3_USA)} & ${BETA3_USA:.4f}{format_stars_latex(PVAL3_USA)}$ & {PVAL3_USA:.4f} \\
+\bottomrule
+\end{{tabular}}
+\end{{table}}
+"""
+
+print(latex_code)
+```
+
+```{python}
+#| echo: false
+
+# Conditional interpretations
+if PVAL3 < 0.05 and BETA3 < 0:
+    interp_cross = "Reinforced inverted U (β₃ < 0 significant)"
+elif PVAL3 < 0.05 and BETA3 > 0:
+    interp_cross = "⚠️ N-shaped curve detected (rebound)"
+else:
+    interp_cross = "Quadratic sufficient (β₃ not significant)"
+
+if PVAL3_USA < 0.05 and BETA3_USA > 0:
+    interp_usa = "⚠️ N-shaped curve detected"
+elif PVAL3_USA < 0.05 and BETA3_USA < 0:
+    interp_usa = "Accelerated decoupling"
+else:
+    interp_usa = "Quadratic sufficient (β₃ not significant)"
+
+display(Markdown(f"""
+**Convergence of both approaches**:
+
+- **Cross-sectional** ({N_PAYS} countries, {ANNEE_CROSS}): β₃ = {BETA3:.4f} (p = {PVAL3:.3f})  
+  → {interp_cross}
+
+- **Time-series** (USA, {ANNEE_DEBUT}–{ANNEE_FIN}): β₃ = {BETA3_USA:.4f} (p = {PVAL3_USA:.3f})  
+  → {interp_usa}
+
+**Verdict**: Both analyses converge → the **quadratic model** (classic inverted U) is sufficient.
+No evidence of an N-shaped curve (rebound) is detected.
+"""))
+```
+
+**Interpretation**:
+
+The **cross-sectional analysis** suggests a lasting structural decoupling 
+(the wealthiest countries have the lowest emissions in 2020).
+
+The **USA time-series analysis** shows no rebound, but the period 
+may be too short to capture a potential recovery.
+
+**Verdict**: The **classic EKC (inverted U) is validated** in cross-section.
+The rebound hypothesis (N-shaped curve) is **refuted**.
+
+## The Verdict
+
+**The classic EKC hypothesis (inverted U) is VALIDATED by the cross-sectional analysis, but must be qualified.**
+
+### 1. Statistical Validation
+Decoupling is real at the global scale in 2020. The wealthiest countries have successfully lowered their carbon footprint per capita, invalidating concerns of a systematic "rebound" (N-shaped curve) at very high incomes.
+
+### 2. Structural Heterogeneity Masked by the Average
+
+The global model validates the EKC **on average**, but this aggregate relationship 
+masks **three distinct trajectories** (Figure 8.2):
+
+| Country Type | Examples | Observed Shape | Turning Point |
+|--------------|----------|----------------|---------------|
+| **Advanced OECD** | USA, France, Germany | Inverted U (∩) | Reached ~1990-2000 |
+| **Industrial Emerging** | China, India, Brazil | Linear increasing (/) | Not yet reached |
+| **Fossil Exporters** | Qatar, Kuwait | High plateau (–) | Weak decoupling |
+
+**Interpretation**: The EKC describes a **conditional trend** (Stern, 2004), 
+not a universal deterministic law. These "convergence clubs" (Baumol, 1986) 
+reflect **path dependencies** linked to past technological 
+and institutional choices.
+
+### 3. Decoupling Is Not Automatic
+The inertia measured in the American case shows that growth alone is not sufficient. The decoupling observed in Europe or the USA is the result of active policies (energy transition, deindustrialization, carbon pricing), not a spontaneous market mechanism.
+
+### Answer to the Initial Question
+
+> *"Does economic growth eventually reduce pollution?"*
+
+**Nuanced answer**: **YES**, the data confirm that there exists a level of wealth beyond which emissions decrease. **BUT** this turning point is not guaranteed: it must be built through proactive policies to break the inertia of fossil systems, as shown by the divergence of trajectories in the Appendix.

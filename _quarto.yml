@@ -46,9 +46,8 @@ format:
     # --- Tables des matières ---    
     toc: true                          # Génère une table des matières au début du PDF.
     toc-depth: 3
-    toc-title: "Table des matières"
-    lof: true                          # Liste des figures
-    lot: true                          # Liste des tableaux    
+    #lof: true                          # Liste des figures
+    #lot: true                          # Liste des tableaux    
     
     
     link-refs: true                    # Active les hyperliens internes pour les références croisées dans le PDF.

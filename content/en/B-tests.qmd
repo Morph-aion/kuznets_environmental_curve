@@ -1,0 +1,80 @@
+---
+title: "Appendix B: Statistical Tests"
+---
+
+This appendix details the mathematical formalisms of the tests used to validate our models.
+
+## Specification Tests {#sec-tests-spec}
+
+These tests validate *a priori* the model structure — choice of variables, functional form, or temporal dynamics — before any inference.
+
+### ADF Test (*Augmented Dickey-Fuller*) {#sec-adf}
+
+The test checks for the presence of a unit root in a time series $y_t$ using the auxiliary regression:
+
+$$ \Delta y_t = \alpha + \beta t + \gamma y_{t-1} + \sum_{i=1}^p \delta_i \Delta y_{t-i} + \varepsilon_t $$
+
+| Element | Detail |
+|---------|--------|
+| **Hypothesis $H_0$** | $\gamma = 0$ (The series has a unit root $\to$ non-stationary) |
+| **Hypothesis $H_1$** | $\gamma < 0$ (The series is stationary) |
+| **Decision rule** | If the $t$ statistic is below the critical value (or $p < 0.05$), we reject $H_0$. |
+| **Used in** | Section 5.2 |
+
+### Nested $F$ Test {#sec-test-f}
+
+Compares two nested models (e.g., quadratic vs cubic) to determine if the additional parameters significantly improve the fit.
+
+$$ F = \frac{(SSR_r - SSR_u) / q}{SSR_u / (n - k - 1)} \sim F(q, n - k - 1) $$
+
+| Element | Detail |
+|---------|--------|
+| **Question** | Does the complex model (cubic) significantly improve the simple model (quadratic)? |
+| **Hypothesis $H_0$** | $\beta_3 = 0$ (the cubic term is unnecessary) |
+| **Notation** | $SSR_r$: constrained residual sum of squares (quadratic)<br>$SSR_u$: unconstrained (cubic) |
+| **Used in** | Section 4.3 |
+
+### AIC Criterion (*Akaike Information Criterion*) {#sec-aic}
+
+Measures the relative quality of a statistical model by penalizing overfitting.
+
+$$ \text{AIC} = 2k - 2\ln(\hat{L}) $$
+
+| Element | Detail |
+|---------|--------|
+| **Interpretation** | Penalizes complexity. Lower AIC = better model |
+| **Advantage** | Comparable between non-nested models |
+| **Used in** | Sections 4.3, 5.3 |
+
+## Diagnostic Tests {#sec-tests-diag}
+
+These tests verify *post-estimation* that residuals $\hat{\varepsilon}_t$ respect the Gauss-Markov assumptions.
+
+### Jarque-Bera Test (Normality) {#sec-jarque-bera}
+
+Checks whether residuals have the skewness ($S$) and kurtosis ($K$) of a normal distribution.
+
+$$ JB = \frac{n}{6} \left( S^2 + \frac{(K - 3)^2}{4} \right) \sim \chi^2(2) $$
+
+| Element | Detail |
+|---------|--------|
+| **Hypothesis $H_0$** | Residuals are normally distributed ($S=0, K=3$) |
+| **Statistic** | Based on skewness and kurtosis |
+| **Decision** | If $p > 0.05$, we do not reject $H_0$ (Normality accepted). |
+| **Consequence if rejected** | Student's $t$ tests and confidence intervals may be biased on small samples. |
+
+### Durbin-Watson Statistic (Autocorrelation) {#sec-durbin-watson}
+
+Detects first-order autocorrelation in time series residuals.
+
+$$ DW = \frac{\sum_{t=2}^T (\hat{\varepsilon}_t - \hat{\varepsilon}_{t-1})^2}{\sum_{t=1}^T \hat{\varepsilon}_t^2} \approx 2(1 - \hat{\rho}) $$
+
+| Element | Detail |
+|---------|--------|
+| **Ideal value** | $DW \approx 2$ (no autocorrelation) |
+| **Critical zones** | $DW < 1.5$ $\to$ positive autocorrelation (trend)<br>$DW > 2.5$ $\to$ negative autocorrelation (oscillation) |
+| **Used in** | Section 5.5 |
+
+### Box-Cox Test (Optimal Transformation)
+
+See @sec-box-cox for details and results.

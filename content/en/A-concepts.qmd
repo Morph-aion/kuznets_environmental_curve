@@ -1,0 +1,108 @@
+---
+title: "Appendix A: Fundamental Concepts"
+---
+
+This appendix clarifies the essential conceptual distinctions for understanding 
+the report.
+
+## Estimation vs Prediction {#sec-estimation-prediction}
+
+| Aspect | **Estimation** | **Prediction** |
+|--------|----------------|----------------|
+| **Question** | What is the relationship between $X$ and $Y$? | What will be the value of $Y$ tomorrow? |
+| **Objective** | Understand mechanisms | Anticipate the future |
+| **Quality criterion** | Significance of coefficients, $R^2$ | RMSE, MAE, out-of-sample performance |
+| **Main risk** | Bias (misspecification) | Overfitting |
+| **Validation** | Statistical tests ($t$, $F$) | Cross-validation, *holdout* |
+
+**Example in this report**:
+- *Estimation*: "Is coefficient $\beta_2 < 0$ significant?" → Testing the inverted U
+- *Prediction*: "What will US emissions be in 2025?" → ARDL projection
+
+::: {.callout-important}
+### Why This Distinction Is Crucial
+
+A model can be **excellent at estimation** (significant coefficients, high $R^2$) 
+but **poor at prediction** (overfitting to past data).
+
+This is why we use **two distinct validation protocols** (Section 3.3).
+:::
+
+## The Bias-Variance Tradeoff {#sec-biais-variance}
+
+Every statistical model faces a tradeoff:
+
+| Component | Definition | Cause | Symptom |
+|-----------|------------|-------|---------|
+| **Bias** | Systematic error | Model too simple | Underfitting |
+| **Variance** | Sensitivity to data | Model too complex | Overfitting |
+
+$$\text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Noise}$$
+
+```{python}
+#| echo: false
+#| fig-cap: "Illustration of the bias-variance tradeoff"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+complexity = np.linspace(0.5, 5, 100)
+bias = 1 / complexity
+variance = 0.1 * complexity ** 1.5
+total = bias + variance
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(complexity, bias, 'b--', label='Bias²', linewidth=2)
+ax.plot(complexity, variance, 'r--', label='Variance', linewidth=2)
+ax.plot(complexity, total, 'k-', label='Total Error', linewidth=2.5)
+ax.axvline(complexity[np.argmin(total)], color='green', linestyle=':', label='Optimum')
+ax.set_xlabel('Model Complexity')
+ax.set_ylabel('Error')
+ax.set_title('Bias-Variance Tradeoff')
+ax.legend()
+ax.set_xticks([1, 2, 3, 4, 5])
+ax.set_xticklabels(['Linear', 'Quadratic', 'Cubic', 'Degree 4', 'Degree 5'])
+plt.tight_layout()
+plt.show()
+```
+
+**Application in this report**:
+- **Linear** model: high bias (ignores non-linearity)
+- **Cubic** model: high variance (sensitive to outliers)
+- **Quadratic** model: optimal tradeoff (validated by AIC and cross-validation)
+
+## Stationarity of Time Series {#sec-stationnarite}
+
+A time series $\{y_t\}_{t=1}^T$ is said to be **(weakly) stationary** if its first three statistical properties are **invariant over time**:
+
+$$
+\begin{aligned}
+(1)\quad & \mathbb{E}[y_t] = \mu \quad & \text{(constant mean)} \\
+(2)\quad & \text{Var}(y_t) = \sigma^2 \quad & \text{(constant variance)} \\
+(3)\quad & \text{Cov}(y_t, y_{t-k}) = \gamma_k \quad & \text{(autocovariance depends only on lag $k$, not on $t$)}
+\end{aligned}
+$$
+
+| Property | Stationary series $I(0)$ | Non-stationary series $I(1)$ |
+|----------|--------------------------|------------------------------|
+| **Mean** | $\mathbb{E}[y_t] = \mu$ | Deterministic trend ($y_t = \alpha t + \varepsilon_t$) or stochastic (unit root) |
+| **Variance** | $\text{Var}(y_t) = \sigma^2$ | Conditional heteroskedasticity (e.g., GARCH), increasing volatility |
+| **Autocorrelation** | Decays exponentially | Quasi-permanent persistence (integration of order 1: I(1)) |
+| **Regressions** | Valid inferences | **Spurious regressions** |
+
+**Why is this crucial?**
+
+Regressing two non-stationary series (e.g., GDP and CO$_2$) without precaution can produce 
+**statistically significant but completely false** results ($R^2 \to 1$, high $t$-stats), 
+simply because both series have a trend, even if they have no causal link 
+(Granger & Newbold, 1974).
+
+**Solution adopted in this report**:
+1. **Test for stationarity** via the ADF test (*Augmented Dickey-Fuller*) — Section 5.2 — whose null hypothesis is:
+   $$
+   H_0: \rho = 1 \quad \text{(presence of a unit root → non-stationary series)}
+   $$
+2. If the series are I(1), **use an ARDL model** (*AutoRegressive Distributed Lag*) — 
+Section 5.3 — which allows estimating short and long-term relationships **without requiring 
+prior stationarity**, provided that the variables are cointegrated or that the model 
+includes sufficient dynamics.

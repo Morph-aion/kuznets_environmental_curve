@@ -790,6 +790,8 @@ plt.tight_layout()
 plt.show()
 ```
 
+{{< pagebreak >}}
+
 ```{python}
 #| echo: false
 

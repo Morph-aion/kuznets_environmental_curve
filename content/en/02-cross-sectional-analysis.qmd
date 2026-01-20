@@ -378,14 +378,14 @@ if DATA_LOADED and not df_cross.empty:
     display(Markdown(f"""
 | Variable | Linear | Quadratic | Cubic |
 |----------|--------|-----------|-------|
-| $\ln(\text{{GDP}})$ centered | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
-| $[\ln(\text{{GDP}})]^2$ | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
-| $[\ln(\text{{GDP}})]^3$ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
+| $\\ln(\\text{{GDP}})$ centered | {format_coef(m_lin, 'log_gdp_c')} | {format_coef(m_quad, 'log_gdp_c')} | {format_coef(m_cub, 'log_gdp_c')} |
+| $[\\ln(\\text{{GDP}})]^2$ | — | {format_coef(m_quad, 'I(log_gdp_c ** 2)')} | {format_coef(m_cub, 'I(log_gdp_c ** 2)')} |
+| $[\\ln(\\text{{GDP}})]^3$ | — | — | {format_coef(m_cub, 'I(log_gdp_c ** 3)')} |
 | **Adjusted $R^2$** | {m_lin.rsquared_adj:.3f} | {m_quad.rsquared_adj:.3f} | {m_cub.rsquared_adj:.3f} |
 | **AIC** | {m_lin.aic:.1f} | {m_quad.aic:.1f} | {m_cub.aic:.1f} |
 | **$N$** | {int(m_lin.nobs)} | {int(m_quad.nobs)} | {int(m_cub.nobs)} |
 
-*HC3 robust standard errors in parentheses. $^{*}p<0.1$, $^{{**}}p<0.05$, $^{{***}}p<0.01$*
+*HC3 robust standard errors in parentheses. $^{{*}}p<0.1$, $^{{**}}p<0.05$, $^{{***}}p<0.01$*
 """))
 ```
 

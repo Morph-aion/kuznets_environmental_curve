@@ -1,0 +1,208 @@
+```{python}
+#| label: setup
+#| output: false
+#| cache: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.stats.diagnostic import het_breuschpagan, acorr_ljungbox
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.stats.stattools import durbin_watson
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+from scipy import stats
+from IPython.display import Markdown, display
+
+# Configuration graphique
+sns.set_theme(style="whitegrid", context="paper", palette="colorblind")
+plt.rcParams['figure.figsize'] = (10, 6)
+plt.rcParams['font.size'] = 11
+
+
+# ═══════════════════════════════════════════════════════════════════
+# DÉTECTION AUTOMATIQUE DU CHEMIN (fonctionne depuis content/ ET presentation/)
+# ═══════════════════════════════════════════════════════════════════
+
+def find_data_file():
+    """Cherche le fichier de données en remontant l'arborescence"""
+    from pathlib import Path
+    
+    current = Path.cwd()
+    
+    # Liste des chemins possibles (ordre de probabilité)
+    possible_paths = [
+        current / "data/01_raw/kuznets_data_final.csv",              # Depuis racine
+        current.parent / "data/01_raw/kuznets_data_final.csv",       # 1 niveau
+        current.parent.parent / "data/01_raw/kuznets_data_final.csv" # 2 niveaux (content/fr ou presentation/fr)
+    ]
+    
+    for path in possible_paths:
+        if path.exists():
+            return path
+    
+    raise FileNotFoundError(
+        f"❌ Impossible de trouver kuznets_data_final.csv.\n"
+        f"Chemins testés :\n" + 
+        "\n".join([f"  - {p}" for p in possible_paths])
+    )
+
+# ═══════════════════════════════════════════════════════════════════
+# CHARGEMENT ET PRÉPARATION DES DONNÉES
+# ═══════════════════════════════════════════════════════════════════
+
+DATA_LOADED = False
+
+try:
+    data_path = find_data_file()
+    print(f"✅ Données chargées depuis : {data_path}")
+    
+    df = pd.read_csv(data_path)
+    DATA_LOADED = True
+    
+    # ─────────────────────────────────────────────────────────────────
+    # DONNÉES TRANSVERSALES
+    # ─────────────────────────────────────────────────────────────────
+    
+    ANNEE_CROSS = int(df['year'].max())
+    df_cross = df[df['year'] == ANNEE_CROSS].copy()
+    
+    # Exclusions (micro-États et paradis fiscaux)
+    EXCLUSIONS = [
+        'Liechtenstein', 'Monaco', 'San Marino', 'Andorra',
+        'Luxembourg', 'Ireland', 'Singapore', 'Malta', 'Cyprus',
+        'Palau', 'Nauru', 'Tuvalu', 'Vatican'
+    ]
+    
+    # Nettoyage    
+    df_cross = df_cross[~df_cross['country'].isin(EXCLUSIONS)]
+    df_cross = df_cross.dropna(subset=['gdp_per_capita', 'co2_per_capita'])
+    
+    # Transformations log
+    df_cross['log_gdp'] = np.log(df_cross['gdp_per_capita'])
+    df_cross['log_co2'] = np.log(df_cross['co2_per_capita'])
+    df_cross['gdp_pc'] = df_cross['gdp_per_capita']
+    
+    # Centrage pour réduire multicolinéarité polynomiale
+    GDP_MEAN = df_cross['log_gdp'].mean()
+    df_cross['log_gdp_c'] = df_cross['log_gdp'] - GDP_MEAN
+    
+    N_PAYS_EXCLUS = len(EXCLUSIONS)
+    N_PAYS = len(df_cross)
+    
+    # ─────────────────────────────────────────────────────────────────
+    # DONNÉES TEMPORELLES (USA)
+    # ─────────────────────────────────────────────────────────────────
+    
+    df_usa = df[df['country'] == 'United States'].sort_values('year').copy()
+    
+    if not df_usa.empty:
+        ANNEE_DEBUT_DATA = int(df_usa['year'].min())
+
+        df_usa['log_co2'] = np.log(df_usa['co2_per_capita'])
+        df_usa['log_gdp'] = np.log(df_usa['gdp_per_capita'])
+        df_usa['gdp_pc'] = df_usa['gdp_per_capita']
+
+        GDP_MEAN_USA = df_usa['log_gdp'].mean()
+        df_usa['log_gdp_c'] = df_usa['log_gdp'] - GDP_MEAN_USA
+
+        df_usa['lag_log_co2'] = df_usa['log_co2'].shift(1)
+        df_usa['lag_log_gdp_c'] = df_usa['log_gdp_c'].shift(1) 
+        
+        df_usa = df_usa.dropna()
+
+        ANNEE_DEBUT_ESTIM = int(df_usa['year'].min())
+        ANNEE_FIN = int(df_usa['year'].max())
+        N_OBS_USA = len(df_usa)
+    else:
+        N_OBS_USA = ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = 0
+        GDP_MEAN_USA = 0
+
+    # ─────────────────────────────────────────────────────────────────
+    # CRÉATION DE LA COLONNE INCOME_GROUP
+    # ─────────────────────────────────────────────────────────────────
+    
+    bins = [0, 1085, 4256, 13206, float('inf')]
+    labels = ['Low income', 'Lower middle income', 'Upper middle income', 'High income']
+    
+    df['income_group'] = pd.cut(
+        df['gdp_per_capita'], 
+        bins=bins, 
+        labels=labels, 
+        right=False
+    )
+    df['income_group'] = df['income_group'].astype(str)
+    
+    if DATA_LOADED:
+        print(f"✅ Groupes de revenu créés : {df['income_group'].value_counts().to_dict()}")
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ALIAS ANGLAIS (pour compatibilité avec les fichiers traduits EN)
+    # English variable aliases for translated content
+    # ═══════════════════════════════════════════════════════════════════
+    
+    # Cross-sectional variables
+    YEAR_CROSS = ANNEE_CROSS          # Year of cross-section
+    CROSS_YEAR = ANNEE_CROSS          # Alternative alias
+    N_COUNTRIES = N_PAYS              # Number of countries
+    N_EXCLUDED = N_PAYS_EXCLUS        # Number of excluded countries
+    
+    # Time series variables
+    START_YEAR_DATA = ANNEE_DEBUT_DATA    # First year with data
+    START_DATA_YEAR = ANNEE_DEBUT_DATA    # Alternative alias
+    START_YEAR = ANNEE_DEBUT_ESTIM        # First year of estimation (after lag)
+    START_YEAR_ESTIM = ANNEE_DEBUT_ESTIM  # Alternative alias
+    END_YEAR = ANNEE_FIN                  # Last year
+    END_DATA_YEAR = ANNEE_FIN             # Alternative alias
+    N_OBS = N_OBS_USA                     # Number of USA observations
+    
+    # Centering means
+    GDP_MEAN_CROSS = GDP_MEAN             # Cross-sectional GDP mean
+    GDP_MEAN_US = GDP_MEAN_USA            # USA GDP mean (alternative alias)
+    
+    print(f"✅ English aliases created: YEAR_CROSS={YEAR_CROSS}, N_COUNTRIES={N_COUNTRIES}, START_YEAR_DATA={START_YEAR_DATA}, END_YEAR={END_YEAR}")
+
+except FileNotFoundError:
+    print("⚠️ ERREUR : Fichier data/01_raw/kuznets_data_final.csv introuvable.")
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    # Variables françaises
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
+    # Variables anglaises
+    YEAR_CROSS = CROSS_YEAR = N_COUNTRIES = N_EXCLUDED = 0
+    START_YEAR_DATA = START_DATA_YEAR = START_YEAR = START_YEAR_ESTIM = 0
+    END_YEAR = END_DATA_YEAR = N_OBS = 0
+    GDP_MEAN_CROSS = GDP_MEAN_US = 0
+
+except ValueError as e:
+    print(f"⚠️ ERREUR DE DONNÉES : {e}")
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
+    YEAR_CROSS = CROSS_YEAR = N_COUNTRIES = N_EXCLUDED = 0
+    START_YEAR_DATA = START_DATA_YEAR = START_YEAR = START_YEAR_ESTIM = 0
+    END_YEAR = END_DATA_YEAR = N_OBS = 0
+    GDP_MEAN_CROSS = GDP_MEAN_US = 0
+
+except Exception as e:
+    print(f"⚠️ ERREUR INATTENDUE : {e}")
+    import traceback
+    traceback.print_exc()
+    df_cross = pd.DataFrame()
+    df_usa = pd.DataFrame()
+    N_PAYS = N_PAYS_EXCLUS = N_OBS_USA = 0
+    ANNEE_DEBUT_DATA = ANNEE_DEBUT_ESTIM = ANNEE_FIN = ANNEE_CROSS = 0
+    GDP_MEAN = GDP_MEAN_USA = 0
+    YEAR_CROSS = CROSS_YEAR = N_COUNTRIES = N_EXCLUDED = 0
+    START_YEAR_DATA = START_DATA_YEAR = START_YEAR = START_YEAR_ESTIM = 0
+    END_YEAR = END_DATA_YEAR = N_OBS = 0
+    GDP_MEAN_CROSS = GDP_MEAN_US = 0
+```

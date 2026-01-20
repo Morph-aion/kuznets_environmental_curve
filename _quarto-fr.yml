@@ -112,8 +112,11 @@ book:
                   
     - content/fr/05-conclusion.qmd
     - content/fr/references.qmd
-    - content/fr/A-concepts.qmd
-    - content/fr/B-tests.qmd
-    - content/fr/C-estimateurs.qmd
-    - content/fr/D-validation.qmd
-    - content/fr/E-donnees.qmd
+    # PART 5: Annexes
+    - part: "Annexes"
+      chapters:
+        - content/fr/A-concepts.qmd
+        - content/fr/B-tests.qmd
+        - content/fr/C-estimateurs.qmd
+        - content/fr/D-validation.qmd
+        - content/fr/E-donnees.qmd

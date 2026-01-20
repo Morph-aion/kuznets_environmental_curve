@@ -1,0 +1,37 @@
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- HARMONIZED FOOTNOTES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<!-- BASIC CONCEPTS (Introduction) -->
+[^ekc]: **EKC** (Environmental Kuznets Curve) — Hypothesis of an inverted U-shaped relationship between pollution and income. Details: @sec-concepts-fondamentaux
+
+[^owid]: **Our World in Data** — Academic repository harmonizing GCP + World Bank data. https://ourworldindata.org
+
+[^ppa]: **PPP** (Purchasing Power Parity) — GDP adjustment for international comparability.
+
+<!-- ESTIMATORS (Methodology) -->
+[^ols]: **OLS** — Ordinary Least Squares. Principle: @sec-ols
+
+[^hc3]: **HC3** — Heteroskedasticity correction (N<250). Formula: @sec-hc3
+
+[^nw]: **Newey-West (HAC)** — Autocorrelation correction (time series). Formula: @sec-nw
+
+[^ardl]: **ARDL** — Dynamic model (lags of Y and X). Specification: @sec-ardl
+
+<!-- STATISTICAL TESTS -->
+[^adf]: **ADF** (Augmented Dickey-Fuller) — Unit root test. H₀: non-stationarity. Details: @sec-adf
+
+[^test-f]: **Nested F-test** — Compares nested models. Formula: @sec-test-f
+
+[^aic]: **AIC** (Akaike Information Criterion) — Balances goodness of fit/parsimony. Lower is better. Formula: @sec-aic
+
+[^jb]: **Jarque-Bera** — Normality test (H₀: normal residuals). Details: @sec-jarque-bera
+
+[^dw]: **Durbin-Watson** — Detects first-order autocorrelation. DW≈2 = no autocorrelation. Details: @sec-durbin-watson
+
+<!-- OTHERS -->
+[^ndc]: **NDC** (Nationally Determined Contributions) — Climate commitments under the Paris Agreement.
+
+[^rmse]: **RMSE** (Root Mean Squared Error) — Penalizes large errors.
+
+[^cv]: **Cross-validation** — Tests generalization on unseen data. Method: @sec-validation

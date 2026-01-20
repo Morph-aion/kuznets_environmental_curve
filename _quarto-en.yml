@@ -22,12 +22,14 @@ lang: en
 # ===================================================================
 # Ces infos s'affichent sur la couverture du PDF et dans les méta-tags HTML
 # -------------------------------------------------------------------
-title: "The Environmental Kuznets Curve: Statistical Mirage or Political Promise?"
-subtitle: "Empirical Validation of the Environmental Kuznets Curve"
+title: "The Environmental Kuznets Curve for $CO_2$"
+subtitle: "An Empirical Evaluation through Cross-Sectional and Time-Series Approaches"
 author: "Morph-ion"
 date: today
 description: |
-  A rigorous econometric analysis testing the GDP-CO2 relationship through two lenses: synchronic (cross-sectional) and diachronic (time-series).
+  Master's Thesis — Applied Econometrics.
+  An econometric investigation testing the promise of automatic decoupling 
+  between growth and CO₂ emissions.
 keywords: [econometrics, Kuznets, CO2, time series, OLS, ARDL, Python]
 
 
@@ -41,6 +43,19 @@ crossref:
   tbl-prefix: "Table"
   sec-prefix: "Section"
   eq-prefix: "Equation"
+  thm-prefix: "Theorem"
+  lem-prefix: "Lemma"
+  def-prefix: "Definition"
+
+# ===================================================================
+# DÉFINITION DES FORMATS DE SORTIE
+# ===================================================================
+# Personnalise l'apparence et les options pour chaque format de sortie (HTML, PDF...).
+# -------------------------------------------------------------------
+format:
+  # --- FORMAT PDF (rendu académique imprimable) ---
+  pdf:
+    toc-title: "Table of Contents"
 
 # ===================================================================
 # CONFIGURATION SPÉCIFIQUE AU LIVRE
@@ -49,7 +64,8 @@ crossref:
 # -------------------------------------------------------------------
 book:
   # --- Métadonnées principales --- 
-  title: "The Environmental Kuznets Curve: Statistical Mirage or Political Promise?"  # Titre du livre
+  title: "The Environmental Kuznets Curve for $CO_2$"  # Titre du livre
+  subtitle: "An Empirical Evaluation through Cross-Sectional and Time-Series Approaches"
   #author: "Morph-ion"                                                                # Auteur par défaut
   author: 
     - "A.Guilmain"
@@ -81,10 +97,18 @@ book:
         - content/en/03-time-series-analysis.qmd
     
     # PART 4: Comparison and Discussion
-    - part: "Comparison of Results — The Policy Dilemma"
+    - part: "Contrasting Results — The Policy Dilemma"
       chapters:
         - content/en/04-policy-discussion.qmd
                   
     - content/en/05-conclusion.qmd
     - content/en/references.qmd
-    - content/en/appendices.qmd
+    
+    # PART 5: Appendices
+    - part: "Appendices"
+      chapters:
+        - content/en/A-concepts.qmd
+        - content/en/B-tests.qmd
+        - content/en/C-estimators.qmd
+        - content/en/D-validation.qmd
+        - content/en/E-data.qmd

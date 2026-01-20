@@ -39,6 +39,8 @@ Initially, we attempted to extract data directly via the `wbgapi` API for standa
 which offers the same source data in a consolidated and stable format.
 :::
 
+{{< pagebreak >}}
+
 ### Variables selected
 
 | Variable | Description | Unit |
@@ -86,6 +88,8 @@ The EKC hypothesis owes its name to an analogy with Kuznets' (1955) curve on ine
 
 After thirty years of research, **no consensus has emerged**:
 
+{{< pagebreak >}}
+
 | Study | Main result | Identified limitation |
 |-------|-------------|-----------------------|
 | Stern (2004) | Results highly sensitive to econometric choices | Massive heterogeneity of specifications |
@@ -120,6 +124,8 @@ if DATA_LOADED:
 | **Temporal** | United States | {START_DATA_YEAR}–{END_DATA_YEAR} | Does a country reduce its emissions *as it becomes richer*? |
 """))
 ```
+
+{{< pagebreak >}}
 
 ### Dual objective: Estimate and Predict
 

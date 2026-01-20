@@ -1,0 +1,98 @@
+---
+title: "Appendix C: Estimators and Corrections"
+---
+
+This appendix justifies the choice of estimators (HC3, Newey-West) and details the mechanics of the ARDL model.
+
+## OLS: Method and Limitations {#sec-ols}
+
+### Principle
+
+The **Ordinary Least Squares** (OLS) estimator minimizes the sum of squared residuals:
+
+$$\hat{\beta}_{OLS} = \arg\min_\beta \sum_{i=1}^n (y_i - x_i'\beta)^2$$
+
+The analytical solution is given by: $\hat{\beta} = (X'X)^{-1}X'Y$.
+
+### Gauss-Markov Assumptions
+
+For the OLS estimator to be **BLUE** (*Best Linear Unbiased Estimator*), five conditions must be met:
+
+| Assumption | Notation | Common Violation |
+|------------|----------|------------------|
+| Linearity | $Y = X\beta + \varepsilon$ | Non-linear relationship |
+| Exogeneity | $E[\varepsilon|X] = 0$ | Correlated omitted variable |
+| Homoskedasticity | $Var(\varepsilon|X) = \sigma^2$ | Non-constant variance |
+| No autocorrelation | $Cov(\varepsilon_i, \varepsilon_j) = 0$ | Time series |
+| No perfect multicollinearity | $X'X$ invertible | Redundant variables |
+
+> **In this report**: The assumptions of homoskedasticity (3) and no autocorrelation (4) are violated → **standard OLS standard errors are biased** → invalid inferences (intervals, t/F tests).
+
+→ **Solution**: Use robust estimators: **HC3** (cross-sectional) and **Newey-West** (time-series).
+
+## Robust Corrections {#sec-corrections}
+
+### HC3: Robustness to Heteroskedasticity {#sec-hc3}
+
+**Problem**: The error variance is not constant (e.g., small countries have different emission variance than large countries).
+
+**Solution**: Use the HC3 "sandwich" estimator from MacKinnon & White (1985).
+
+$$\widehat{\text{Var}}_{HC3}(\hat{\beta}) = (X'X)^{-1} \left( \sum_{i=1}^n \frac{\hat{\varepsilon}_i^2}{(1-h_{ii})^2} x_i x_i' \right) (X'X)^{-1}$$
+
+where $h_{ii}$ represents the *leverage* of observation $i$, from the projection matrix $H = X(X'X)^{-1}X'$.
+
+> **Why HC3?** Among the variants (HC0 to HC4), HC3 is **the most reliable on small samples** ($N < 250$) — which is our case (159 countries). Reference: Long & Ervin (2000).
+
+→ **Practical impact**: Without HC3, p-values would be too optimistic — we would risk falsely believing a coefficient is significant.
+
+### Newey-West: Robustness to Autocorrelation (HAC) {#sec-nw}
+
+**Problem**: In time series, the error at $t$ is often correlated with that at $t-1$ (shock inertia).
+
+**Solution**: HAC estimator (*Heteroskedasticity and Autocorrelation Consistent*) with Bartlett kernel.
+
+$$\widehat{\text{Var}}_{NW} = (X'X)^{-1} \hat{\Omega} (X'X)^{-1}$$
+
+where $\hat{\Omega}$ weights autocovariances up to lag $L$:
+
+$$ \hat{\Omega} = \hat{\Gamma}_0 + \sum_{j=1}^L w_j (\hat{\Gamma}_j + \hat{\Gamma}_j') \quad \text{with} \quad w_j = 1 - \frac{j}{L+1} $$
+
+> **Choice of $L$**: Automatic rule: $L \approx \lfloor 4(T/100)^{2/9} \rfloor$. For $T=30$ (USA 1990–2020) → $L=3$.
+
+→ **Practical impact**: Without Newey-West, we would underestimate coefficient uncertainty → risk of falsely concluding that a policy has a significant effect.
+
+## ARDL Model {#sec-ardl}
+
+The *AutoRegressive Distributed Lag* (ARDL) model allows simultaneous analysis of short-term dynamics and long-term equilibrium.
+
+### Specification (ARDL 1,1)
+
+$$ Y_t = \alpha + \rho Y_{t-1} + \beta_0 X_t + \beta_1 X_{t-1} + \varepsilon_t $$
+
+→ Allows modeling **inertia** (persistent effect of the past) and **gradual adjustments**.
+
+### Interpretation of Structural Parameters
+
+| Parameter | Economic Meaning | Derived Formula |
+|-----------|------------------|-----------------|
+| $\rho$ | **Inertia / Persistence** | Autoregressive coefficient |
+| $\beta_0$ | **Immediate impact** | Short-term elasticity ($\varepsilon_{ST}$) |
+| $\theta = \frac{\beta_0 + \beta_1}{1-\rho}$ | **Total cumulative impact** | Long-term elasticity ($\varepsilon_{LT}$) |
+| $H = \frac{\ln(0.5)}{\ln(\rho)}$ | **Half-life** | Time to absorb 50% of a shock |
+
+### Why ARDL?
+
+1. **Integration flexibility**: ARDL remains valid whether regressors are $I(0)$, $I(1)$, or a mix (Pesaran et al., 2001).
+2. **Explicit dynamics**: It captures technological adjustment time, unlike static regression.
+3. **Small sample robustness**: More performant than Johansen cointegration for $T < 50$.
+
+### Stability Condition
+
+For the long-term elasticity to be meaningful, the model must be dynamically stable:
+
+$$ |\rho| < 1 $$
+
+If $\rho \approx 1$ (as observed for the USA), the process is **non-stationary**: shocks have a permanent effect and there is no return to equilibrium.
+
+> **In our USA case**: $\rho \approx 1.003$ → very close to 1 → sign of instability or small sample → long-term elasticity not calculable → cautious interpretation required.
