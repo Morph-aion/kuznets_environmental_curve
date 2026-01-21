@@ -137,8 +137,8 @@ Pour aller plus loin (2030-2050), il faudrait un modèle structurel avec des sc�
 
 **Pour aller plus loin :**
 
-- 📧 morphion.research@univ.fr
-- 💻 Code & Données : GitHub
-- 📄 Rapport complet disponible (51 pages)
+<!-- - 📧 morphion.research@univ.fr -->
+- 💻 Code & Données : [acquisition-donnees-owid](https://github.com/Morph-aion/kuznets_environmental_curve/blob/main/notebooks/01-acquisition-donnees-owid.ipynb)
+- 📄 Rapport complet disponible (51 pages) : [rapport-anglais](https://github.com/Morph-aion/kuznets_environmental_curve/blob/main/output/_book/en/The-Environmental-Kuznets-Curve-for-%24CO_2%24.pdf)
 
 :::
