@@ -7,8 +7,13 @@
 :::
 
 ::: {.notes}
-Durée : ~7 minutes.
-Objectif : Montrer l'inertie extrême + projection insuffisante pour Paris.
+**1. INTRODUCTION (40s)**
+
+On passe de la photo (analyse transversale) au film : on suit les USA sur **30 ans (1990-2020)**. 
+
+**Pourquoi eux ?**
+→ Premier émetteur historique, économie mature, données fiables.
+→ Idéal pour tester si le découplage PIB-CO₂ est **structurel**… ou juste un coup de chance.
 :::
 
 ---
@@ -77,6 +82,28 @@ Demi-vie : **Non calculable**
 :::
 :::
 :::
+
+::: {.notes}
+2. LE MODÈLE ARDL (50s)
+Pas de simple régression (OLS), car :
+
+1. Les émissions sont inertielles (ce qu’on construit aujourd’hui dure 30-50 ans).
+2. On veut séparer effet court terme vs long terme.
+3. Nos séries sont non-stationnaires (tests ADF confirmés).
+
+👉 Correction : erreurs Newey-West avec 3 lags (règle T^0.25).
+
+3. RÉSULTATS CHOC : ρ = 1,003 (50s)
+Le cœur du modèle : ρ = 1,003 → quasi 1.
+→ Signifie que les chocs sont quasi-permanents.
+→ Demi-vie non calculable.
+→ En pratique : toute politique climatique doit durer plus de 30 ans.
+
+- Élasticité court terme : -0,122 (Très faible).
+- Pic en 2005, baisse de -21%.
+- Pas de "rebond" (courbe en N rejetée).
+:::
+
 
 ---
 
@@ -212,4 +239,32 @@ Sur données **non vues** (2016-2020), l'ARDL offre l'erreur la plus faible.
 → La capacité prédictive du modèle est validée.
 :::
 
+:::
+
+::: {.notes}
+4. VALIDATION & PROJECTION (50s)
+
+- Test hors-échantillon (2016-2020) : RMSE = 0,047 (Mieux que tous les benchmarks). Modèle ROBUSTE.
+- Projection 2025 (+2% PIB/an) : Baisse de 8,5% seulement.
+- Accord de Paris : -50% requis.
+
+🔴 GAP DE 29 POINTS
+→ Trajectoire 6 fois trop lente.
+→ Intervalle de confiance s’élargit vite (incertitude due à ρ≈1).
+
+5. CONCLUSION FINALE (30s)
+
+1. Découplage réel (Oui, pic 2005).
+2. Mais lent et bloqué (Inertie extrême).
+3. Insuffisant : Marché seul échec. Besoin rupture politique.
+
+📌 En gros :
+→ Dans l’espace (Suède), c'est possible (4 t/hab).
+→ Dans le temps (USA), c'est trop lent (13 t/hab en 2025 vs 7 t/hab requis).
+
+⚡ REPONSES AUX QUESTIONS  
+🔹 “Pourquoi ARDL et pas OLS ?” -> Séries I(1).  
+🔹 “Pourquoi 3 lags Newey-West ?” -> Règle T^0.25.  
+🔹 “ρ=1,003 ?” -> Biais petit échantillon possible, mais reflète l'inertie physique.  
+🔹 “Pourquoi pas projeter 2030 ?” -> Variance explose.
 :::

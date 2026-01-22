@@ -2,7 +2,16 @@
 
 ---
 
-## A1. Statistiques descriptives
+## A1. Schéma global de la démarche statistique {.unnumbered}
+
+::: {style="text-align: center;"}
+![Diagramme récapitulatif de la méthodologie : analyse transversale vs temporelle, tests, modèles retenus, validation](../assets/figures/methodology_diagram.svg){width=39%}
+*Figure A4 : Résumé de la démarche (Source : Auteur)*
+:::
+
+---
+
+## A2. Statistiques descriptives
 
 ::: {style="font-size: 0.85em;"}
 | Variable | Moy. | É.-T. | Min | Médiane | Max | N |
@@ -17,7 +26,7 @@
 
 ---
 
-## A2. Résultats complets OLS (transversal)
+## A3. Résultats complets OLS (transversal)
 
 ::: {style="font-size: 0.8em;"}
 | Variable | Linéaire | Quadratique | Cubique |
@@ -36,7 +45,7 @@
 
 ---
 
-## A3. Résultats complets ARDL (temporel)
+## A4. Résultats complets ARDL (temporel)
 
 ::: {style="font-size: 0.8em;"}
 | Variable | AR(1) | ARDL lin. | ARDL quad. |
