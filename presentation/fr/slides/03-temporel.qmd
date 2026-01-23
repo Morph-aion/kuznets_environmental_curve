@@ -69,8 +69,8 @@ $$\ln(\mathrm{CO}_2)_t = \rho \ln(\mathrm{CO}_2)_{t-1} + \beta_0 \ln(\text{PIB})
 |-----------|--------|----------------|
 | $\rho$ | **1.003*** | Inertie extrême |
 | $\varepsilon_{CT}$ | -0.122* | Faible élasticité |
-| Pic | **2005** | Turning point |
-| Baisse | **-21%** | 2005→2020 |
+| Pic | **2000** | Turning point |
+| Baisse | **-21%** | 2000→2020 |
 
 ::: {.fragment}
 ::: {.callout-warning}
